@@ -8,6 +8,10 @@ import { jogos } from "../data/jogos";
 import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
 
+"use client";
+
+import { useMemo } from "react";
+
 export default function Home() {
 
   const jogosAbertos = jogos.filter((jogo) => {
@@ -70,10 +74,13 @@ export default function Home() {
 
     }, {} as Record<string, typeof jogos[number][]>);
 
-    const memeAleatorio =
-    memes[
-      Math.floor(Math.random() * memes.length)
-    ];
+    const memeAleatorio = useMemo(() => {
+
+      return memes[
+        Math.floor(Math.random() * memes.length)
+      ];
+    
+    }, []);
 
   return (
 
