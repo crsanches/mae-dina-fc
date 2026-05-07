@@ -74,13 +74,7 @@ export default function Home() {
 
     }, {} as Record<string, typeof jogos[number][]>);
 
-    const memeAleatorio = useMemo(() => {
-
-      return memes[
-        Math.floor(Math.random() * memes.length)
-      ];
-    
-    }, []);
+    const memeAleatorio = memes[0];
 
   return (
 
