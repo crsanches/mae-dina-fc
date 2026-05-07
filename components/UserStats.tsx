@@ -26,7 +26,7 @@ export default function UserStats() {
 
           }
 
-        } catch (error) {
+        } catch {
 
           console.error("Erro ao calcular pontos");
 
@@ -42,22 +42,26 @@ export default function UserStats() {
 
   useEffect(() => {
 
-    calcularPontuacao();
-
+    const timeout = setTimeout(() => {
+      calcularPontuacao();
+    }, 0);
+  
     window.addEventListener(
       "betSaved",
       calcularPontuacao
     );
-
+  
     return () => {
-
+  
+      clearTimeout(timeout);
+  
       window.removeEventListener(
         "betSaved",
         calcularPontuacao
       );
-
+  
     };
-
+  
   }, []);
 
   return (
