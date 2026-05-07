@@ -1,3 +1,4 @@
+"use client";
 import Header from "../components/Header";
 import MatchCard from "../components/MatchCard";
 import BetTable from "../components/BetTable";
@@ -7,10 +8,9 @@ import { memes } from "../data/memes";
 import { jogos } from "../data/jogos";
 import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
-
-"use client";
-
 import { useMemo } from "react";
+
+
 
 export default function Home() {
 
