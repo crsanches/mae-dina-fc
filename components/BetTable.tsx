@@ -40,7 +40,7 @@ export default function BetTable() {
   
           }
   
-        } catch (error) {
+        } catch {
   
           console.error("Erro ao carregar aposta");
   
@@ -56,7 +56,11 @@ export default function BetTable() {
 
   useEffect(() => {
 
-    carregarApostas();
+    const timeout = setTimeout(() => {
+  
+      carregarApostas();
+  
+    }, 0);
   
     window.addEventListener(
       "betSaved",
@@ -64,10 +68,14 @@ export default function BetTable() {
     );
   
     return () => {
+  
+      clearTimeout(timeout);
+  
       window.removeEventListener(
         "betSaved",
         carregarApostas
       );
+  
     };
   
   }, []);
