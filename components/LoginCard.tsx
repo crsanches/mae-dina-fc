@@ -24,13 +24,21 @@ export default function LoginCard() {
 
   useEffect(() => {
 
-    const storedName =
-      localStorage.getItem("mae-dina-user");
-
-    if (storedName) {
-      setSavedName(storedName);
-    }
-
+    const timeout = setTimeout(() => {
+  
+      const storedName =
+        localStorage.getItem("mae-dina-user");
+  
+      if (storedName) {
+  
+        setSavedName(storedName);
+  
+      }
+  
+    }, 0);
+  
+    return () => clearTimeout(timeout);
+  
   }, []);
 
   if (savedName) {
