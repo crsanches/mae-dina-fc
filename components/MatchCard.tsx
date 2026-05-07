@@ -72,27 +72,39 @@ export default function MatchCard({
     }, 2000);
   
   }
- useEffect(() => {
+  useEffect(() => {
 
-  const savedBet = localStorage.getItem(storageKey);
-  if (savedBet) {
-    try {
-
-      const parsedBet = JSON.parse(savedBet);
-
-      setGolsA(parsedBet.golsA);
-      setGolsB(parsedBet.golsB);
-      setPoints(parsedBet.points || 0);
-
-    } catch (error) {
-
-      console.error("Erro ao carregar aposta");
-
-    }
-
-  }
-
-}, [storageKey]);
+    const timeout = setTimeout(() => {
+  
+      const savedBet =
+        localStorage.getItem(storageKey);
+  
+      if (savedBet) {
+  
+        try {
+  
+          const parsedBet =
+            JSON.parse(savedBet);
+  
+          setGolsA(parsedBet.golsA);
+          setGolsB(parsedBet.golsB);
+          setPoints(parsedBet.points || 0);
+  
+        } catch {
+  
+          console.error(
+            "Erro ao carregar aposta"
+          );
+  
+        }
+  
+      }
+  
+    }, 0);
+  
+    return () => clearTimeout(timeout);
+  
+  }, [storageKey]);
 
 useEffect(() => {
 
