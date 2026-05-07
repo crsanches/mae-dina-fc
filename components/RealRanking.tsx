@@ -46,7 +46,7 @@ export default function RealRanking() {
 
           }
 
-        } catch (error) {
+        } catch {
 
           console.error(
             "Erro ao calcular ranking"
@@ -74,22 +74,28 @@ export default function RealRanking() {
 
   useEffect(() => {
 
-    calcularRanking();
-
+    const timeout = setTimeout(() => {
+  
+      calcularRanking();
+  
+    }, 0);
+  
     window.addEventListener(
       "betSaved",
       calcularRanking
     );
-
+  
     return () => {
-
+  
+      clearTimeout(timeout);
+  
       window.removeEventListener(
         "betSaved",
         calcularRanking
       );
-
+  
     };
-
+  
   }, []);
 
   if (ranking.length === 0) {
