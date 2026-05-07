@@ -70,6 +70,11 @@ export default function Home() {
 
     }, {} as Record<string, typeof jogos[number][]>);
 
+    const memeAleatorio =
+    memes[
+      Math.floor(Math.random() * memes.length)
+    ];
+
   return (
 
     <main className="min-h-screen bg-zinc-950 text-white pb-24">
@@ -193,12 +198,8 @@ export default function Home() {
         <RealRanking />
 
         <MemeCard
-          mensagem={
-            memes[
-              Math.floor(Math.random() * memes.length)
-            ]
-          }
-        />
+  mensagem={memeAleatorio}
+/>
 
         <BetTable />
 
