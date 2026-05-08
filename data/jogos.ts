@@ -10,7 +10,7 @@ export const jogos: Match[] = [
     resultadoA: 2,
     resultadoB: 1,
     phase: "Amistosos",
-    matchDate: "2026-05-07T19:00:00"
+    matchDate: "2026-05-07T23:00:00"
   },
 
   {
@@ -21,7 +21,7 @@ export const jogos: Match[] = [
     resultadoA: 2,
     resultadoB: 1,
     phase: "Amistosos",
-    matchDate: "2026-05-07T19:00:00"
+    matchDate: "2026-05-07T23:00:00"
   }
 
 ];
