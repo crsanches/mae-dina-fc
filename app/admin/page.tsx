@@ -236,7 +236,14 @@ export default function AdminPage() {
             href="/admin/bets"
             className="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-600 transition px-4 py-2 rounded-xl font-semibold text-sm"
           >
+          
             🎯 Ver Palpites
+          </Link>
+          <Link
+            href="/admin/memes"
+            className="inline-flex items-center gap-2 bg-pink-700 hover:bg-pink-600 transition px-4 py-2 rounded-xl font-semibold text-sm"
+          >
+            🤣 Memes
           </Link>
 
         </div>

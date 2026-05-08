@@ -11,10 +11,15 @@ import RealRanking from "../components/RealRanking";
 
 import { useEffect, useState } from "react";
 
-import { db } from "../lib/firebase";
+import { db, auth} from "../lib/firebase";
+import {getAutomaticMeme} from "../lib/automaticMemes";
+import {
+  calculatePoints
+} from "../lib/calculatePoints";
 
 import {
   collection,
+  getDocs,
   onSnapshot,
   orderBy,
   query
@@ -44,7 +49,9 @@ export default function Home() {
 
   const [memeAleatorio, setMemeAleatorio] =
     useState("");
-
+  
+    const [automaticMeme, setAutomaticMeme] =
+    useState("");
     useEffect(() => {
 
       const q = query(
@@ -109,11 +116,20 @@ useEffect(() => {
 
         const memes: string[] = [];
 
+  const currentUser =
+  auth.currentUser?.displayName;
+
         snapshot.forEach((doc) => {
 
           const data = doc.data();
 
-          if (data.active) {
+          if (
+            data.active &&
+            (
+              !data.targetUser ||
+              data.targetUser === currentUser
+            )
+          ) {
 
             memes.push(data.text);
 
@@ -144,6 +160,147 @@ useEffect(() => {
 
 }, []);
   
+useEffect(() => {
+
+  async function gerarMemeAutomatico() {
+
+    const currentUser =
+      auth.currentUser?.displayName;
+
+    if (!currentUser) {
+      return;
+    }
+
+    const betsSnapshot =
+      await getDocs(
+        collection(db, "bets")
+      );
+
+    const gamesSnapshot =
+      await getDocs(
+        collection(db, "games")
+      );
+
+    const ranking:
+      Record<string, number> = {};
+
+    let exactScore = false;
+
+    let crazyBet = false;
+
+    betsSnapshot.forEach((betDoc) => {
+
+      const bet =
+        betDoc.data();
+
+      let points = 0;
+
+      gamesSnapshot.forEach((gameDoc) => {
+
+        const game =
+          gameDoc.data();
+
+        if (
+          game.match === bet.match &&
+          game.resultadoA !== undefined &&
+          game.resultadoB !== undefined
+        ) {
+
+          points =
+            calculatePoints({
+
+              apostaA:
+                Number(bet.golsA),
+
+              apostaB:
+                Number(bet.golsB),
+
+              resultadoA:
+                Number(game.resultadoA),
+
+              resultadoB:
+                Number(game.resultadoB)
+
+            });
+
+          if (
+            bet.userName === currentUser &&
+            Number(bet.golsA) === Number(game.resultadoA) &&
+            Number(bet.golsB) === Number(game.resultadoB)
+          ) {
+
+            exactScore = true;
+
+          }
+
+          if (
+            bet.userName === currentUser &&
+            (
+              Number(bet.golsA) >= 6 ||
+              Number(bet.golsB) >= 6
+            )
+          ) {
+
+            crazyBet = true;
+
+          }
+
+        }
+
+      });
+
+      if (!ranking[bet.userName]) {
+
+        ranking[bet.userName] = 0;
+
+      }
+
+      ranking[bet.userName] += points;
+
+    });
+
+    const sorted =
+
+      Object.entries(ranking)
+
+        .sort(
+          (a, b) =>
+            b[1] - a[1]
+        );
+
+    const isLeader =
+      sorted[0]?.[0] === currentUser;
+
+    const isLastPlace =
+      sorted[
+        sorted.length - 1
+      ]?.[0] === currentUser;
+
+    const meme =
+      getAutomaticMeme({
+
+        isLeader,
+
+        isLastPlace,
+
+        exactScore,
+
+        crazyBet
+
+      });
+
+    if (meme) {
+
+      setAutomaticMeme(meme);
+
+    }
+
+  }
+
+  gerarMemeAutomatico();
+
+}, []);
+
 
   const jogosAbertos = jogos.filter((jogo) => {
 
@@ -223,6 +380,17 @@ useEffect(() => {
         <RealRanking />
 
         {/* MEME */}
+        {automaticMeme && (
+
+        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center">
+
+          <p className="text-lg font-black">
+            🤖 {automaticMeme}
+          </p>
+
+        </div>
+
+        )}
         <MemeCard
           mensagem={memeAleatorio}
         />
