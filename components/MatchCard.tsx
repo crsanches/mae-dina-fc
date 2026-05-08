@@ -15,6 +15,7 @@ import {
 
 import {
   doc,
+  getDoc,
   serverTimestamp,
   setDoc
 } from "firebase/firestore";
@@ -58,6 +59,9 @@ export default function MatchCard({
 
   const [points, setPoints] =
     useState(0);
+
+    const [alreadyBet, setAlreadyBet] =
+    useState(false);
 
   const [currentTime, setCurrentTime] =
     useState(new Date());
@@ -126,7 +130,7 @@ export default function MatchCard({
     );
 
     setPoints(calculatedPoints);
-
+    setAlreadyBet(true);
     window.dispatchEvent(
       new Event("betSaved")
     );
@@ -148,20 +152,41 @@ export default function MatchCard({
 
   useEffect(() => {
 
-    const interval =
-      setInterval(() => {
-
-        setCurrentTime(
-          new Date()
-        );
-
-      }, 60000);
-
-    return () =>
-      clearInterval(interval);
-
-  }, []);
-
+    async function carregarAposta() {
+  
+      const userName =
+        auth.currentUser?.displayName;
+  
+      if (!userName) {
+        return;
+      }
+  
+      const betId =
+        `${userName}-${teamA}-${teamB}`;
+  
+      const betRef =
+        doc(db, "bets", betId);
+  
+      const snapshot =
+        await getDoc(betRef);
+  
+      if (snapshot.exists()) {
+  
+        const data =
+          snapshot.data();
+  
+        setGolsA(data.golsA);
+        setGolsB(data.golsB);
+  
+        setAlreadyBet(true);
+  
+      }
+  
+    }
+  
+    carregarAposta();
+  
+  }, [teamA, teamB]);
   const gameDate =
     new Date(matchDate);
 
@@ -224,7 +249,7 @@ export default function MatchCard({
         isLocked
           ? "bg-red-950 border-red-700"
           : isEndingSoon
-          ? "bg-orange-950 border-orange-600"
+          ? "bg-zinc-800 border-zinc-500"
           : "bg-blue-950 border-blue-700"
       }`}
     >
@@ -256,7 +281,9 @@ export default function MatchCard({
               )
             }
             className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
-            disabled={isLocked}
+            disabled={
+              isLocked || alreadyBet
+            }
           />
 
           <span className="text-zinc-500 text-lg">
@@ -274,7 +301,9 @@ export default function MatchCard({
               )
             }
             className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
-            disabled={isLocked}
+            disabled={
+              isLocked || alreadyBet
+            }
           />
 
         </div>
@@ -299,21 +328,33 @@ export default function MatchCard({
           {getRemainingTime()}
         </span>
 
-        {!salvo && (
+        {alreadyBet ? (
 
-          <button
-            onClick={salvarPalpite}
-            className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
-              isLocked
-                ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-                : "bg-green-500 hover:bg-green-600 text-black"
-            }`}
-            disabled={isLocked}
-          >
-            Salvar
-          </button>
+<button
+  onClick={() =>
+    setAlreadyBet(false)
+  }
+  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
+  disabled={isLocked}
+>
+  Alterar
+</button>
 
-        )}
+) : !salvo && (
+
+<button
+  onClick={salvarPalpite}
+  className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
+    isLocked
+      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+      : "bg-green-500 hover:bg-green-600 text-black"
+  }`}
+  disabled={isLocked}
+>
+  Salvar
+</button>
+
+)}
 
       </div>
 

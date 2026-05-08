@@ -6,7 +6,8 @@ import { db } from "../lib/firebase";
 
 import {
   collection,
-  getDocs
+  getDocs,
+  onSnapshot
 } from "firebase/firestore";
 
 import { calculatePoints }
@@ -14,6 +15,10 @@ from "../lib/calculatePoints";
 
 import { auth }
 from "../lib/firebase";
+
+import {
+  onAuthStateChanged
+} from "firebase/auth";
 
 type UserData = {
   position: number;
@@ -30,108 +35,138 @@ export default function UserStats() {
 
 
 
-  async function carregarStats() {
-
-    const currentUser =
-  auth.currentUser?.displayName;
-
-    if (!currentUser) {
-      return;
-    }
-
-    const betsSnapshot =
-      await getDocs(
-        collection(db, "bets")
-      );
-
-    const gamesSnapshot =
-      await getDocs(
-        collection(db, "games")
-      );
-
-    const ranking:
-      Record<string, number> = {};
-
-    betsSnapshot.forEach((betDoc) => {
-
-      const bet =
-        betDoc.data();
-
-      let points = 0;
-
-      gamesSnapshot.forEach((gameDoc) => {
-
-        const game =
-          gameDoc.data();
-
-        if (
-          game.match === bet.match &&
-          game.resultadoA !== undefined &&
-          game.resultadoB !== undefined
-        ) {
-
-          points =
-            calculatePoints({
-
-              apostaA:
-                Number(bet.golsA),
-
-              apostaB:
-                Number(bet.golsB),
-
-              resultadoA:
-                Number(game.resultadoA),
-
-              resultadoB:
-                Number(game.resultadoB)
-
-            });
-
-        }
-
-      });
-
-      if (!ranking[bet.userName]) {
-        ranking[bet.userName] = 0;
-      }
-
-      ranking[bet.userName] += points;
-
-    });
-
-    const sorted =
-      Object.entries(ranking)
-        .sort(
-          (a, b) =>
-            b[1] - a[1]
+    async function carregarStats(
+      currentUser: string
+    ) {
+    
+      const betsSnapshot =
+        await getDocs(
+          collection(db, "bets")
         );
+    
+      const gamesSnapshot =
+        await getDocs(
+          collection(db, "games")
+        );
+    
+      const ranking:
+        Record<string, number> = {};
+    
+      betsSnapshot.forEach((betDoc) => {
+    
+        const bet =
+          betDoc.data();
+    
+        let points = 0;
+    
+        gamesSnapshot.forEach((gameDoc) => {
+    
+          const game =
+            gameDoc.data();
+    
+          if (
+            game.match === bet.match &&
+            game.resultadoA !== undefined &&
+            game.resultadoB !== undefined
+          ) {
+    
+            points =
+              calculatePoints({
+    
+                apostaA:
+                  Number(bet.golsA),
+    
+                apostaB:
+                  Number(bet.golsB),
+    
+                resultadoA:
+                  Number(game.resultadoA),
+    
+                resultadoB:
+                  Number(game.resultadoB)
+    
+              });
+    
+          }
+    
+        });
+    
+        if (!ranking[bet.userName]) {
+          ranking[bet.userName] = 0;
+        }
+    
+        ranking[bet.userName] += points;
+    
+      });
+    
+      const sorted =
+        Object.entries(ranking)
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          );
+    
+      const position =
+        sorted.findIndex(
+          ([user]) =>
+            user === currentUser
+        ) + 1;
+    
+      const points =
+        ranking[currentUser] || 0;
+    
+      setData({
+        position,
+        points
+      });
+    
+    }
+    
+    useEffect(() => {
 
-    const position =
-      sorted.findIndex(
-        ([user]) =>
-          user === currentUser
-      ) + 1;
+      const unsubscribeAuth =
+        onAuthStateChanged(
+          auth,
+          (user) => {
+    
+            if (!user) {
+    
+              setData({
+                position: 0,
+                points: 0
+              });
+    
+              return;
+    
+            }
+    
+            const unsubscribeBets =
+              onSnapshot(
+    
+                collection(db, "bets"),
+    
+                () => {
+    
+                  carregarStats(
+                    user.displayName || ""
+                  );
+    
+                }
+    
+              );
+    
+            return () =>
+              unsubscribeBets();
+    
+          }
+        );
+    
+      return () =>
+        unsubscribeAuth();
+    
+    }, []);
 
-    const points =
-      ranking[currentUser] || 0;
-
-    setData({
-      position,
-      points
-    });
-
-  }
-  useEffect(() => {
-
-    const timeout = setTimeout(() => {
-
-      carregarStats();
-
-    }, 0);
-
-    return () => clearTimeout(timeout);
-
-  }, []);
+    
   return (
 
     <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-5">

@@ -12,11 +12,11 @@ from "../lib/firebase";
 import {
   collection,
   getDocs,
+  onSnapshot,
   orderBy,
   query,
   where
 } from "firebase/firestore";
-
 type Bet = {
   jogo: string;
   user: string;
@@ -25,12 +25,19 @@ type Bet = {
   points: number;
 };
 
+import {
+  onAuthStateChanged
+} from "firebase/auth";
+
+
 export default function BetTable() {
 
   const [bets, setBets] =
     useState<Bet[]>([]);
 
-  async function carregarApostas() {
+    async function carregarApostas(
+      currentUser: string
+    ) {
 
     const allBets: Bet[] = [];
 
@@ -46,8 +53,7 @@ export default function BetTable() {
       
 
       const data = betDoc.data();
-      const currentUser =
-      auth.currentUser?.displayName;
+     
   
     if (
       data.userName !== currentUser
@@ -121,28 +127,43 @@ export default function BetTable() {
 
   useEffect(() => {
 
-    const timeout = setTimeout(() => {
-
-      carregarApostas();
-
-    }, 0);
-
-    window.addEventListener(
-      "betSaved",
-      carregarApostas
-    );
-
-    return () => {
-
-      clearTimeout(timeout);
-
-      window.removeEventListener(
-        "betSaved",
-        carregarApostas
+    const unsubscribeAuth =
+      onAuthStateChanged(
+        auth,
+        (user) => {
+  
+          if (!user) {
+  
+            setBets([]);
+  
+            return;
+  
+          }
+  
+          const unsubscribeBets =
+            onSnapshot(
+  
+              collection(db, "bets"),
+  
+              () => {
+  
+                carregarApostas(
+                  user.displayName || ""
+                );
+  
+              }
+  
+            );
+  
+          return () =>
+            unsubscribeBets();
+  
+        }
       );
-
-    };
-
+  
+    return () =>
+      unsubscribeAuth();
+  
   }, []);
 
   return (
