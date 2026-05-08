@@ -1,71 +1,63 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import RankingCard from "./RankingCard";
-import ShareRanking from "./ShareRanking";
+
+import { db } from "../lib/firebase";
+
+import {
+  collection,
+  getDocs
+} from "firebase/firestore";
 
 type RankingUser = {
-  nome: string;
-  pontos: number;
+  user: string;
+  points: number;
 };
 
 export default function RealRanking() {
 
-  const [ranking, setRanking] = useState<
-    RankingUser[]
-  >([]);
+  const [ranking, setRanking] =
+    useState<RankingUser[]>([]);
 
-  function calcularRanking() {
+  async function carregarRanking() {
 
-    const userPoints: Record<string, number> = {};
+    const snapshot =
+      await getDocs(
+        collection(db, "bets")
+      );
 
-    for (const key in localStorage) {
+    const rankingMap:
+      Record<string, number> = {};
 
-      if (key.includes("-")) {
+    snapshot.forEach((doc) => {
 
-        try {
+      const data = doc.data();
 
-          const data =
-            localStorage.getItem(key);
+      const user =
+        data.userName || "Anônimo";
 
-          if (data) {
+      const points =
+        Number(data.points || 0);
 
-            const parsed = JSON.parse(data);
+      if (!rankingMap[user]) {
 
-            const user =
-              parsed.user || "Anônimo";
-
-            const points =
-              Number(parsed.points || 0);
-
-            if (!userPoints[user]) {
-              userPoints[user] = 0;
-            }
-
-            userPoints[user] += points;
-
-          }
-
-        } catch {
-
-          console.error(
-            "Erro ao calcular ranking"
-          );
-
-        }
+        rankingMap[user] = 0;
 
       }
 
-    }
+      rankingMap[user] += points;
+
+    });
 
     const rankingArray =
-      Object.entries(userPoints)
-        .map(([nome, pontos]) => ({
-          nome,
-          pontos
+      Object.entries(rankingMap)
+        .map(([user, points]) => ({
+          user,
+          points
         }))
         .sort(
-          (a, b) => b.pontos - a.pontos
+          (a, b) =>
+            b.points - a.points
         );
 
     setRanking(rankingArray);
@@ -75,103 +67,83 @@ export default function RealRanking() {
   useEffect(() => {
 
     const timeout = setTimeout(() => {
-  
-      calcularRanking();
-  
+
+      carregarRanking();
+
     }, 0);
-  
+
     window.addEventListener(
       "betSaved",
-      calcularRanking
+      carregarRanking
     );
-  
+
     return () => {
-  
+
       clearTimeout(timeout);
-  
+
       window.removeEventListener(
         "betSaved",
-        calcularRanking
+        carregarRanking
       );
-  
+
     };
-  
+
   }, []);
-
-  if (ranking.length === 0) {
-
-    return (
-
-      <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
-
-        <h2 className="text-2xl font-bold mb-5">
-          🏆 Ranking Real
-        </h2>
-
-        <p className="text-zinc-400">
-          Nenhuma aposta ainda.
-        </p>
-
-      </div>
-
-    );
-
-  }
-
-  const campeao = ranking[0];
-
-  const ultimo =
-    ranking[ranking.length - 1];
 
   return (
 
     <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
 
       <h2 className="text-2xl font-bold mb-5">
-        🏆 Ranking Real
+        🏆 Ranking Mundial da Vergonha
       </h2>
-
-      <div className="mb-5 space-y-2">
-
-        <div className="bg-green-500 text-black rounded-xl p-3 font-bold">
-          👑 {campeao.nome} lidera com {campeao.pontos} pts
-        </div>
-
-        <div className="bg-red-500 text-black rounded-xl p-3 font-bold">
-          🤡 {ultimo.nome} está precisando estudar futebol
-        </div>
-
-      </div>
 
       <div className="space-y-3">
 
+        {ranking.length === 0 && (
+
+          <p className="text-zinc-400">
+            Nenhuma aposta registrada.
+          </p>
+
+        )}
+
         {ranking.map((user, index) => (
 
-          <RankingCard
-            key={user.nome}
-            nome={user.nome}
-            pontos={user.pontos}
-            emoji={
-              index === 0
-                ? "🥇"
-                : index === 1
-                ? "🥈"
-                : index === 2
-                ? "🥉"
-                : "⚽"
-            }
-            destaque={index === ranking.length - 1}
-          />
+          <div
+            key={index}
+            className="bg-zinc-800 rounded-2xl p-4 flex justify-between items-center"
+          >
+
+            <div className="flex items-center gap-3">
+
+              <span className="text-2xl">
+
+                {index === 0 && "🥇"}
+                {index === 1 && "🥈"}
+                {index === 2 && "🥉"}
+                {index > 2 && "⚽"}
+
+              </span>
+
+              <p className="font-bold">
+                {user.user}
+              </p>
+
+            </div>
+
+            <p className="text-yellow-400 font-black">
+              ⭐ {user.points}
+            </p>
+
+          </div>
 
         ))}
 
       </div>
-      <div className="mt-5">
 
-        <ShareRanking ranking={ranking} />
-
-        </div>
     </div>
 
   );
+
 }
