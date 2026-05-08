@@ -16,6 +16,9 @@ import {getAutomaticMeme} from "../lib/automaticMemes";
 import {
   calculatePoints
 } from "../lib/calculatePoints";
+import {
+  onAuthStateChanged
+} from "firebase/auth";
 
 import {
   collection,
@@ -160,144 +163,159 @@ useEffect(() => {
 
 }, []);
   
-useEffect(() => {
+async function gerarMemeAutomatico(
+  currentUser: string
+) {
 
-  async function gerarMemeAutomatico() {
+  const betsSnapshot =
+    await getDocs(
+      collection(db, "bets")
+    );
 
-    const currentUser =
-      auth.currentUser?.displayName;
+  const gamesSnapshot =
+    await getDocs(
+      collection(db, "games")
+    );
 
-    if (!currentUser) {
-      return;
-    }
+  const ranking:
+    Record<string, number> = {};
 
-    const betsSnapshot =
-      await getDocs(
-        collection(db, "bets")
-      );
+  let exactScore = false;
 
-    const gamesSnapshot =
-      await getDocs(
-        collection(db, "games")
-      );
+  let crazyBet = false;
 
-    const ranking:
-      Record<string, number> = {};
+  betsSnapshot.forEach((betDoc) => {
 
-    let exactScore = false;
+    const bet =
+      betDoc.data();
 
-    let crazyBet = false;
+    let points = 0;
 
-    betsSnapshot.forEach((betDoc) => {
+    gamesSnapshot.forEach((gameDoc) => {
 
-      const bet =
-        betDoc.data();
+      const game =
+        gameDoc.data();
 
-      let points = 0;
+      if (
+        game.match === bet.match &&
+        game.resultadoA !== undefined &&
+        game.resultadoB !== undefined
+      ) {
 
-      gamesSnapshot.forEach((gameDoc) => {
+        points =
+          calculatePoints({
 
-        const game =
-          gameDoc.data();
+            apostaA:
+              Number(bet.golsA),
+
+            apostaB:
+              Number(bet.golsB),
+
+            resultadoA:
+              Number(game.resultadoA),
+
+            resultadoB:
+              Number(game.resultadoB)
+
+          });
 
         if (
-          game.match === bet.match &&
-          game.resultadoA !== undefined &&
-          game.resultadoB !== undefined
+          bet.userName === currentUser &&
+          Number(bet.golsA) === Number(game.resultadoA) &&
+          Number(bet.golsB) === Number(game.resultadoB)
         ) {
 
-          points =
-            calculatePoints({
-
-              apostaA:
-                Number(bet.golsA),
-
-              apostaB:
-                Number(bet.golsB),
-
-              resultadoA:
-                Number(game.resultadoA),
-
-              resultadoB:
-                Number(game.resultadoB)
-
-            });
-
-          if (
-            bet.userName === currentUser &&
-            Number(bet.golsA) === Number(game.resultadoA) &&
-            Number(bet.golsB) === Number(game.resultadoB)
-          ) {
-
-            exactScore = true;
-
-          }
-
-          if (
-            bet.userName === currentUser &&
-            (
-              Number(bet.golsA) >= 6 ||
-              Number(bet.golsB) >= 6
-            )
-          ) {
-
-            crazyBet = true;
-
-          }
+          exactScore = true;
 
         }
 
-      });
+        if (
+          bet.userName === currentUser &&
+          (
+            Number(bet.golsA) >= 6 ||
+            Number(bet.golsB) >= 6
+          )
+        ) {
 
-      if (!ranking[bet.userName]) {
+          crazyBet = true;
 
-        ranking[bet.userName] = 0;
+        }
 
       }
 
-      ranking[bet.userName] += points;
-
     });
 
-    const sorted =
+    if (!ranking[bet.userName]) {
 
-      Object.entries(ranking)
-
-        .sort(
-          (a, b) =>
-            b[1] - a[1]
-        );
-
-    const isLeader =
-      sorted[0]?.[0] === currentUser;
-
-    const isLastPlace =
-      sorted[
-        sorted.length - 1
-      ]?.[0] === currentUser;
-
-    const meme =
-      getAutomaticMeme({
-
-        isLeader,
-
-        isLastPlace,
-
-        exactScore,
-
-        crazyBet
-
-      });
-
-    if (meme) {
-
-      setAutomaticMeme(meme);
+      ranking[bet.userName] = 0;
 
     }
 
+    ranking[bet.userName] += points;
+
+  });
+
+  const sorted =
+
+    Object.entries(ranking)
+
+      .sort(
+        (a, b) =>
+          b[1] - a[1]
+      );
+
+  const isLeader =
+    sorted[0]?.[0] === currentUser;
+
+  const isLastPlace =
+    sorted[
+      sorted.length - 1
+    ]?.[0] === currentUser;
+
+  const meme =
+    getAutomaticMeme({
+
+      isLeader,
+
+      isLastPlace,
+
+      exactScore,
+
+      crazyBet
+
+    });
+
+  if (meme) {
+
+    setAutomaticMeme(meme);
+
   }
 
-  gerarMemeAutomatico();
+}
+
+useEffect(() => {
+
+  const unsubscribe =
+    onAuthStateChanged(
+      auth,
+      (user) => {
+
+        if (!user) {
+
+          setAutomaticMeme("");
+
+          return;
+
+        }
+
+        gerarMemeAutomatico(
+          user.displayName || ""
+        );
+
+      }
+    );
+
+  return () => unsubscribe();
 
 }, []);
 
