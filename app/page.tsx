@@ -20,7 +20,6 @@ import {
   query
 } from "firebase/firestore";
 
-
 type Game = {
   id: string;
 
@@ -41,53 +40,53 @@ type Game = {
 export default function Home() {
 
   const [jogos, setJogos] =
-  useState<Game[]>([]);
+    useState<Game[]>([]);
 
   useEffect(() => {
 
     async function carregarJogos() {
-  
+
       const q = query(
         collection(db, "games"),
         orderBy("createdAt", "asc")
       );
-  
+
       const snapshot =
         await getDocs(q);
-  
+
       const games: Game[] = [];
-  
+
       snapshot.forEach((doc) => {
-  
+
         const data = doc.data();
-  
+
         games.push({
-  
+
           id: doc.id,
-  
+
           teamA: data.teamA,
           teamB: data.teamB,
-  
+
           emojiA: data.emojiA,
           emojiB: data.emojiB,
-  
+
           phase: data.phase,
-  
+
           matchDate: data.matchDate,
-  
+
           resultadoA: data.resultadoA,
           resultadoB: data.resultadoB
-  
+
         });
-  
+
       });
-  
+
       setJogos(games);
-  
+
     }
-  
+
     carregarJogos();
-  
+
   }, []);
 
   const memeAleatorio = memes[0];
@@ -154,11 +153,11 @@ export default function Home() {
 
   return (
 
-    <main className="min-h-screen bg-zinc-950 text-white pb-24">
+    <main className="min-h-screen bg-zinc-950 text-white pb-20">
 
       <Header />
 
-      <section className="max-w-5xl mx-auto p-4 grid gap-5">
+      <section className="max-w-3xl mx-auto px-4 grid gap-4">
 
         {/* LOGIN */}
         <LoginCard />
@@ -174,18 +173,16 @@ export default function Home() {
           mensagem={memeAleatorio}
         />
 
-        
-
         {/* JOGOS ABERTOS */}
-        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+        <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800">
 
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-center justify-between mb-4">
 
-            <h2 className="text-2xl font-bold">
+            <h2 className="text-xl font-black">
               ⚽ Jogos da Rodada
             </h2>
 
-            <span className="text-zinc-400 text-sm">
+            <span className="text-zinc-400 text-xs">
               Faça seus palpites 😎
             </span>
 
@@ -198,14 +195,14 @@ export default function Home() {
 
                 <div
                   key={fase}
-                  className="mb-8"
+                  className="mb-6"
                 >
 
-                  <h3 className="text-xl font-black mb-4 text-blue-400">
+                  <h3 className="text-lg font-black mb-3 text-blue-400">
                     {fase}
                   </h3>
 
-                  <div className="space-y-4">
+                  <div className="space-y-3">
 
                     {jogosDaFase.map((jogo) => (
 
@@ -234,10 +231,11 @@ export default function Home() {
 
         {/* MINHAS APOSTAS */}
         <BetTable />
-{/* JOGOS ENCERRADOS */}
-        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
 
-          <h2 className="text-2xl font-bold mb-5">
+        {/* JOGOS ENCERRADOS */}
+        <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800">
+
+          <h2 className="text-xl font-black mb-4">
             📜 Resultados Oficiais
           </h2>
 
@@ -246,10 +244,10 @@ export default function Home() {
 
               <div
                 key={fase}
-                className="mb-6"
+                className="mb-5"
               >
 
-                <h3 className="text-lg font-black mb-3 text-red-400">
+                <h3 className="text-base font-black mb-3 text-red-400">
                   {fase}
                 </h3>
 
@@ -259,12 +257,12 @@ export default function Home() {
 
                     <div
                       key={`${jogo.teamA}-${jogo.teamB}`}
-                      className="bg-zinc-800 border border-zinc-700 rounded-2xl p-4 flex justify-between items-center"
+                      className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3 flex justify-between items-center"
                     >
 
                       <div>
 
-                        <p className="font-bold">
+                        <p className="font-bold text-sm">
 
                           {jogo.emojiA}
                           {" "}
@@ -278,13 +276,13 @@ export default function Home() {
 
                         </p>
 
-                        <p className="text-zinc-400 text-sm">
+                        <p className="text-zinc-400 text-xs">
                           🔒 Encerrado
                         </p>
 
                       </div>
 
-                      <p className="font-black text-xl">
+                      <p className="font-black text-lg">
                         {jogo.resultadoA}
                         {" x "}
                         {jogo.resultadoB}
@@ -301,6 +299,7 @@ export default function Home() {
           ))}
 
         </div>
+
       </section>
 
     </main>

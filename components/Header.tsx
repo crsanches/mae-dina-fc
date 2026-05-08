@@ -6,7 +6,7 @@ export default function Header() {
 
     <header className="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
 
-      <div className="max-w-5xl mx-auto py-5 text-center">
+    <div className="max-w-4xl mx-auto px-4 py-4 text-center">
 
         {/* TÍTULO */}
 
