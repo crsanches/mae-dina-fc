@@ -89,7 +89,7 @@ export default function Home() {
     carregarJogos();
   
   }, []);
-  
+
   const memeAleatorio = memes[0];
 
   const jogosAbertos = jogos.filter((jogo) => {
@@ -174,7 +174,67 @@ export default function Home() {
           mensagem={memeAleatorio}
         />
 
-        {/* JOGOS ENCERRADOS */}
+        
+
+        {/* JOGOS ABERTOS */}
+        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
+
+          <div className="flex items-center justify-between mb-5">
+
+            <h2 className="text-2xl font-bold">
+              ⚽ Jogos da Rodada
+            </h2>
+
+            <span className="text-zinc-400 text-sm">
+              Faça seus palpites 😎
+            </span>
+
+          </div>
+
+          <div className="space-y-4">
+
+            {Object.entries(jogosAbertosPorFase).map(
+              ([fase, jogosDaFase]) => (
+
+                <div
+                  key={fase}
+                  className="mb-8"
+                >
+
+                  <h3 className="text-xl font-black mb-4 text-blue-400">
+                    {fase}
+                  </h3>
+
+                  <div className="space-y-4">
+
+                    {jogosDaFase.map((jogo) => (
+
+                      <MatchCard
+                        key={`${jogo.teamA}-${jogo.teamB}`}
+                        teamA={jogo.teamA}
+                        teamB={jogo.teamB}
+                        emojiA={jogo.emojiA}
+                        emojiB={jogo.emojiB}
+                        resultadoA={jogo.resultadoA}
+                        resultadoB={jogo.resultadoB}
+                        matchDate={jogo.matchDate}
+                      />
+
+                    ))}
+
+                  </div>
+
+                </div>
+
+            ))}
+
+          </div>
+
+        </div>
+
+        {/* MINHAS APOSTAS */}
+        <BetTable />
+{/* JOGOS ENCERRADOS */}
         <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
 
           <h2 className="text-2xl font-bold mb-5">
@@ -241,66 +301,6 @@ export default function Home() {
           ))}
 
         </div>
-
-        {/* JOGOS ABERTOS */}
-        <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
-
-          <div className="flex items-center justify-between mb-5">
-
-            <h2 className="text-2xl font-bold">
-              ⚽ Jogos da Rodada
-            </h2>
-
-            <span className="text-zinc-400 text-sm">
-              Faça seus palpites 😎
-            </span>
-
-          </div>
-
-          <div className="space-y-4">
-
-            {Object.entries(jogosAbertosPorFase).map(
-              ([fase, jogosDaFase]) => (
-
-                <div
-                  key={fase}
-                  className="mb-8"
-                >
-
-                  <h3 className="text-xl font-black mb-4 text-blue-400">
-                    {fase}
-                  </h3>
-
-                  <div className="space-y-4">
-
-                    {jogosDaFase.map((jogo) => (
-
-                      <MatchCard
-                        key={`${jogo.teamA}-${jogo.teamB}`}
-                        teamA={jogo.teamA}
-                        teamB={jogo.teamB}
-                        emojiA={jogo.emojiA}
-                        emojiB={jogo.emojiB}
-                        resultadoA={jogo.resultadoA}
-                        resultadoB={jogo.resultadoB}
-                        matchDate={jogo.matchDate}
-                      />
-
-                    ))}
-
-                  </div>
-
-                </div>
-
-            ))}
-
-          </div>
-
-        </div>
-
-        {/* MINHAS APOSTAS */}
-        <BetTable />
-
       </section>
 
     </main>
