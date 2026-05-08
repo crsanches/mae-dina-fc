@@ -51,13 +51,19 @@ export default function MatchCard({
     }
 
 
-    const calculatedPoints = calculatePoints({
-      apostaA: Number(golsA),
-      apostaB: Number(golsB),
-      resultadoA,
-      resultadoB
-    });
+    const calculatedPoints =
 
+    resultadoA !== undefined &&
+    resultadoB !== undefined
+  
+      ? calculatePoints({
+          apostaA: Number(golsA),
+          apostaB: Number(golsB),
+          resultadoA,
+          resultadoB
+        })
+  
+      : 0;
 
       const userName =
       localStorage.getItem("mae-dina-user");
@@ -278,27 +284,34 @@ const isEndingSoon =
         </div>
       )}
 
-      <div className="mt-4 pt-4 border-t border-zinc-700">
+{resultadoA !== undefined &&
+ resultadoB !== undefined && (
 
-      <div className="flex justify-between items-center">
+  <div className="mt-4 pt-4 border-t border-zinc-700">
 
-        <p className="text-zinc-400 text-sm">
-          Resultado oficial
-        </p>
+    <div className="flex justify-between items-center">
 
-        <p className="font-bold">
-          {resultadoA} x {resultadoB}
-        </p>
+      <p className="text-zinc-400 text-sm">
+        Resultado oficial
+      </p>
 
-      </div>
+      <p className="font-bold">
+        {resultadoA} x {resultadoB}
+      </p>
 
-      {points > 0 && (
-        <div className="mt-3 bg-green-500 text-black font-bold rounded-xl p-2 text-center">
-          ⭐ Você ganhou {points} pontos!
-        </div>
-      )}
-
-      </div>
     </div>
+
+    {points > 0 && (
+
+      <div className="mt-3 bg-green-500 text-black font-bold rounded-xl p-2 text-center">
+        ⭐ Você ganhou {points} pontos!
+      </div>
+
+    )}
+
+  </div>
+
+)}
+</div>
   );
 }

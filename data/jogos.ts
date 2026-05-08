@@ -7,8 +7,6 @@ export const jogos: Match[] = [
     teamB: "Argentina",
     emojiA: "🇧🇷",
     emojiB: "🇦🇷",
-    resultadoA: 2,
-    resultadoB: 1,
     phase: "Amistosos",
     matchDate: "2026-05-07T23:59:00"
   },
@@ -18,8 +16,6 @@ export const jogos: Match[] = [
     teamB: "Alemanha",
     emojiA: "🇳🇱",
     emojiB: "🇩🇪",
-    resultadoA: 2,
-    resultadoB: 1,
     phase: "Amistosos",
     matchDate: "2026-05-07T23:59:00"
   }
