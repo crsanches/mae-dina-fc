@@ -15,7 +15,7 @@ import { db } from "../lib/firebase";
 
 import {
   collection,
-  getDocs,
+  onSnapshot,
   orderBy,
   query
 } from "firebase/firestore";
@@ -42,52 +42,59 @@ export default function Home() {
   const [jogos, setJogos] =
     useState<Game[]>([]);
 
-  useEffect(() => {
-
-    async function carregarJogos() {
+    useEffect(() => {
 
       const q = query(
+    
         collection(db, "games"),
+    
         orderBy("createdAt", "asc")
+    
       );
-
-      const snapshot =
-        await getDocs(q);
-
-      const games: Game[] = [];
-
-      snapshot.forEach((doc) => {
-
-        const data = doc.data();
-
-        games.push({
-
-          id: doc.id,
-
-          teamA: data.teamA,
-          teamB: data.teamB,
-
-          emojiA: data.emojiA,
-          emojiB: data.emojiB,
-
-          phase: data.phase,
-
-          matchDate: data.matchDate,
-
-          resultadoA: data.resultadoA,
-          resultadoB: data.resultadoB
-
-        });
-
-      });
-
-      setJogos(games);
-
-    }
-
-    carregarJogos();
-
-  }, []);
+    
+      const unsubscribe =
+        onSnapshot(
+    
+          q,
+    
+          (snapshot) => {
+    
+            const games: Game[] = [];
+    
+            snapshot.forEach((doc) => {
+    
+              const data = doc.data();
+    
+              games.push({
+    
+                id: doc.id,
+    
+                teamA: data.teamA,
+                teamB: data.teamB,
+    
+                emojiA: data.emojiA,
+                emojiB: data.emojiB,
+    
+                phase: data.phase,
+    
+                matchDate: data.matchDate,
+    
+                resultadoA: data.resultadoA,
+                resultadoB: data.resultadoB
+    
+              });
+    
+            });
+    
+            setJogos(games);
+    
+          }
+    
+        );
+    
+      return () => unsubscribe();
+    
+    }, []);
 
   const memeAleatorio = memes[0];
 
