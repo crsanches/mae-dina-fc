@@ -6,6 +6,8 @@ import { db } from "../lib/firebase";
 
 import { calculatePoints }
 from "../lib/calculatePoints";
+import { auth }
+from "../lib/firebase";
 
 import {
   collection,
@@ -41,9 +43,17 @@ export default function BetTable() {
       await getDocs(betsQuery);
 
     for (const betDoc of betsSnapshot.docs) {
+      
 
       const data = betDoc.data();
-
+      const currentUser =
+      auth.currentUser?.displayName;
+  
+    if (
+      data.userName !== currentUser
+    ) {
+      continue;
+    }
       const gamesQuery = query(
         collection(db, "games"),
         where(

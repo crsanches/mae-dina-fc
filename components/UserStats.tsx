@@ -12,6 +12,9 @@ import {
 import { calculatePoints }
 from "../lib/calculatePoints";
 
+import { auth }
+from "../lib/firebase";
+
 type UserData = {
   position: number;
   points: number;
@@ -30,9 +33,7 @@ export default function UserStats() {
   async function carregarStats() {
 
     const currentUser =
-      localStorage.getItem(
-        "mae-dina-user"
-      );
+  auth.currentUser?.displayName;
 
     if (!currentUser) {
       return;
