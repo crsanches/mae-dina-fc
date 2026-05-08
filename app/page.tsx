@@ -9,10 +9,87 @@ import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
 
 import { memes } from "../data/memes";
-import { jogos } from "../data/jogos";
+import { useEffect, useState } from "react";
+
+import { db } from "../lib/firebase";
+
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query
+} from "firebase/firestore";
+
+
+type Game = {
+  id: string;
+
+  teamA: string;
+  teamB: string;
+
+  emojiA: string;
+  emojiB: string;
+
+  phase: string;
+
+  matchDate: string;
+
+  resultadoA?: number;
+  resultadoB?: number;
+};
 
 export default function Home() {
 
+  const [jogos, setJogos] =
+  useState<Game[]>([]);
+
+  useEffect(() => {
+
+    async function carregarJogos() {
+  
+      const q = query(
+        collection(db, "games"),
+        orderBy("createdAt", "asc")
+      );
+  
+      const snapshot =
+        await getDocs(q);
+  
+      const games: Game[] = [];
+  
+      snapshot.forEach((doc) => {
+  
+        const data = doc.data();
+  
+        games.push({
+  
+          id: doc.id,
+  
+          teamA: data.teamA,
+          teamB: data.teamB,
+  
+          emojiA: data.emojiA,
+          emojiB: data.emojiB,
+  
+          phase: data.phase,
+  
+          matchDate: data.matchDate,
+  
+          resultadoA: data.resultadoA,
+          resultadoB: data.resultadoB
+  
+        });
+  
+      });
+  
+      setJogos(games);
+  
+    }
+  
+    carregarJogos();
+  
+  }, []);
+  
   const memeAleatorio = memes[0];
 
   const jogosAbertos = jogos.filter((jogo) => {
