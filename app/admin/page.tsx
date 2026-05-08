@@ -1,14 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { db } from "../../lib/firebase";
 
 import {
   addDoc,
   collection,
-  serverTimestamp
+  deleteDoc,
+  doc,
+  getDocs,
+  serverTimestamp,
+  updateDoc
 } from "firebase/firestore";
+
+type Game = {
+  id: string;
+
+  teamA: string;
+  teamB: string;
+
+  emojiA: string;
+  emojiB: string;
+
+  phase: string;
+
+  matchDate: string;
+};
 
 export default function AdminPage() {
 
@@ -32,6 +50,56 @@ export default function AdminPage() {
 
   const [success, setSuccess] =
     useState(false);
+
+  const [games, setGames] =
+    useState<Game[]>([]);
+
+  async function carregarJogos() {
+
+    const snapshot =
+      await getDocs(
+        collection(db, "games")
+      );
+
+    const loadedGames: Game[] = [];
+
+    snapshot.forEach((docItem) => {
+
+      const data = docItem.data();
+
+      loadedGames.push({
+
+        id: docItem.id,
+
+        teamA: data.teamA,
+        teamB: data.teamB,
+
+        emojiA: data.emojiA,
+        emojiB: data.emojiB,
+
+        phase: data.phase,
+
+        matchDate: data.matchDate
+
+      });
+
+    });
+
+    setGames(loadedGames);
+
+  }
+
+  useEffect(() => {
+
+    const timeout = setTimeout(() => {
+
+      carregarJogos();
+
+    }, 0);
+
+    return () => clearTimeout(timeout);
+
+  }, []);
 
   async function criarJogo() {
 
@@ -71,8 +139,13 @@ export default function AdminPage() {
 
     setTeamA("");
     setTeamB("");
+
     setEmojiA("");
     setEmojiB("");
+
+    setMatchDate("");
+
+    carregarJogos();
 
     setTimeout(() => {
 
@@ -82,15 +155,54 @@ export default function AdminPage() {
 
   }
 
+  async function atualizarData(
+    gameId: string,
+    newDate: string
+  ) {
+
+    await updateDoc(
+      doc(db, "games", gameId),
+      {
+        matchDate: newDate
+      }
+    );
+
+    carregarJogos();
+
+  }
+
+  async function excluirJogo(
+    gameId: string
+  ) {
+
+    const confirmDelete =
+      confirm(
+        "Excluir jogo?"
+      );
+
+    if (!confirmDelete) {
+      return;
+    }
+
+    await deleteDoc(
+      doc(db, "games", gameId)
+    );
+
+    carregarJogos();
+
+  }
+
   return (
 
     <main className="min-h-screen bg-zinc-950 text-white p-6">
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
 
         <h1 className="text-4xl font-black mb-8">
           👑 Admin — Mãe Diná FC
         </h1>
+
+        {/* FORMULÁRIO */}
 
         <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 space-y-5">
 
@@ -229,6 +341,86 @@ export default function AdminPage() {
             </div>
 
           )}
+
+        </div>
+
+        {/* LISTA DE JOGOS */}
+
+        <div className="mt-10">
+
+          <h2 className="text-3xl font-black mb-5">
+            📋 Jogos Cadastrados
+          </h2>
+
+          <div className="space-y-4">
+
+            {games.map((game) => (
+
+              <div
+                key={game.id}
+                className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+              >
+
+                <div className="flex justify-between items-center">
+
+                  <div>
+
+                    <h3 className="text-2xl font-black">
+
+                      {game.emojiA}
+                      {" "}
+                      {game.teamA}
+
+                      {" x "}
+
+                      {game.emojiB}
+                      {" "}
+                      {game.teamB}
+
+                    </h3>
+
+                    <p className="text-zinc-400">
+                      {game.phase}
+                    </p>
+
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      excluirJogo(game.id)
+                    }
+                    className="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-xl text-black font-bold"
+                  >
+                    Excluir
+                  </button>
+
+                </div>
+
+                <div className="mt-5">
+
+                  <label className="block mb-2 font-bold">
+                    Alterar data/hora
+                  </label>
+
+                  <input
+                    type="datetime-local"
+                    defaultValue={game.matchDate}
+                    onBlur={(e) =>
+                      atualizarData(
+                        game.id,
+                        e.target.value
+                      )
+                    }
+                    className="bg-zinc-800 rounded-xl p-3"
+                  />
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
 
         </div>
 
