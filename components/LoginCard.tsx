@@ -52,8 +52,12 @@ export default function LoginCard() {
 
   async function logout() {
 
+    localStorage.clear();
+  
     await signOut(auth);
-
+  
+    window.location.reload();
+  
   }
 
   return (

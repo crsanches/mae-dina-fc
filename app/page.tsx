@@ -157,7 +157,7 @@ export default function Home() {
 
       <Header />
 
-      <section className="max-w-3xl mx-auto px-4 grid gap-4">
+      <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3">
 
         {/* LOGIN */}
         <LoginCard />
@@ -174,7 +174,7 @@ export default function Home() {
         />
 
         {/* JOGOS ABERTOS */}
-        <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800">
+        <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
           <div className="flex items-center justify-between mb-4">
 
@@ -233,7 +233,7 @@ export default function Home() {
         <BetTable />
 
         {/* JOGOS ENCERRADOS */}
-        <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800">
+        <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
           <h2 className="text-xl font-black mb-4">
             📜 Resultados Oficiais
