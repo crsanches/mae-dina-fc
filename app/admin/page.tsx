@@ -231,6 +231,13 @@ export default function AdminPage() {
           >
             ⚽ Bolão
           </Link>
+          
+          <Link
+            href="/admin/bets"
+            className="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-600 transition px-4 py-2 rounded-xl font-semibold text-sm"
+          >
+            🎯 Ver Palpites
+          </Link>
 
         </div>
 

@@ -8,7 +8,7 @@ import MemeCard from "../components/MemeCard";
 import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
 
-import { memes } from "../data/memes";
+
 import { useEffect, useState } from "react";
 
 import { db } from "../lib/firebase";
@@ -41,6 +41,9 @@ export default function Home() {
 
   const [jogos, setJogos] =
     useState<Game[]>([]);
+
+  const [memeAleatorio, setMemeAleatorio] =
+    useState("");
 
     useEffect(() => {
 
@@ -95,8 +98,52 @@ export default function Home() {
       return () => unsubscribe();
     
     }, []);
+useEffect(() => {
 
-  const memeAleatorio = memes[0];
+  const unsubscribe =
+    onSnapshot(
+
+      collection(db, "memes"),
+
+      (snapshot) => {
+
+        const memes: string[] = [];
+
+        snapshot.forEach((doc) => {
+
+          const data = doc.data();
+
+          if (data.active) {
+
+            memes.push(data.text);
+
+          }
+
+        });
+
+        if (memes.length > 0) {
+
+          const randomIndex =
+
+            Math.floor(
+              Math.random() *
+              memes.length
+            );
+
+          setMemeAleatorio(
+            memes[randomIndex]
+          );
+
+        }
+
+      }
+
+    );
+
+  return () => unsubscribe();
+
+}, []);
+  
 
   const jogosAbertos = jogos.filter((jogo) => {
 
