@@ -1,22 +1,51 @@
+import Image from "next/image";
+
 export default function Header() {
+
   return (
-    <header className="bg-zinc-900 border-b border-zinc-800 p-5 sticky top-0 z-50">
 
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
+    <header className="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-50">
 
-      <header className="text-center py-8">
-          <h1 className="text-4xl font-black">
-            ⚽ Mãe Diná FC ⚽
+      <div className="max-w-5xl mx-auto py-5 text-center">
+
+        {/* TÍTULO */}
+
+        <div className="flex items-center justify-center gap-3">
+
+          <h1 className="text-3xl md:text-4xl font-black flex items-center gap-3">
+
+            <span>⚽</span>
+
+            <span>
+              Mãe Diná FC
+            </span>
+
+            <span>⚽</span>
+
           </h1>
-      </header>
-        <div>
-          <p className="text-zinc-400 text-sm">
-            O único bolão onde errar feio também vira troféu.
-          </p>
+
+          <Image
+            src="/icon.png"
+            alt="Mãe Diná FC"
+            width={52}
+            height={52}
+            className="rounded-xl"
+          />
+
         </div>
 
-        </div>  
+        {/* SUBTÍTULO */}
+
+        <p className="text-zinc-400 text-sm md:text-base mt-2">
+
+          O único bolão onde errar feio também vira troféu.
+
+        </p>
+
+      </div>
 
     </header>
+
   );
+
 }
