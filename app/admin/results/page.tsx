@@ -73,8 +73,14 @@ export default function AdminResultsPage() {
 
   useEffect(() => {
 
-    carregarJogos();
-
+    const timeout = setTimeout(() => {
+  
+      carregarJogos();
+  
+    }, 0);
+  
+    return () => clearTimeout(timeout);
+  
   }, []);
 
   async function salvarResultado(

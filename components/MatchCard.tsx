@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { db } from "../lib/firebase";
 
 import {
-  collection,
   doc,
   serverTimestamp,
   setDoc
@@ -97,6 +96,8 @@ export default function MatchCard({
     );
 
     setSalvo(true);
+    setGolsA("");
+    setGolsB("");
   
     setTimeout(() => {
       setSalvo(false);
@@ -265,6 +266,8 @@ const isEndingSoon =
         {getRemainingTime()}
         </span>
 
+        {!salvo && (
+
         <button
           onClick={salvarPalpite}
           className={`px-4 py-2 rounded-xl font-bold transition ${
@@ -276,7 +279,8 @@ const isEndingSoon =
         >
           Salvar Palpite
         </button>
-
+      )}
+      
       </div>
       {salvo && (
         <div className="mt-4 bg-green-500 text-black font-bold p-3 rounded-xl text-center animate-pulse">
