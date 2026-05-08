@@ -1,96 +1,127 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signOut,
+  onAuthStateChanged,
+  User
+} from "firebase/auth";
+
+import {
+  useEffect,
+  useState
+} from "react";
+
+import {
+  auth
+} from "../lib/firebase";
 
 export default function LoginCard() {
 
-  const [name, setName] = useState("");
-  const [savedName, setSavedName] = useState("");
-
-  function salvarNome() {
-
-    if (!name.trim()) {
-      return;
-    }
-
-    localStorage.setItem(
-      "mae-dina-user",
-      name
-    );
-
-    setSavedName(name);
-
-  }
+  const [user, setUser] =
+    useState<User | null>(null);
 
   useEffect(() => {
 
-    const timeout = setTimeout(() => {
-  
-      const storedName =
-        localStorage.getItem("mae-dina-user");
-  
-      if (storedName) {
-  
-        setSavedName(storedName);
-  
-      }
-  
-    }, 0);
-  
-    return () => clearTimeout(timeout);
-  
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (currentUser) => {
+
+          setUser(currentUser);
+
+        }
+      );
+
+    return () => unsubscribe();
+
   }, []);
 
-  if (savedName) {
+  async function loginGoogle() {
 
-    return (
+    const provider =
+      new GoogleAuthProvider();
 
-      <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-
-        <p className="text-zinc-400 text-sm mb-2">
-          Apostador conectado
-        </p>
-
-        <h2 className="text-3xl font-black">
-          😎 {savedName}
-        </h2>
-
-      </div>
-
+    await signInWithPopup(
+      auth,
+      provider
     );
+
+  }
+
+  async function logout() {
+
+    await signOut(auth);
 
   }
 
   return (
 
-    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
 
-      <h2 className="text-2xl font-black mb-4">
-        👤 Quem é você?
-      </h2>
+      {!user && (
 
-      <div className="flex gap-3">
+        <div>
 
-        <input
-          type="text"
-          placeholder="Digite seu nome"
-          value={name}
-          onChange={(e) =>
-            setName(e.target.value)
-          }
-          className="flex-1 bg-zinc-800 rounded-xl px-4 py-3 outline-none"
-        />
+          <h2 className="text-xl font-black mb-4">
+            🔐 Entrar
+          </h2>
 
-        <button
-          onClick={salvarNome}
-          className="bg-green-500 hover:bg-green-600 px-4 rounded-xl font-bold text-black"
-        >
-          Entrar
-        </button>
+          <button
+            onClick={loginGoogle}
+            className="w-full bg-white hover:bg-zinc-200 transition text-black font-bold rounded-xl p-3"
+          >
+            Entrar com Google
+          </button>
 
-      </div>
+        </div>
+
+      )}
+
+      {user && (
+
+        <div className="flex items-center justify-between gap-4">
+
+          <div className="flex items-center gap-3">
+
+            {user.photoURL && (
+
+              <img
+                src={user.photoURL}
+                alt="User"
+                className="w-12 h-12 rounded-full"
+              />
+
+            )}
+
+            <div>
+
+              <p className="font-black">
+                {user.displayName}
+              </p>
+
+              <p className="text-zinc-400 text-sm">
+                {user.email}
+              </p>
+
+            </div>
+
+          </div>
+
+          <button
+            onClick={logout}
+            className="bg-red-500 hover:bg-red-600 transition text-black font-bold rounded-xl px-4 py-2 text-sm"
+          >
+            Sair
+          </button>
+
+        </div>
+
+      )}
 
     </div>
 
   );
+
 }
