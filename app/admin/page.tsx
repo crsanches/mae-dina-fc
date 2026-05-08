@@ -51,7 +51,10 @@ export default function AdminPage() {
   const [success, setSuccess] =
     useState(false);
 
-  const [games, setGames] =
+  const [updated, setUpdated] =
+    useState(false);
+  
+    const [games, setGames] =
     useState<Game[]>([]);
 
   async function carregarJogos() {
@@ -159,16 +162,24 @@ export default function AdminPage() {
     gameId: string,
     newDate: string
   ) {
-
+  
     await updateDoc(
       doc(db, "games", gameId),
       {
         matchDate: newDate
       }
     );
-
+  
+    setUpdated(true);
+  
     carregarJogos();
-
+  
+    setTimeout(() => {
+  
+      setUpdated(false);
+  
+    }, 2000);
+  
   }
 
   async function excluirJogo(
@@ -351,6 +362,15 @@ export default function AdminPage() {
           <h2 className="text-3xl font-black mb-5">
             📋 Jogos Cadastrados
           </h2>
+          {updated && (
+
+            <div className="mb-5 bg-blue-500 text-black font-bold rounded-2xl p-4 text-center animate-pulse">
+
+            ✅ Data/hora atualizada com sucesso!
+
+            </div>
+
+          )}
 
           <div className="space-y-4">
 
