@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { db } from "../../../lib/firebase";
+import Link from "next/link";
 
 import {
   collection,
@@ -110,19 +111,19 @@ export default function AdminResultsPage() {
       <div className="max-w-4xl mx-auto">
       <div className="mb-6 flex gap-3">
 
-  <a
+  <Link
     href="/admin/dashboard"
     className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
   >
     ← Dashboard
-  </a>
+  </Link>
 
-  <a
+  <Link
     href="/"
     className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-5 py-3 rounded-2xl font-bold"
   >
     ⚽ Bolão
-  </a>
+  </Link>
 
 </div>
 
