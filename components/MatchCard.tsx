@@ -1,6 +1,13 @@
 "use client";
 import { calculatePoints } from "../lib/calculatePoints";
 import { useEffect, useState } from "react";
+import { db } from "../lib/firebase";
+
+import {
+  addDoc,
+  collection,
+  serverTimestamp
+} from "firebase/firestore";
 
 type Props = {
   teamA: string;
@@ -33,7 +40,7 @@ export default function MatchCard({
   
   
 
-  function salvarPalpite() {
+  async function salvarPalpite() {
     const user =
     localStorage.getItem("mae-dina-user");
 
@@ -51,15 +58,23 @@ export default function MatchCard({
     });
 
 
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        user,
-        golsA,
-        golsB,
-        points: calculatedPoints
-      })
-    );
+    await addDoc(collection(db, "bets"), {
+
+      userName:
+        localStorage.getItem("mae-dina-user"),
+    
+      match:
+        `${teamA} x ${teamB}`,
+    
+      golsA,
+      golsB,
+    
+      points,
+    
+      createdAt:
+        serverTimestamp()
+    
+    });
     setPoints(calculatedPoints);
     window.dispatchEvent(
       new Event("betSaved")
