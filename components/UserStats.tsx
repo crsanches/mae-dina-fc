@@ -2,95 +2,173 @@
 
 import { useEffect, useState } from "react";
 
+import { db } from "../lib/firebase";
+
+import {
+  collection,
+  getDocs
+} from "firebase/firestore";
+
+import { calculatePoints }
+from "../lib/calculatePoints";
+
+type UserData = {
+  position: number;
+  points: number;
+};
+
 export default function UserStats() {
 
-  const [totalPoints, setTotalPoints] = useState(0);
-
-  function calcularPontuacao() {
-
-    let total = 0;
-
-    for (const key in localStorage) {
-
-      if (key.includes("-")) {
-
-        try {
-
-          const data = localStorage.getItem(key);
-
-          if (data) {
-
-            const parsed = JSON.parse(data);
-
-            total += Number(parsed.points || 0);
-
-          }
-
-        } catch {
-
-          console.error("Erro ao calcular pontos");
-
-        }
-
-      }
-
-    }
-
-    setTotalPoints(total);
-
-  }
+  const [data, setData] =
+    useState<UserData>({
+      position: 0,
+      points: 0
+    });
 
   useEffect(() => {
 
     const timeout = setTimeout(() => {
-      calcularPontuacao();
+
+      carregarStats();
+
     }, 0);
-  
-    window.addEventListener(
-      "betSaved",
-      calcularPontuacao
-    );
-  
-    return () => {
-  
-      clearTimeout(timeout);
-  
-      window.removeEventListener(
-        "betSaved",
-        calcularPontuacao
-      );
-  
-    };
-  
+
+    return () => clearTimeout(timeout);
+
   }, []);
 
+  async function carregarStats() {
+
+    const currentUser =
+      localStorage.getItem(
+        "mae-dina-user"
+      );
+
+    if (!currentUser) {
+      return;
+    }
+
+    const betsSnapshot =
+      await getDocs(
+        collection(db, "bets")
+      );
+
+    const gamesSnapshot =
+      await getDocs(
+        collection(db, "games")
+      );
+
+    const ranking:
+      Record<string, number> = {};
+
+    betsSnapshot.forEach((betDoc) => {
+
+      const bet =
+        betDoc.data();
+
+      let points = 0;
+
+      gamesSnapshot.forEach((gameDoc) => {
+
+        const game =
+          gameDoc.data();
+
+        if (
+          game.match === bet.match &&
+          game.resultadoA !== undefined &&
+          game.resultadoB !== undefined
+        ) {
+
+          points =
+            calculatePoints({
+
+              apostaA:
+                Number(bet.golsA),
+
+              apostaB:
+                Number(bet.golsB),
+
+              resultadoA:
+                Number(game.resultadoA),
+
+              resultadoB:
+                Number(game.resultadoB)
+
+            });
+
+        }
+
+      });
+
+      if (!ranking[bet.userName]) {
+        ranking[bet.userName] = 0;
+      }
+
+      ranking[bet.userName] += points;
+
+    });
+
+    const sorted =
+      Object.entries(ranking)
+        .sort(
+          (a, b) =>
+            b[1] - a[1]
+        );
+
+    const position =
+      sorted.findIndex(
+        ([user]) =>
+          user === currentUser
+      ) + 1;
+
+    const points =
+      ranking[currentUser] || 0;
+
+    setData({
+      position,
+      points
+    });
+
+  }
+
   return (
-    <div className="bg-gradient-to-r from-green-500 to-green-700 rounded-3xl p-6 shadow-lg">
 
-      <div className="flex items-center justify-between">
+    <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-5">
 
-        <div>
-          <p className="text-sm uppercase opacity-80">
-            Sua posição
+      <h2 className="text-xl font-black mb-4">
+        📊 Sua Situação
+      </h2>
+
+      <div className="grid grid-cols-2 gap-4">
+
+        <div className="bg-zinc-800 rounded-2xl p-4 text-center">
+
+          <p className="text-zinc-400 text-sm">
+            Posição
           </p>
 
-          <h2 className="text-5xl font-black">
-            #1
-          </h2>
+          <p className="text-3xl font-black text-yellow-400">
+            #{data.position || "-"}
+          </p>
+
         </div>
 
-        <div className="text-right">
-          <p className="text-sm uppercase opacity-80">
+        <div className="bg-zinc-800 rounded-2xl p-4 text-center">
+
+          <p className="text-zinc-400 text-sm">
             Pontos
           </p>
 
-          <h2 className="text-5xl font-black">
-            {totalPoints}
-          </h2>
+          <p className="text-3xl font-black text-green-400">
+            {data.points}
+          </p>
+
         </div>
 
       </div>
 
     </div>
+
   );
+
 }

@@ -4,21 +4,19 @@ export default function Header() {
 
       <div className="max-w-5xl mx-auto flex items-center justify-between">
 
-        <div>
-          <h1 className="text-3xl font-black text-green-400">
+      <header className="text-center py-8">
+
+        <h1 className="text-4xl font-black">
             ⚽ Mãe Diná FC
           </h1>
+          </header>
 
           <p className="text-zinc-400 text-sm">
             O único bolão onde errar feio também vira troféu.
           </p>
         </div>
 
-        <div className="bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full">
-          🔥 Rodada 3
-        </div>
-
-      </div>
+        
 
     </header>
   );
