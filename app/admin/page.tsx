@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useEffect, useState } from "react";
 
 import { db } from "../../lib/firebase";
@@ -53,8 +55,8 @@ export default function AdminPage() {
 
   const [updated, setUpdated] =
     useState(false);
-  
-    const [games, setGames] =
+
+  const [games, setGames] =
     useState<Game[]>([]);
 
   async function carregarJogos() {
@@ -121,10 +123,9 @@ export default function AdminPage() {
     await addDoc(
       collection(db, "games"),
       {
-    
+
         match:
           `${teamA} x ${teamB}`,
-    
 
         teamA,
         teamB,
@@ -166,24 +167,24 @@ export default function AdminPage() {
     gameId: string,
     newDate: string
   ) {
-  
+
     await updateDoc(
       doc(db, "games", gameId),
       {
         matchDate: newDate
       }
     );
-  
+
     setUpdated(true);
-  
+
     carregarJogos();
-  
+
     setTimeout(() => {
-  
+
       setUpdated(false);
-  
+
     }, 2000);
-  
+
   }
 
   async function excluirJogo(
@@ -213,17 +214,40 @@ export default function AdminPage() {
 
       <div className="max-w-4xl mx-auto">
 
-        <h1 className="text-4xl font-black mb-8">
-          👑 Admin — Mãe Diná FC
+        {/* NAVEGAÇÃO */}
+
+        <div className="mb-6 flex gap-3">
+
+          <Link
+            href="/admin/dashboard"
+            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl font-semibold text-sm"
+          >
+            ← Dashboard
+          </Link>
+
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-4 py-2 rounded-xl font-semibold text-sm"
+          >
+            ⚽ Bolão
+          </Link>
+
+        </div>
+
+        {/* TÍTULO */}
+
+        <h1 className="text-3xl font-black mb-6">
+          👑 Administrador — Mãe Diná FC
+          👑  Registro de jogos
         </h1>
 
         {/* FORMULÁRIO */}
 
-        <div className="bg-zinc-900 rounded-3xl p-6 border border-zinc-800 space-y-5">
+        <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 space-y-4">
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Time A
             </label>
 
@@ -232,14 +256,14 @@ export default function AdminPage() {
               onChange={(e) =>
                 setTeamA(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             />
 
           </div>
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Emoji Time A
             </label>
 
@@ -248,14 +272,14 @@ export default function AdminPage() {
               onChange={(e) =>
                 setEmojiA(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             />
 
           </div>
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Time B
             </label>
 
@@ -264,14 +288,14 @@ export default function AdminPage() {
               onChange={(e) =>
                 setTeamB(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             />
 
           </div>
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Emoji Time B
             </label>
 
@@ -280,14 +304,14 @@ export default function AdminPage() {
               onChange={(e) =>
                 setEmojiB(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             />
 
           </div>
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Fase
             </label>
 
@@ -296,7 +320,7 @@ export default function AdminPage() {
               onChange={(e) =>
                 setPhase(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             >
 
               <option>
@@ -325,7 +349,7 @@ export default function AdminPage() {
 
           <div>
 
-            <label className="block mb-2 font-bold">
+            <label className="block mb-2 font-semibold text-sm">
               Data/Hora do jogo
             </label>
 
@@ -335,21 +359,21 @@ export default function AdminPage() {
               onChange={(e) =>
                 setMatchDate(e.target.value)
               }
-              className="w-full bg-zinc-800 rounded-xl p-3"
+              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
             />
 
           </div>
 
           <button
             onClick={criarJogo}
-            className="w-full bg-green-500 hover:bg-green-600 transition text-black font-black rounded-2xl p-4"
+            className="w-full bg-green-500 hover:bg-green-600 transition text-black font-bold rounded-xl p-3 text-sm"
           >
             🚀 Criar Jogo
           </button>
 
           {success && (
 
-            <div className="bg-green-500 text-black font-bold rounded-xl p-3 text-center">
+            <div className="bg-green-500 text-black font-bold rounded-xl p-3 text-center text-sm">
 
               ✅ Jogo criado com sucesso!
 
@@ -361,35 +385,36 @@ export default function AdminPage() {
 
         {/* LISTA DE JOGOS */}
 
-        <div className="mt-10">
+        <div className="mt-8">
 
-          <h2 className="text-3xl font-black mb-5">
+          <h2 className="text-2xl font-black mb-4">
             📋 Jogos Cadastrados
           </h2>
+
           {updated && (
 
-            <div className="mb-5 bg-blue-500 text-black font-bold rounded-2xl p-4 text-center animate-pulse">
+            <div className="mb-4 bg-blue-500 text-black font-bold rounded-xl p-3 text-center text-sm animate-pulse">
 
-            ✅ Data/hora atualizada com sucesso!
+              ✅ Data/hora atualizada com sucesso!
 
             </div>
 
           )}
 
-          <div className="space-y-4">
+          <div className="space-y-3">
 
             {games.map((game) => (
 
               <div
                 key={game.id}
-                className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5"
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4"
               >
 
                 <div className="flex justify-between items-center">
 
                   <div>
 
-                    <h3 className="text-2xl font-black">
+                    <h3 className="text-xl font-black">
 
                       {game.emojiA}
                       {" "}
@@ -403,7 +428,7 @@ export default function AdminPage() {
 
                     </h3>
 
-                    <p className="text-zinc-400">
+                    <p className="text-zinc-400 text-sm">
                       {game.phase}
                     </p>
 
@@ -413,16 +438,16 @@ export default function AdminPage() {
                     onClick={() =>
                       excluirJogo(game.id)
                     }
-                    className="bg-red-500 hover:bg-red-600 transition px-4 py-2 rounded-xl text-black font-bold"
+                    className="bg-red-500 hover:bg-red-600 transition px-3 py-2 rounded-xl text-black font-bold text-sm"
                   >
                     Excluir
                   </button>
 
                 </div>
 
-                <div className="mt-5">
+                <div className="mt-4">
 
-                  <label className="block mb-2 font-bold">
+                  <label className="block mb-2 font-semibold text-sm">
                     Alterar data/hora
                   </label>
 
@@ -435,7 +460,7 @@ export default function AdminPage() {
                         e.target.value
                       )
                     }
-                    className="bg-zinc-800 rounded-xl p-3"
+                    className="bg-zinc-800 rounded-xl p-3 text-sm"
                   />
 
                 </div>
