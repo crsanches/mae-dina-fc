@@ -7,7 +7,7 @@ import UserStats from "../components/UserStats";
 import MemeCard from "../components/MemeCard";
 import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
-
+import Link from "next/link";
 
 import { useEffect, useState } from "react";
 
@@ -396,7 +396,28 @@ useEffect(() => {
 
         {/* RANKING */}
         <RealRanking />
+        <Link
+          href="/analytics"
+          className="bg-zinc-900 border border-zinc-800 hover:border-purple-500 transition rounded-3xl p-5 flex items-center gap-4"
+        >
 
+          <div className="text-5xl">
+            🤓
+          </div>
+
+          <div>
+
+            <h2 className="text-xl font-black text-purple-400">
+              📊 Análises Fundamentalistas
+            </h2>
+
+            <p className="text-zinc-400 text-sm mt-1">
+              Especialistas analisam suas tragédias futebolísticas 😄
+            </p>
+
+          </div>
+
+        </Link>
         {/* MEME */}
         {automaticMeme && (
 
