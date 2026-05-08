@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import { db } from "../lib/firebase";
 
 import {
-  addDoc,
   collection,
-  serverTimestamp
+  doc,
+  serverTimestamp,
+  setDoc
 } from "firebase/firestore";
 
 type Props = {
@@ -58,23 +59,32 @@ export default function MatchCard({
     });
 
 
-    await addDoc(collection(db, "bets"), {
+      const userName =
+      localStorage.getItem("mae-dina-user");
 
-      userName:
-        localStorage.getItem("mae-dina-user"),
-    
-      match:
-        `${teamA} x ${teamB}`,
-    
-      golsA,
-      golsB,
-    
-      points,
-    
-      createdAt:
-        serverTimestamp()
-    
-    });
+    const betId =
+      `${userName}-${teamA}-${teamB}`;
+
+      await setDoc(
+        doc(db, "bets", betId),
+        {
+      
+          userName:
+            localStorage.getItem("mae-dina-user"),
+      
+          match:
+            `${teamA} x ${teamB}`,
+      
+          golsA,
+          golsB,
+      
+          points: calculatedPoints,
+      
+          createdAt:
+            serverTimestamp()
+      
+        }
+      );
     setPoints(calculatedPoints);
     window.dispatchEvent(
       new Event("betSaved")
