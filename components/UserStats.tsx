@@ -25,17 +25,7 @@ export default function UserStats() {
       points: 0
     });
 
-  useEffect(() => {
 
-    const timeout = setTimeout(() => {
-
-      carregarStats();
-
-    }, 0);
-
-    return () => clearTimeout(timeout);
-
-  }, []);
 
   async function carregarStats() {
 
@@ -130,7 +120,17 @@ export default function UserStats() {
     });
 
   }
+  useEffect(() => {
 
+    const timeout = setTimeout(() => {
+
+      carregarStats();
+
+    }, 0);
+
+    return () => clearTimeout(timeout);
+
+  }, []);
   return (
 
     <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-5">
