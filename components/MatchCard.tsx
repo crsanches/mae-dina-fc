@@ -199,13 +199,13 @@ const isEndingSoon =
 
   return (
     <div
-  className={`rounded-2xl p-4 transition border ${
-    isLocked
-      ? "bg-red-950 border-red-700"
-      : isEndingSoon
-      ? "bg-yellow-950 border-yellow-600"
-      : "bg-zinc-800 border-zinc-700"
-  }`}>
+    className={`rounded-2xl p-4 transition border ${
+      isLocked
+        ? "bg-red-950 border-red-700"
+        : isEndingSoon
+        ? "bg-orange-950 border-orange-600"
+        : "bg-blue-950 border-blue-700"
+    }`}>
 
       <div className="flex items-center justify-between">
 
