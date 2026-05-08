@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { db } from "../lib/firebase";
+
+import {
+  collection,
+  getDocs,
+  orderBy,
+  query
+} from "firebase/firestore";
 
 type Bet = {
   jogo: string;
@@ -14,43 +22,33 @@ export default function BetTable() {
 
   const [bets, setBets] = useState<Bet[]>([]);
 
-  function carregarApostas() {
+  async function carregarApostas() {
 
     const allBets: Bet[] = [];
+
+const q = query(
+  collection(db, "bets"),
+  orderBy("createdAt", "desc")
+);
+
+const querySnapshot =
+  await getDocs(q);
+
+  querySnapshot.forEach((doc) => {
+
+    const data = doc.data();
   
-    for (const key in localStorage) {
+    allBets.push({
+      jogo: data.match,
+      user: data.userName,
+      golsA: data.golsA,
+      golsB: data.golsB,
+      points: data.points || 0
+    });
   
-      if (key.includes("-")) {
+  });
   
-        try {
-  
-          const data = localStorage.getItem(key);
-  
-          if (data) {
-  
-            const parsed = JSON.parse(data);
-  
-            allBets.push({
-                user: parsed.user || "Anônimo",
-                jogo: key,
-                golsA: parsed.golsA,
-                golsB: parsed.golsB,
-                points: parsed.points || 0
-              });
-  
-          }
-  
-        } catch {
-  
-          console.error("Erro ao carregar aposta");
-  
-        }
-  
-      }
-  
-    }
-  
-    setBets(allBets);
+  setBets(allBets);
   
   }
 
