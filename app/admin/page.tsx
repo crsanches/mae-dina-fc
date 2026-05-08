@@ -121,6 +121,10 @@ export default function AdminPage() {
     await addDoc(
       collection(db, "games"),
       {
+    
+        match:
+          `${teamA} x ${teamB}`,
+    
 
         teamA,
         teamB,

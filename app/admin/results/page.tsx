@@ -108,6 +108,23 @@ export default function AdminResultsPage() {
     <main className="min-h-screen bg-zinc-950 text-white p-6">
 
       <div className="max-w-4xl mx-auto">
+      <div className="mb-6 flex gap-3">
+
+  <a
+    href="/admin/dashboard"
+    className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+  >
+    ← Dashboard
+  </a>
+
+  <a
+    href="/"
+    className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-5 py-3 rounded-2xl font-bold"
+  >
+    ⚽ Bolão
+  </a>
+
+</div>
 
         <h1 className="text-4xl font-black mb-8">
           🏆 Resultados Oficiais

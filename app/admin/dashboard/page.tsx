@@ -9,6 +9,17 @@ export default function AdminDashboard() {
     <main className="min-h-screen bg-zinc-950 text-white p-6">
 
       <div className="max-w-4xl mx-auto">
+      <div className="mb-6">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+        >
+
+          ← Voltar ao Bolão
+
+        </Link>
+
+      </div>
 
         <h1 className="text-5xl font-black mb-10">
           👑 Painel Administrativo
