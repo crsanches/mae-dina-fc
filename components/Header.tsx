@@ -5,18 +5,17 @@ export default function Header() {
       <div className="max-w-5xl mx-auto flex items-center justify-between">
 
       <header className="text-center py-8">
-
-        <h1 className="text-4xl font-black">
-            ⚽ Mãe Diná FC
+          <h1 className="text-4xl font-black">
+            ⚽ Mãe Diná FC ⚽
           </h1>
-          </header>
-
+      </header>
+        <div>
           <p className="text-zinc-400 text-sm">
             O único bolão onde errar feio também vira troféu.
           </p>
         </div>
 
-        
+        </div>  
 
     </header>
   );
