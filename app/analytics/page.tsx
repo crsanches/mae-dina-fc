@@ -1,6 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
+import {
+  auth
+} from "../../lib/firebase";
+
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Legend
+} from "recharts";
 
 import {
   useEffect,
@@ -42,41 +57,59 @@ type Stats = {
 
   totalBets: number;
 
+  totalGames: number;
+
+  totalExactScores: number;
+
+  totalCrazyBets: number;
+
 };
 
 export default function AnalyticsPage() {
 
   const [stats, setStats] =
-  useState<Stats>({
+    useState<Stats>({
 
-    leader: {
-      user: "-",
-      value: 0
-    },
+      leader: {
+        user: "-",
+        value: 0
+      },
 
-    lastPlace: {
-      user: "-",
-      value: 0
-    },
+      lastPlace: {
+        user: "-",
+        value: 0
+      },
 
-    drawKing: {
-      user: "-",
-      value: 0
-    },
+      drawKing: {
+        user: "-",
+        value: 0
+      },
 
-    crazyBetter: {
-      user: "-",
-      value: 0
-    },
+      crazyBetter: {
+        user: "-",
+        value: 0
+      },
 
-    exactMaster: {
-      user: "-",
-      value: 0
-    },
+      exactMaster: {
+        user: "-",
+        value: 0
+      },
 
-    totalBets: 0
+      totalBets: 0,
 
-  });
+      totalGames: 0,
+
+      totalExactScores: 0,
+
+      totalCrazyBets: 0
+
+    });
+
+  const [chartData, setChartData] =
+    useState<any[]>([]);
+  
+  const [usersToShow, setUsersToShow] =
+    useState<string[]>([]);
 
   useEffect(() => {
 
@@ -103,6 +136,10 @@ export default function AnalyticsPage() {
 
       const exactCount:
         Record<string, number> = {};
+
+      let totalExactScores = 0;
+
+      let totalCrazyBets = 0;
 
       betsSnapshot.forEach((betDoc) => {
 
@@ -144,6 +181,8 @@ export default function AnalyticsPage() {
 
           crazyCount[user]++;
 
+          totalCrazyBets++;
+
         }
 
         gamesSnapshot.forEach((gameDoc) => {
@@ -183,6 +222,8 @@ export default function AnalyticsPage() {
 
               exactCount[user]++;
 
+              totalExactScores++;
+
             }
 
           }
@@ -193,105 +234,282 @@ export default function AnalyticsPage() {
 
       const leaderEntry =
 
-  Object.entries(ranking)
+        Object.entries(ranking)
 
-    .sort(
-      (a, b) =>
-        b[1] - a[1]
-    )[0];
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          )[0];
 
-const lastPlaceEntry =
+      const lastPlaceEntry =
 
-  Object.entries(ranking)
+        Object.entries(ranking)
 
-    .sort(
-      (a, b) =>
-        a[1] - b[1]
-    )[0];
+          .sort(
+            (a, b) =>
+              a[1] - b[1]
+          )[0];
 
-const drawKingEntry =
+      const drawKingEntry =
 
-  Object.entries(drawCount)
+        Object.entries(drawCount)
 
-    .sort(
-      (a, b) =>
-        b[1] - a[1]
-    )[0];
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          )[0];
 
-const crazyBetterEntry =
+      const crazyBetterEntry =
 
-  Object.entries(crazyCount)
+        Object.entries(crazyCount)
 
-    .sort(
-      (a, b) =>
-        b[1] - a[1]
-    )[0];
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          )[0];
 
-const exactMasterEntry =
+      const exactMasterEntry =
 
-  Object.entries(exactCount)
+        Object.entries(exactCount)
 
-    .sort(
-      (a, b) =>
-        b[1] - a[1]
-    )[0];
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          )[0];
 
-setStats({
+      const evolution:
+        any[] = [];
 
-  leader: {
+      const cumulative:
+        Record<string, number> = {};
 
-    user:
-      leaderEntry?.[0] || "-",
+      const allUsers =
+        Array.from(
 
-    value:
-      leaderEntry?.[1] || 0
+          new Set(
 
-  },
+            betsSnapshot.docs.map(
+              (doc) =>
+                doc.data().userName
+            )
 
-  lastPlace: {
+          )
 
-    user:
-      lastPlaceEntry?.[0] || "-",
+        );
 
-    value:
-      lastPlaceEntry?.[1] || 0
+      allUsers.forEach((user) => {
 
-  },
+        cumulative[user] = 0;
 
-  drawKing: {
+      }); 
 
-    user:
-      drawKingEntry?.[0] || "-",
+      const sortedRanking =
 
-    value:
-      drawKingEntry?.[1] || 0
+      Object.entries(ranking)
+    
+        .sort(
+          (a, b) =>
+            b[1] - a[1]
+        );
+    
+    const topUsers =
+    
+      sortedRanking
+    
+        .slice(0, 2)
+    
+        .map(([user]) => user);
+    
+    const bottomUsers =
+    
+      sortedRanking
+    
+        .slice(-2)
+    
+        .map(([user]) => user);
+    
+    const currentUser =
+    
+      auth.currentUser
+        ?.displayName || "";
+    
+    const  visibleUsers =
+    
+      Array.from(
+    
+        new Set([
+    
+          ...topUsers,
+    
+          ...bottomUsers,
+    
+          currentUser
+    
+        ])
+    
+      );
 
-  },
 
-  crazyBetter: {
+      gamesSnapshot.docs
 
-    user:
-      crazyBetterEntry?.[0] || "-",
+        .filter((doc) => {
 
-    value:
-      crazyBetterEntry?.[1] || 0
+          const game =
+            doc.data();
 
-  },
+          return (
+            game.resultadoA !== undefined &&
+            game.resultadoB !== undefined
+          );
 
-  exactMaster: {
+        })
 
-    user:
-      exactMasterEntry?.[0] || "-",
+        .forEach((gameDoc, index) => {
 
-    value:
-      exactMasterEntry?.[1] || 0
+          const game =
+            gameDoc.data();
 
-  },
+          const processedUsers =
+            new Set();
 
-  totalBets:
-    betsSnapshot.size
+          betsSnapshot.forEach((betDoc) => {
 
-});
+            const bet =
+              betDoc.data();
+
+            if (
+              bet.match === game.match &&
+              game.resultadoA !== undefined &&
+              game.resultadoB !== undefined
+            ) {
+
+              if (
+                processedUsers.has(
+                  bet.userName
+                )
+              ) {
+
+                return;
+
+              }
+
+              processedUsers.add(
+                bet.userName
+              );
+
+              const points =
+                calculatePoints({
+
+                  apostaA:
+                    Number(bet.golsA),
+
+                  apostaB:
+                    Number(bet.golsB),
+
+                  resultadoA:
+                    Number(game.resultadoA),
+
+                  resultadoB:
+                    Number(game.resultadoB)
+
+                });
+
+              cumulative[
+                bet.userName
+              ] += points;
+
+            }
+
+          });
+
+          const row: any = {
+
+            jogo:
+              `J${index + 1}`
+
+          };
+
+          visibleUsers.forEach((user) => {
+
+            row[user] =
+              cumulative[user];
+
+          });
+
+          evolution.push(row);
+
+        });
+
+       
+      
+      setChartData(evolution);
+      setUsersToShow(
+        visibleUsers
+      );
+
+      setStats({
+
+        leader: {
+
+          user:
+            leaderEntry?.[0] || "-",
+
+          value:
+            leaderEntry?.[1] || 0
+
+        },
+
+        lastPlace: {
+
+          user:
+            lastPlaceEntry?.[0] || "-",
+
+          value:
+            lastPlaceEntry?.[1] || 0
+
+        },
+
+        drawKing: {
+
+          user:
+            drawKingEntry?.[0] || "-",
+
+          value:
+            drawKingEntry?.[1] || 0
+
+        },
+
+        crazyBetter: {
+
+          user:
+            crazyBetterEntry?.[0] || "-",
+
+          value:
+            crazyBetterEntry?.[1] || 0
+
+        },
+
+        exactMaster: {
+
+          user:
+            exactMasterEntry?.[0] || "-",
+
+          value:
+            exactMasterEntry?.[1] || 0
+
+        },
+
+        totalBets:
+          betsSnapshot.size,
+
+        totalGames:
+          gamesSnapshot.size,
+
+        totalExactScores,
+
+        totalCrazyBets
+
+      });
 
     }
 
@@ -305,37 +523,53 @@ setStats({
       emoji: "👑",
       title: "Líder Supremo",
       user: stats.leader.user,
-      value: `${stats.leader.value} pts`
+      value: `${stats.leader.value} pts`,
+      badge: "🏆 Oráculo da Bola"
     },
-  
+
     {
-      emoji: "📉",
+      emoji: "🐢",
       title: "Lanterna da Vergonha",
       user: stats.lastPlace.user,
-      value: `${stats.lastPlace.value} pts`
+      value: `${stats.lastPlace.value} pts`,
+      badge: "⚽ Técnico do Íbis FC"
     },
-  
+
     {
       emoji: "🤝",
       title: "Rei do Empate",
       user: stats.drawKing.user,
-      value: `${stats.drawKing.value} empates`
+      value: `${stats.drawKing.value} empates`,
+      badge: "🤝 Fair Play do Futebol"
     },
-  
+
     {
       emoji: "💣",
       title: "Apostador Insano",
       user: stats.crazyBetter.user,
-      value: `${stats.crazyBetter.value} apostas absurdas`
+      value: `${stats.crazyBetter.value} apostas absurdas`,
+      badge: "🔥 Profeta do Caos"
     },
-  
+
     {
       emoji: "🎯",
       title: "Mestre dos Placares",
       user: stats.exactMaster.user,
-      value: `${stats.exactMaster.value} acertos`
+      value: `${stats.exactMaster.value} acertos`,
+      badge: "🏹 Sniper em Ação"
     }
-  
+
+  ];
+
+  const colors = [
+
+    "#22c55e",
+    "#3b82f6",
+    "#eab308",
+    "#ef4444",
+    "#a855f7",
+    "#14b8a6"
+
   ];
 
   return (
@@ -359,6 +593,117 @@ setStats({
 
         </div>
 
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
+
+            <p className="text-3xl font-black text-green-400">
+              {stats.totalBets}
+            </p>
+
+            <p className="text-zinc-400 text-sm mt-2">
+              📊 Apostas
+            </p>
+
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
+
+            <p className="text-3xl font-black text-blue-400">
+              {stats.totalGames}
+            </p>
+
+            <p className="text-zinc-400 text-sm mt-2">
+              ⚽ Jogos
+            </p>
+
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
+
+            <p className="text-3xl font-black text-yellow-400">
+              {stats.totalExactScores}
+            </p>
+
+            <p className="text-zinc-400 text-sm mt-2">
+              🎯 Placares Exatos
+            </p>
+
+          </div>
+
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
+
+            <p className="text-3xl font-black text-red-400">
+              {stats.totalCrazyBets}
+            </p>
+
+            <p className="text-zinc-400 text-sm mt-2">
+              💣 Apostas Insanas
+            </p>
+
+          </div>
+
+        </div>
+
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
+
+          <h2 className="text-2xl font-black mb-5">
+
+            🐢 Evolução dos Palpiteiros: os melhores, os piores e você!
+
+          </h2>
+
+          <div className="h-[350px]">
+
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+
+              <LineChart
+                data={chartData}
+              >
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis dataKey="jogo" />
+
+                <YAxis
+                  domain={[0, "dataMax + 5"]}
+                />
+
+                <Tooltip />
+
+                <Legend />
+
+                {usersToShow.map((user, index) => (
+
+                  <Line
+                    key={user}
+                    type="monotone"
+                    dataKey={user}
+                    strokeWidth={3}
+                    dot={false}
+                    connectNulls
+                    stroke={
+                      colors[
+                        index % colors.length
+                      ]
+                    }
+                  />
+
+                  ))}
+
+              </LineChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
 
           {cards.map((card) => (
@@ -376,9 +721,19 @@ setStats({
                 {card.title}
               </h2>
 
+              <p className="text-green-400 text-2xl font-black">
+                {card.user}
+              </p>
+
               <p className="text-zinc-400 text-sm mt-2">
                 {card.value}
               </p>
+
+              <div className="mt-4 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
+
+                {card.badge}
+
+              </div>
 
             </div>
 
