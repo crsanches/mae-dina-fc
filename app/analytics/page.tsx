@@ -725,6 +725,110 @@ export default function AnalyticsPage() {
 
         </div>
 
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
+
+          <h2 className="text-2xl font-black mb-5">
+
+            🐢 Evolução dos Palpiteiros
+
+          </h2>
+
+          <div className="h-[350px]">
+
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+            >
+
+              <LineChart
+                data={chartData}
+              >
+
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                />
+
+                <XAxis dataKey="jogo" />
+
+                <YAxis
+                  domain={[0, "dataMax + 5"]}
+                />
+
+                <Tooltip />
+
+                <Legend />
+
+                {usersToShow.map((user, index) => (
+
+                  <Line
+                    key={user}
+                    type="monotone"
+                    dataKey={user}
+                    strokeWidth={3}
+                    dot={false}
+                    connectNulls
+                    stroke={
+                      colors[
+                        index % colors.length
+                      ]
+                    }
+                  />
+
+                ))}
+
+              </LineChart>
+
+            </ResponsiveContainer>
+
+          </div>
+
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-4">
+
+          {cards.map((card) => (
+
+            <div
+              key={card.title}
+              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
+            >
+
+              <div className="text-5xl mb-4">
+
+                {card.emoji}
+
+              </div>
+
+              <h2 className="text-xl font-black mb-2">
+
+                {card.title}
+
+              </h2>
+
+              <p className="text-green-400 text-2xl font-black">
+
+                {card.user}
+
+              </p>
+
+              <p className="text-zinc-400 text-sm mt-2">
+
+                {card.value}
+
+              </p>
+
+              <div className="mt-4 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
+
+                {card.badge}
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
       </div>
 
     </main>
