@@ -20,36 +20,63 @@ import {
   calculatePoints
 } from "../../lib/calculatePoints";
 
+type StatItem = {
+
+  user: string;
+
+  value: number;
+
+};
+
 type Stats = {
 
-  leader: string;
+  leader: StatItem;
 
-  lastPlace: string;
+  lastPlace: StatItem;
 
-  drawKing: string;
+  drawKing: StatItem;
 
-  crazyBetter: string;
+  crazyBetter: StatItem;
 
-  exactMaster: string;
+  exactMaster: StatItem;
+
+  totalBets: number;
 
 };
 
 export default function AnalyticsPage() {
 
   const [stats, setStats] =
-    useState<Stats>({
+  useState<Stats>({
 
-      leader: "-",
+    leader: {
+      user: "-",
+      value: 0
+    },
 
-      lastPlace: "-",
+    lastPlace: {
+      user: "-",
+      value: 0
+    },
 
-      drawKing: "-",
+    drawKing: {
+      user: "-",
+      value: 0
+    },
 
-      crazyBetter: "-",
+    crazyBetter: {
+      user: "-",
+      value: 0
+    },
 
-      exactMaster: "-"
+    exactMaster: {
+      user: "-",
+      value: 0
+    },
 
-    });
+    totalBets: 0
+
+  });
 
   useEffect(() => {
 
@@ -164,54 +191,107 @@ export default function AnalyticsPage() {
 
       });
 
-      const leader =
-        Object.entries(ranking)
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0]?.[0] || "-";
+      const leaderEntry =
 
-      const lastPlace =
-        Object.entries(ranking)
-          .sort(
-            (a, b) =>
-              a[1] - b[1]
-          )[0]?.[0] || "-";
+  Object.entries(ranking)
 
-      const drawKing =
-        Object.entries(drawCount)
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0]?.[0] || "-";
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )[0];
 
-      const crazyBetter =
-        Object.entries(crazyCount)
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0]?.[0] || "-";
+const lastPlaceEntry =
 
-      const exactMaster =
-        Object.entries(exactCount)
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0]?.[0] || "-";
+  Object.entries(ranking)
 
-      setStats({
+    .sort(
+      (a, b) =>
+        a[1] - b[1]
+    )[0];
 
-        leader,
+const drawKingEntry =
 
-        lastPlace,
+  Object.entries(drawCount)
 
-        drawKing,
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )[0];
 
-        crazyBetter,
+const crazyBetterEntry =
 
-        exactMaster
+  Object.entries(crazyCount)
 
-      });
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )[0];
+
+const exactMasterEntry =
+
+  Object.entries(exactCount)
+
+    .sort(
+      (a, b) =>
+        b[1] - a[1]
+    )[0];
+
+setStats({
+
+  leader: {
+
+    user:
+      leaderEntry?.[0] || "-",
+
+    value:
+      leaderEntry?.[1] || 0
+
+  },
+
+  lastPlace: {
+
+    user:
+      lastPlaceEntry?.[0] || "-",
+
+    value:
+      lastPlaceEntry?.[1] || 0
+
+  },
+
+  drawKing: {
+
+    user:
+      drawKingEntry?.[0] || "-",
+
+    value:
+      drawKingEntry?.[1] || 0
+
+  },
+
+  crazyBetter: {
+
+    user:
+      crazyBetterEntry?.[0] || "-",
+
+    value:
+      crazyBetterEntry?.[1] || 0
+
+  },
+
+  exactMaster: {
+
+    user:
+      exactMasterEntry?.[0] || "-",
+
+    value:
+      exactMasterEntry?.[1] || 0
+
+  },
+
+  totalBets:
+    betsSnapshot.size
+
+});
 
     }
 
@@ -224,33 +304,38 @@ export default function AnalyticsPage() {
     {
       emoji: "👑",
       title: "Líder Supremo",
-      user: stats.leader
+      user: stats.leader.user,
+      value: `${stats.leader.value} pts`
     },
-
+  
     {
       emoji: "📉",
       title: "Lanterna da Vergonha",
-      user: stats.lastPlace
+      user: stats.lastPlace.user,
+      value: `${stats.lastPlace.value} pts`
     },
-
+  
     {
       emoji: "🤝",
       title: "Rei do Empate",
-      user: stats.drawKing
+      user: stats.drawKing.user,
+      value: `${stats.drawKing.value} empates`
     },
-
+  
     {
       emoji: "💣",
       title: "Apostador Insano",
-      user: stats.crazyBetter
+      user: stats.crazyBetter.user,
+      value: `${stats.crazyBetter.value} apostas absurdas`
     },
-
+  
     {
       emoji: "🎯",
       title: "Mestre dos Placares",
-      user: stats.exactMaster
+      user: stats.exactMaster.user,
+      value: `${stats.exactMaster.value} acertos`
     }
-
+  
   ];
 
   return (
@@ -291,8 +376,8 @@ export default function AnalyticsPage() {
                 {card.title}
               </h2>
 
-              <p className="text-green-400 text-2xl font-black">
-                {card.user}
+              <p className="text-zinc-400 text-sm mt-2">
+                {card.value}
               </p>
 
             </div>

@@ -408,7 +408,7 @@ useEffect(() => {
           <div>
 
             <h2 className="text-xl font-black text-purple-400">
-              📊 Análises Fundamentalistas
+              📊 Análises Fundamentalistas - jamais clique aqui...
             </h2>
 
             <p className="text-zinc-400 text-sm mt-1">
