@@ -14,8 +14,19 @@ import {
 } from "react";
 
 import {
-  auth
+  useRouter
+} from "next/navigation";
+
+import {
+  doc,
+  getDoc
+} from "firebase/firestore";
+
+import {
+  auth,
+  db
 } from "../lib/firebase";
+
 
 export default function LoginCard() {
 
@@ -38,16 +49,67 @@ export default function LoginCard() {
 
   }, []);
 
+
+  const router =
+  useRouter();
+
+
   async function loginGoogle() {
 
     const provider =
       new GoogleAuthProvider();
-
+  
     await signInWithPopup(
       auth,
       provider
     );
-
+  
+    const user =
+      auth.currentUser;
+  
+    if (!user) {
+      return;
+    }
+  
+    const userRef =
+      doc(
+        db,
+        "users",
+        user.uid
+      );
+  
+    const userSnap =
+      await getDoc(
+        userRef
+      );
+  
+    if (
+      !userSnap.exists()
+    ) {
+  
+      router.push(
+        "/create-group"
+      );
+  
+      return;
+  
+    }
+  
+    const userData =
+      userSnap.data();
+  
+    if (
+      !userData.groupId
+    ) {
+  
+      router.push(
+        "/create-group"
+      );
+  
+      return;
+  
+    }
+  
   }
 
   async function logout() {

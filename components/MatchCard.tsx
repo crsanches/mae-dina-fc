@@ -73,16 +73,50 @@ export default function MatchCard({
 
     const userName =
       auth.currentUser?.displayName;
+    const user =
+      auth.currentUser;
 
     if (!userName) {
 
       alert(
         "Faça login primeiro 😄"
       );
+      return;
+    }
+
+    if (!user) {
 
       return;
-
+    
     }
+    
+    const userRef =
+      doc(
+        db,
+        "users",
+        user.uid
+      );
+    
+    const userSnap =
+      await getDoc(userRef);
+    
+    if (
+      !userSnap.exists()
+    ) {
+    
+      alert(
+        "Usuário sem grupo 😥"
+      );
+    
+      return;
+    
+    }
+    
+    const userData =
+      userSnap.data();
+    
+    const groupId =
+      userData.groupId;
 
     const calculatedPoints =
 
@@ -124,7 +158,8 @@ export default function MatchCard({
           calculatedPoints,
 
         createdAt:
-          serverTimestamp()
+          serverTimestamp(),
+          groupId 
 
       }
     );

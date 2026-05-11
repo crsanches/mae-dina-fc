@@ -6,6 +6,11 @@ import {
 } from "react";
 
 import {
+  doc,
+  getDoc
+} from "firebase/firestore";
+
+import {
   db,
   auth
 } from "../lib/firebase";
@@ -35,6 +40,32 @@ export default function RealRanking() {
 
   async function carregarRanking() {
 
+          const currentUser =
+        auth.currentUser;
+
+      if (!currentUser) {
+        return;
+      }
+
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+
+      const userSnap =
+        await getDoc(userRef);
+
+      if (
+        !userSnap.exists()
+      ) {
+        return;
+      }
+
+      const currentGroupId =
+        userSnap.data().groupId;
+
     const betsSnapshot =
       await getDocs(
         collection(db, "bets")
@@ -48,58 +79,67 @@ export default function RealRanking() {
     const rankingMap:
       Record<string, number> = {};
 
-    betsSnapshot.forEach((betDoc) => {
+      betsSnapshot.forEach((betDoc) => {
 
-      const bet =
-        betDoc.data();
-
-      const user =
-        bet.userName || "Anônimo";
-
-      let calculatedPoints = 0;
-
-      gamesSnapshot.forEach((gameDoc) => {
-
-        const game =
-          gameDoc.data();
-
+        const bet =
+          betDoc.data();
+      
         if (
-          game.match === bet.match &&
-          game.resultadoA !== undefined &&
-          game.resultadoB !== undefined
+          bet.groupId !==
+          currentGroupId
         ) {
-
-          calculatedPoints =
-            calculatePoints({
-
-              apostaA:
-                Number(bet.golsA),
-
-              apostaB:
-                Number(bet.golsB),
-
-              resultadoA:
-                Number(game.resultadoA),
-
-              resultadoB:
-                Number(game.resultadoB)
-
-            });
-
+      
+          return;
+      
         }
-
+      
+        const user =
+          bet.userName || "Anônimo";
+      
+        let calculatedPoints = 0;
+      
+        gamesSnapshot.forEach((gameDoc) => {
+      
+          const game =
+            gameDoc.data();
+      
+          if (
+            game.match === bet.match &&
+            game.resultadoA !== undefined &&
+            game.resultadoB !== undefined
+          ) {
+      
+            calculatedPoints =
+              calculatePoints({
+      
+                apostaA:
+                  Number(bet.golsA),
+      
+                apostaB:
+                  Number(bet.golsB),
+      
+                resultadoA:
+                  Number(game.resultadoA),
+      
+                resultadoB:
+                  Number(game.resultadoB)
+      
+              });
+      
+          }
+      
+        });
+      
+        if (!rankingMap[user]) {
+      
+          rankingMap[user] = 0;
+      
+        }
+      
+        rankingMap[user] +=
+          calculatedPoints;
+      
       });
-
-      if (!rankingMap[user]) {
-
-        rankingMap[user] = 0;
-
-      }
-
-      rankingMap[user] +=
-        calculatedPoints;
-
-    });
 
     const rankingArray =
 

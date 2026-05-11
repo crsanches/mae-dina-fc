@@ -3,7 +3,8 @@
 import Link from "next/link";
 
 import {
-  auth
+  auth,
+  db
 } from "../../lib/firebase";
 
 import {
@@ -23,11 +24,9 @@ import {
 } from "react";
 
 import {
-  db
-} from "../../lib/firebase";
-
-import {
   collection,
+  doc,
+  getDoc,
   getDocs
 } from "firebase/firestore";
 
@@ -115,14 +114,40 @@ export default function AnalyticsPage() {
     });
 
   const [chartData, setChartData] =
-  useState<ChartRow[]>([])
-  
+    useState<ChartRow[]>([]);
+
   const [usersToShow, setUsersToShow] =
     useState<string[]>([]);
 
   useEffect(() => {
 
     async function carregarAnalytics() {
+
+      const currentUser =
+        auth.currentUser;
+
+      if (!currentUser) {
+        return;
+      }
+
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+
+      const userSnap =
+        await getDoc(userRef);
+
+      if (
+        !userSnap.exists()
+      ) {
+        return;
+      }
+
+      const currentGroupId =
+        userSnap.data().groupId;
 
       const betsSnapshot =
         await getDocs(
@@ -150,10 +175,23 @@ export default function AnalyticsPage() {
 
       let totalCrazyBets = 0;
 
+      let totalBets = 0;
+
       betsSnapshot.forEach((betDoc) => {
 
         const bet =
           betDoc.data();
+
+        if (
+          bet.groupId !==
+          currentGroupId
+        ) {
+
+          return;
+
+        }
+
+        totalBets++;
 
         const user =
           bet.userName;
@@ -287,7 +325,7 @@ export default function AnalyticsPage() {
           )[0];
 
       const evolution:
-      ChartRow[] = [];
+        ChartRow[] = [];
 
       const cumulative:
         Record<string, number> = {};
@@ -297,10 +335,22 @@ export default function AnalyticsPage() {
 
           new Set(
 
-            betsSnapshot.docs.map(
-              (doc) =>
-                doc.data().userName
-            )
+            betsSnapshot.docs
+
+              .map((doc) =>
+                doc.data()
+              )
+
+              .filter(
+                (bet) =>
+                  bet.groupId ===
+                  currentGroupId
+              )
+
+              .map(
+                (bet) =>
+                  bet.userName
+              )
 
           )
 
@@ -310,54 +360,48 @@ export default function AnalyticsPage() {
 
         cumulative[user] = 0;
 
-      }); 
+      });
 
       const sortedRanking =
 
-      Object.entries(ranking)
-    
-        .sort(
-          (a, b) =>
-            b[1] - a[1]
-        );
-    
-    const topUsers =
-    
-      sortedRanking
-    
-        .slice(0, 2)
-    
-        .map(([user]) => user);
-    
-    const bottomUsers =
-    
-      sortedRanking
-    
-        .slice(-2)
-    
-        .map(([user]) => user);
-    
-    const currentUser =
-    
-      auth.currentUser
-        ?.displayName || "";
-    
-    const  visibleUsers =
-    
-      Array.from(
-    
-        new Set([
-    
-          ...topUsers,
-    
-          ...bottomUsers,
-    
-          currentUser
-    
-        ])
-    
-      );
+        Object.entries(ranking)
 
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          );
+
+      const topUsers =
+
+        sortedRanking
+
+          .slice(0, 2)
+
+          .map(([user]) => user);
+
+      const bottomUsers =
+
+        sortedRanking
+
+          .slice(-2)
+
+          .map(([user]) => user);
+
+      const visibleUsers =
+
+        Array.from(
+
+          new Set([
+
+            ...topUsers,
+
+            ...bottomUsers,
+
+            currentUser.displayName || ""
+
+          ])
+
+        );
 
       gamesSnapshot.docs
 
@@ -385,6 +429,15 @@ export default function AnalyticsPage() {
 
             const bet =
               betDoc.data();
+
+            if (
+              bet.groupId !==
+              currentGroupId
+            ) {
+
+              return;
+
+            }
 
             if (
               bet.match === game.match &&
@@ -449,9 +502,8 @@ export default function AnalyticsPage() {
 
         });
 
-       
-      
       setChartData(evolution);
+
       setUsersToShow(
         visibleUsers
       );
@@ -508,8 +560,7 @@ export default function AnalyticsPage() {
 
         },
 
-        totalBets:
-          betsSnapshot.size,
+        totalBets,
 
         totalGames:
           gamesSnapshot.size,
@@ -590,14 +641,18 @@ export default function AnalyticsPage() {
         <div className="flex items-center justify-between mb-6">
 
           <h1 className="text-3xl font-black">
+
             📊 Analytics da Vergonha
+
           </h1>
 
           <Link
             href="/"
             className="bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl font-bold text-sm"
           >
+
             ← Voltar
+
           </Link>
 
         </div>
@@ -607,11 +662,15 @@ export default function AnalyticsPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
 
             <p className="text-3xl font-black text-green-400">
+
               {stats.totalBets}
+
             </p>
 
             <p className="text-zinc-400 text-sm mt-2">
+
               📊 Apostas
+
             </p>
 
           </div>
@@ -619,11 +678,15 @@ export default function AnalyticsPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
 
             <p className="text-3xl font-black text-blue-400">
+
               {stats.totalGames}
+
             </p>
 
             <p className="text-zinc-400 text-sm mt-2">
+
               ⚽ Jogos
+
             </p>
 
           </div>
@@ -631,11 +694,15 @@ export default function AnalyticsPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
 
             <p className="text-3xl font-black text-yellow-400">
+
               {stats.totalExactScores}
+
             </p>
 
             <p className="text-zinc-400 text-sm mt-2">
+
               🎯 Placares Exatos
+
             </p>
 
           </div>
@@ -643,110 +710,18 @@ export default function AnalyticsPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 text-center">
 
             <p className="text-3xl font-black text-red-400">
+
               {stats.totalCrazyBets}
+
             </p>
 
             <p className="text-zinc-400 text-sm mt-2">
+
               💣 Apostas Insanas
+
             </p>
 
           </div>
-
-        </div>
-
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
-
-          <h2 className="text-2xl font-black mb-5">
-
-            🐢 Evolução dos Palpiteiros: os melhores, os piores e você!
-
-          </h2>
-
-          <div className="h-[350px]">
-
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
-            >
-
-              <LineChart
-                data={chartData}
-              >
-
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                />
-
-                <XAxis dataKey="jogo" />
-
-                <YAxis
-                  domain={[0, "dataMax + 5"]}
-                />
-
-                <Tooltip />
-
-                <Legend />
-
-                {usersToShow.map((user, index) => (
-
-                  <Line
-                    key={user}
-                    type="monotone"
-                    dataKey={user}
-                    strokeWidth={3}
-                    dot={false}
-                    connectNulls
-                    stroke={
-                      colors[
-                        index % colors.length
-                      ]
-                    }
-                  />
-
-                  ))}
-
-              </LineChart>
-
-            </ResponsiveContainer>
-
-          </div>
-
-        </div>
-
-        <div className="grid md:grid-cols-2 gap-4">
-
-          {cards.map((card) => (
-
-            <div
-              key={card.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
-            >
-
-              <div className="text-5xl mb-4">
-                {card.emoji}
-              </div>
-
-              <h2 className="text-xl font-black mb-2">
-                {card.title}
-              </h2>
-
-              <p className="text-green-400 text-2xl font-black">
-                {card.user}
-              </p>
-
-              <p className="text-zinc-400 text-sm mt-2">
-                {card.value}
-              </p>
-
-              <div className="mt-4 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
-
-                {card.badge}
-
-              </div>
-
-            </div>
-
-          ))}
 
         </div>
 

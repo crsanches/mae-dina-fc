@@ -9,16 +9,22 @@ import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
 import Link from "next/link";
 
+import GroupCard
+from "../components/GroupCard";
+
 import { useEffect, useState } from "react";
 
 import { db, auth} from "../lib/firebase";
 import {getAutomaticMeme} from "../lib/automaticMemes";
+
 import {
   calculatePoints
 } from "../lib/calculatePoints";
+
 import {
   onAuthStateChanged
 } from "firebase/auth";
+
 
 import {
   collection,
@@ -108,6 +114,7 @@ export default function Home() {
       return () => unsubscribe();
     
     }, []);
+    
 useEffect(() => {
 
   const unsubscribe =
@@ -390,6 +397,9 @@ useEffect(() => {
 
         {/* LOGIN */}
         <LoginCard />
+       
+        {/* SUA LIGA */}
+        <GroupCard />
 
         {/* STATUS USUÁRIO */}
         <UserStats />
