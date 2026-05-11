@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+
 import {
   auth
 } from "../../lib/firebase";
@@ -65,6 +65,15 @@ type Stats = {
 
 };
 
+type ChartRow = {
+
+  jogo: string;
+
+  [key: string]:
+    string | number;
+
+};
+
 export default function AnalyticsPage() {
 
   const [stats, setStats] =
@@ -106,7 +115,7 @@ export default function AnalyticsPage() {
     });
 
   const [chartData, setChartData] =
-    useState<any[]>([]);
+  useState<ChartRow[]>([])
   
   const [usersToShow, setUsersToShow] =
     useState<string[]>([]);
@@ -278,7 +287,7 @@ export default function AnalyticsPage() {
           )[0];
 
       const evolution:
-        any[] = [];
+      ChartRow[] = [];
 
       const cumulative:
         Record<string, number> = {};
@@ -422,7 +431,7 @@ export default function AnalyticsPage() {
 
           });
 
-          const row: any = {
+          const row: ChartRow = {
 
             jogo:
               `J${index + 1}`
