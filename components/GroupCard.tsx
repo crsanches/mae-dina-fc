@@ -27,14 +27,28 @@ type GroupData = {
   name: string;
 
 };
+type LoadedGroup = {
+
+  id: string;
+
+  name: string;
+
+};
 
 export default function GroupCard() {
 
   const [groupName, setGroupName] =
     useState("");
 
-  const [groups, setGroups] =
-    useState<any[]>([]);
+    type LoadedGroup = {
+
+      id: string;
+    
+      name: string;
+    
+    };
+    const [groups, setGroups] =
+    useState<LoadedGroup[]>([]);
 
   const [inviteLink, setInviteLink] =
     useState("");
@@ -85,13 +99,7 @@ export default function GroupCard() {
               const userGroups =
                 userData.groups || [];
 
-              type LoadedGroup = {
-
-                id: string;
-
-                name: string;
-
-              };
+            
 
               const loadedGroups:
                 LoadedGroup[] = [];
