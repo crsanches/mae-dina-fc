@@ -8,6 +8,8 @@ import {
   useRouter
 } from "next/navigation";
 
+import Link from "next/link";
+
 import {
   auth,
   db
@@ -15,6 +17,7 @@ import {
 
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
   serverTimestamp,
@@ -87,16 +90,26 @@ export default function CreateGroupPage() {
           user.uid
         ),
         {
-
+      
           uid:
             user.uid,
-
+      
           displayName:
             user.displayName || "Anônimo",
-
+      
           groupId:
-            groupRef.id
-
+            groupRef.id,
+      
+          groups:
+            arrayUnion(
+              groupRef.id
+            )
+      
+        },
+        {
+      
+          merge: true
+      
         }
       );
 
@@ -124,6 +137,20 @@ export default function CreateGroupPage() {
     <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
 
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+        
+        <div className="mb-6">
+
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+        >
+
+          ← Voltar
+
+        </Link>
+
+        </div>
+
 
         <h1 className="text-3xl font-black mb-2">
 

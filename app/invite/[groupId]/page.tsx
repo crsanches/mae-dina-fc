@@ -17,6 +17,7 @@ import {
 
 import {
   doc,
+  arrayUnion,
   getDoc,
   updateDoc
 } from "firebase/firestore";
@@ -126,14 +127,19 @@ export default function InvitePage() {
           user.uid
         );
 
-      await updateDoc(
-        userRef,
-        {
-
-          groupId
-
-        }
-      );
+        await updateDoc(
+          userRef,
+          {
+        
+            groupId,
+        
+            groups:
+              arrayUnion(
+                groupId
+              )
+        
+          }
+        );
 
       router.push("/");
 

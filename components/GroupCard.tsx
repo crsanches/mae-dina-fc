@@ -16,8 +16,11 @@ import {
 
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc
 } from "firebase/firestore";
+
+import Link from "next/link";
 
 type GroupData = {
 
@@ -29,6 +32,9 @@ export default function GroupCard() {
 
   const [groupName, setGroupName] =
     useState("");
+
+  const [groups, setGroups] =
+    useState<any[]>([]);
 
   const [inviteLink, setInviteLink] =
     useState("");
@@ -72,7 +78,71 @@ export default function GroupCard() {
               ) {
                 return;
               }
-      
+              console.log(
+                "USER DATA:",
+                userData
+              );
+              const userGroups =
+                userData.groups || [];
+
+              type LoadedGroup = {
+
+                id: string;
+
+                name: string;
+
+              };
+
+              const loadedGroups:
+                LoadedGroup[] = [];
+
+              for (const groupId of userGroups) {
+                console.log(
+                  "LOOP GROUP:",
+                  groupId
+                );
+                const groupRef =
+                  doc(
+                    db,
+                    "groups",
+                    groupId
+                  );
+
+                const groupSnap =
+                  await getDoc(groupRef);
+                  console.log(
+                    "GROUP EXISTS:",
+                    groupId,
+                    groupSnap.exists()
+                  );
+                if (
+                  groupSnap.exists()
+                ) {
+
+                  const data =
+                  groupSnap.data() as GroupData;
+
+                loadedGroups.push({
+
+                  id:
+                    groupSnap.id,
+
+                  name:
+                    data.name
+
+                });
+                }
+
+              }
+              console.log(
+                "GROUPS:",
+                loadedGroups
+              );
+
+              setGroups(
+                loadedGroups
+              );
+
               const groupRef =
                 doc(
                   db,
@@ -135,33 +205,145 @@ export default function GroupCard() {
     return null;
   }
 
+  async function trocarGrupo(
+    groupId: string
+  ) {
+  
+    const currentUser =
+      auth.currentUser;
+  
+    if (!currentUser) {
+      return;
+    }
+  
+    try {
+  
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+  
+      await updateDoc(
+        userRef,
+        {
+  
+          groupId
+  
+        }
+      );
+  
+      window.location.href = "/";
+  
+    } catch (error) {
+  
+      console.error(error);
+  
+      alert(
+        "Erro ao trocar grupo 😥"
+      );
+  
+    }
+  
+  }
+
   return (
 
-    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
+    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
+  
+      <div className="flex items-center justify-between mb-4">
+  
+        <div>
+  
+          <h2 className="text-xl font-black">
+  
+            🚀 Sua Liga
+  
+          </h2>
+  
+          <p className="text-zinc-400 text-sm mt-1">
+  
+            Convide amigos para a humilhação pública 😂
+  
+          </p>
+  
+        </div>
+  
+        <div className="bg-zinc-800 border border-zinc-700 px-3 py-1 rounded-full text-xs font-bold text-zinc-300">
+  
+          👥 Liga Privada
+  
+        </div>
+  
+      </div>
+  
+      <div className="bg-zinc-950 border border-zinc-800 rounded-2xl p-4 mb-5">
+  
+        <p className="text-3xl font-black text-green-400 break-words">
+  
+          {groupName}
+  
+        </p>
 
-      <h2 className="text-xl font-black mb-2">
+        <div className="mt-4">
 
-        🚀 Sua Liga
+  <select
 
-      </h2>
+    value={inviteLink.split("/").pop()}
 
-      <p className="text-2xl font-black text-green-400 mb-4">
+    onChange={(e) =>
+      trocarGrupo(
+        e.target.value
+      )
+    }
 
-        {groupName}
+    className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl px-4 py-3 text-white font-bold outline-none focus:border-green-500"
+  >
 
-      </p>
+    {groups.map((group) => (
 
-      <button
-        onClick={copiarConvite}
-        className="bg-green-500 hover:bg-green-600 transition text-black font-black rounded-xl px-4 py-3"
+      <option
+        key={group.id}
+        value={group.id}
       >
 
-        🔗 Copiar Convite
+        {group.name}
 
-      </button>
+      </option>
 
+    ))}
+
+  </select>
+
+</div>
+  
+      </div>
+  
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+  
+        <button
+          onClick={copiarConvite}
+          className="w-full bg-green-500 hover:bg-green-600 transition text-black font-black rounded-2xl px-4 py-3 flex items-center justify-center"
+        >
+  
+          🔗 Copiar Convite
+  
+        </button>
+  
+        <Link
+          href="/create-group"
+          className="w-full bg-zinc-800 hover:bg-zinc-700 transition text-white font-bold rounded-2xl px-4 py-3 flex items-center justify-center border border-zinc-700"
+        >
+  
+          ➕ Criar Liga
+  
+        </Link>
+  
+      </div>
+  
     </div>
-
+  
   );
 
 }

@@ -130,10 +130,12 @@ export default function RealRanking() {
       
         });
       
-        if (!rankingMap[user]) {
-      
+        if (
+          rankingMap[user] === undefined
+        ) {
+        
           rankingMap[user] = 0;
-      
+        
         }
       
         rankingMap[user] +=
