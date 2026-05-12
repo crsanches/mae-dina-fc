@@ -6,6 +6,8 @@ import { db } from "../lib/firebase";
 
 import {
   collection,
+  doc,
+  getDoc,
   getDocs,
   onSnapshot
 } from "firebase/firestore";
@@ -39,6 +41,32 @@ export default function UserStats() {
       currentUser: string
     ) {
     
+      const firebaseUser =
+        auth.currentUser;
+    
+      if (!firebaseUser) {
+        return;
+      }
+    
+      const userRef =
+        doc(
+          db,
+          "users",
+          firebaseUser.uid
+        );
+    
+      const userSnap =
+        await getDoc(userRef);
+    
+      if (
+        !userSnap.exists()
+      ) {
+        return;
+      }
+    
+      const currentGroupId =
+        userSnap.data().groupId;
+    
       const betsSnapshot =
         await getDocs(
           collection(db, "bets")
@@ -56,6 +84,15 @@ export default function UserStats() {
     
         const bet =
           betDoc.data();
+    
+        if (
+          bet.groupId !==
+          currentGroupId
+        ) {
+    
+          return;
+    
+        }
     
         let points = 0;
     
@@ -91,22 +128,31 @@ export default function UserStats() {
     
         });
     
-        if (!ranking[bet.userName]) {
+        if (
+          ranking[bet.userName] ===
+          undefined
+        ) {
+    
           ranking[bet.userName] = 0;
+    
         }
     
-        ranking[bet.userName] += points;
+        ranking[bet.userName] +=
+          points;
     
       });
     
       const sorted =
+    
         Object.entries(ranking)
+    
           .sort(
             (a, b) =>
               b[1] - a[1]
           );
     
       const position =
+    
         sorted.findIndex(
           ([user]) =>
             user === currentUser
@@ -116,8 +162,11 @@ export default function UserStats() {
         ranking[currentUser] || 0;
     
       setData({
+    
         position,
+    
         points
+    
       });
     
     }
