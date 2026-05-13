@@ -109,7 +109,7 @@ export default function InvitePage() {
     if (!user) {
 
       alert(
-        "Faça login primeiro 😄"
+        "Faça seu login primeiro 😄"
       );
 
       return;
