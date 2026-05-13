@@ -139,8 +139,8 @@ export default function MatchCard({
 
         : 0;
 
-    const betId =
-      `${userName}-${teamA}-${teamB}`;
+        const betId =
+        `${groupId}-${userName}-${teamA}-${teamB}`;
 
     await setDoc(
       doc(db, "bets", betId),
@@ -196,8 +196,34 @@ export default function MatchCard({
         return;
       }
   
-      const betId =
-        `${userName}-${teamA}-${teamB}`;
+      const user =
+      auth.currentUser;
+    
+    if (!user) {
+      return;
+    }
+    
+    const userRef =
+      doc(
+        db,
+        "users",
+        user.uid
+      );
+    
+    const userSnap =
+      await getDoc(userRef);
+    
+    if (
+      !userSnap.exists()
+    ) {
+      return;
+    }
+    
+    const groupId =
+      userSnap.data().groupId;
+    
+    const betId =
+      `${groupId}-${userName}-${teamA}-${teamB}`;
   
       const betRef =
         doc(db, "bets", betId);

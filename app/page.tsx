@@ -60,7 +60,11 @@ export default function Home() {
     useState("");
   
     const [automaticMeme, setAutomaticMeme] =
-    useState("");
+  useState<{
+    text: string;
+    image?: string;
+  } | null>(null);
+
     useEffect(() => {
 
       const q = query(
@@ -309,7 +313,7 @@ useEffect(() => {
 
         if (!user) {
 
-          setAutomaticMeme("");
+          setAutomaticMeme(null);
 
           return;
 
@@ -431,15 +435,27 @@ useEffect(() => {
         {/* MEME */}
         {automaticMeme && (
 
-        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center">
+  <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
 
-          <p className="text-lg font-black">
-            🤖 {automaticMeme}
-          </p>
+    {automaticMeme.image && (
 
-        </div>
+      <img
+        src={automaticMeme.image}
+        alt="Meme"
+        className="rounded-2xl mb-4 w-full"
+      />
 
-        )}
+    )}
+
+    <p className="text-lg font-black">
+
+      🤖 {automaticMeme.text}
+
+    </p>
+
+  </div>
+
+)}
         <MemeCard
           mensagem={memeAleatorio}
         />
