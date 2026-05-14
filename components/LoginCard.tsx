@@ -1,103 +1,69 @@
 "use client";
 
 import {
-
   GoogleAuthProvider,
-
   signInWithPopup,
-
   signOut,
-
   onAuthStateChanged,
-
   sendSignInLinkToEmail,
-
   isSignInWithEmailLink,
-
   signInWithEmailLink,
-
   User
-
 } from "firebase/auth";
 
 import {
-
   useEffect,
-
   useState
-
 } from "react";
 
 import {
-
   useRouter
-
 } from "next/navigation";
 
 import {
-
   doc,
-
   getDoc
-
 } from "firebase/firestore";
 
 import {
-
   auth,
-
   db
-
 } from "../lib/firebase";
 
 export default function LoginCard() {
 
+  const LOGIN_EMAIL_ATIVO = false;
   const [user, setUser] =
     useState<User | null>(null);
-
   const [email, setEmail] =
     useState("");
-
   const router =
     useRouter();
 
   useEffect(() => {
-
     async function finalizarLogin() {
-
       if (
-
         isSignInWithEmailLink(
           auth,
           window.location.href
         )
-
       ) {
 
         let savedEmail =
           localStorage.getItem(
             "emailForSignIn"
           );
-
         if (!savedEmail) {
-
           savedEmail =
             window.prompt(
               "Digite seu email"
             ) || "";
-
         }
-
         try {
-
           await signInWithEmailLink(
-
             auth,
-
             savedEmail,
-
             window.location.href
-
           );
 
           localStorage.removeItem(
@@ -107,9 +73,7 @@ export default function LoginCard() {
           window.location.href = "/";
 
         } catch (error) {
-
           console.error(error);
-
           alert(
             "Erro ao finalizar login 😥"
           );
@@ -127,19 +91,12 @@ export default function LoginCard() {
   useEffect(() => {
 
     const unsubscribe =
-  
       onAuthStateChanged(
-  
         auth,
-  
         async (currentUser) => {
-  
           if (!currentUser) {
-  
             setUser(null);
-  
             return;
-  
           }
   
           setUser(currentUser);
@@ -354,28 +311,30 @@ export default function LoginCard() {
               Entrar com Google
 
             </button>
+            {LOGIN_EMAIL_ATIVO && (
+  <>
+    <input
+      type="email"
+      placeholder="Digite seu email"
+      value={email}
+      onChange={(e) =>
+        setEmail(
+          e.target.value
+        )
+      }
+      className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 outline-none"
+    />
 
-            <input
-              type="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) =>
-                setEmail(
-                  e.target.value
-                )
-              }
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 outline-none"
-            />
+    <button
+      onClick={entrarComEmail}
+      className="w-full bg-blue-600 hover:bg-blue-700 transition rounded-2xl p-4 font-black"
+    >
 
-            <button
-              onClick={entrarComEmail}
-              className="w-full bg-blue-600 hover:bg-blue-700 transition rounded-2xl p-4 font-black"
-            >
+      ✉️ Entrar por Email
 
-              ✉️ Entrar por Email
-
-            </button>
-
+    </button>
+  </>
+)}
           </div>
 
         </div>
