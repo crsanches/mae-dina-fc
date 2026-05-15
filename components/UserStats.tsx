@@ -9,7 +9,9 @@ import {
   doc,
   getDoc,
   getDocs,
-  onSnapshot
+  onSnapshot,
+  query,
+where
 } from "firebase/firestore";
 
 import { calculatePoints }
@@ -65,12 +67,26 @@ export default function UserStats() {
       }
     
       const currentGroupId =
-        userSnap.data().groupId;
+  userSnap.data().activeGroupId ||
+  userSnap.data().groupId;
     
-      const betsSnapshot =
-        await getDocs(
-          collection(db, "bets")
-        );
+  const betsQuery =
+  query(
+
+    collection(db, "bets"),
+
+    where(
+      "groupId",
+      "==",
+      currentGroupId
+    )
+
+  );
+
+const betsSnapshot =
+  await getDocs(
+    betsQuery
+  );
     
       const gamesSnapshot =
         await getDocs(
