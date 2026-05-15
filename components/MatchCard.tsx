@@ -66,6 +66,9 @@ export default function MatchCard({
     const currentTime =
     new Date();
 
+    const [isEditing, setIsEditing] =
+  useState(false);
+
  
 
   async function salvarPalpite() {
@@ -166,14 +169,15 @@ export default function MatchCard({
 
     setPoints(calculatedPoints);
     setAlreadyBet(true);
+    setIsEditing(false);
     window.dispatchEvent(
       new Event("betSaved")
     );
 
     setSalvo(true);
 
-    setGolsA("");
-    setGolsB("");
+    //setGolsA("");
+    //setGolsB("");
 
     setTimeout(() => {
 
@@ -187,66 +191,65 @@ export default function MatchCard({
 
   useEffect(() => {
 
-    async function carregarAposta() {
+    const unsubscribe =
+      auth.onAuthStateChanged(
+        async (user) => {
   
-      const userName =
-        auth.currentUser?.displayName;
+          if (!user) {
+            return;
+          }
   
-      if (!userName) {
-        return;
-      }
+          const userName =
+            user.displayName;
   
-      const user =
-      auth.currentUser;
-    
-    if (!user) {
-      return;
-    }
-    
-    const userRef =
-      doc(
-        db,
-        "users",
-        user.uid
+          if (!userName) {
+            return;
+          }
+  
+          const userRef =
+            doc(
+              db,
+              "users",
+              user.uid
+            );
+  
+          const userSnap =
+            await getDoc(userRef);
+  
+          if (!userSnap.exists()) {
+            return;
+          }
+  
+          const groupId =
+            userSnap.data().activeGroupId ||
+            userSnap.data().groupId;
+  
+          const betId =
+            `${groupId}-${userName}-${teamA}-${teamB}`;
+  
+          const betRef =
+            doc(db, "bets", betId);
+  
+          const snapshot =
+            await getDoc(betRef);
+  
+          if (snapshot.exists()) {
+  
+            const data =
+              snapshot.data();
+  
+            setGolsA(data.golsA);
+  
+            setGolsB(data.golsB);
+  
+            setAlreadyBet(true);
+  
+          }
+  
+        }
       );
-    
-    const userSnap =
-      await getDoc(userRef);
-    
-    if (
-      !userSnap.exists()
-    ) {
-      return;
-    }
-    
-    const groupId =
-  userSnap.data().activeGroupId ||
-  userSnap.data().groupId;
-    
-    const betId =
-      `${groupId}-${userName}-${teamA}-${teamB}`;
   
-      const betRef =
-        doc(db, "bets", betId);
-  
-      const snapshot =
-        await getDoc(betRef);
-  
-      if (snapshot.exists()) {
-  
-        const data =
-          snapshot.data();
-  
-        setGolsA(data.golsA);
-        setGolsB(data.golsB);
-  
-        setAlreadyBet(true);
-  
-      }
-  
-    }
-  
-    carregarAposta();
+    return () => unsubscribe();
   
   }, [teamA, teamB]);
   const gameDate =
@@ -343,7 +346,10 @@ export default function MatchCard({
             }
             className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
             disabled={
-              isLocked || alreadyBet
+              isLocked || (
+                alreadyBet &&
+                !isEditing
+              )
             }
           />
 
@@ -363,7 +369,10 @@ export default function MatchCard({
             }
             className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
             disabled={
-              isLocked || alreadyBet
+              isLocked || (
+                alreadyBet &&
+                !isEditing
+              )
             }
           />
 
@@ -389,35 +398,41 @@ export default function MatchCard({
           {getRemainingTime()}
         </span>
 
-        {alreadyBet && (
+        <div className="flex gap-2">
 
-<button
-  onClick={() =>
-    setAlreadyBet(false)
-  }
-  className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
-  disabled={isLocked}
->
-  Alterar
-</button>
+{alreadyBet && !isEditing && (
+
+  <button
+    onClick={() =>
+      setIsEditing(true)
+    }
+    className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
+    disabled={isLocked}
+  >
+    clique aqui para permitir alteração
+  </button>
+
+)}
+
+{(!alreadyBet || isEditing) && !salvo && (
+
+  <button
+    onClick={salvarPalpite}
+    className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
+      isLocked
+        ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+        : "bg-green-500 hover:bg-green-600 text-black"
+    }`}
+    disabled={isLocked}
+  >
+    {alreadyBet
+      ? "Edite e clique aqui para salvar"
+      : "faça seu palpite e clique aqui para salvar"}
+  </button>
 
 )}
 
-{!alreadyBet && !salvo && (
-
-<button
-  onClick={salvarPalpite}
-  className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
-    isLocked
-      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-      : "bg-green-500 hover:bg-green-600 text-black"
-  }`}
-  disabled={isLocked}
->
-  Salvar
-</button>
-
-)}
+</div>
 
       </div>
 

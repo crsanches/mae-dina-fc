@@ -32,6 +32,8 @@ type Game = {
 
 export default function AdminPage() {
 
+  
+
   const [teamA, setTeamA] =
     useState("");
 
@@ -58,6 +60,15 @@ export default function AdminPage() {
 
   const [games, setGames] =
     useState<Game[]>([]);
+
+  const [editedDates, setEditedDates] =
+    useState<{ [key: string]: string }>({});
+  
+  const [savingGameId, setSavingGameId] =
+    useState<string | null>(null);
+  
+  const [savedGameId, setSavedGameId] =
+    useState<string | null>(null);
 
   async function carregarJogos() {
 
@@ -175,15 +186,7 @@ export default function AdminPage() {
       }
     );
 
-    setUpdated(true);
-
     carregarJogos();
-
-    setTimeout(() => {
-
-      setUpdated(false);
-
-    }, 2000);
 
   }
 
@@ -367,15 +370,7 @@ export default function AdminPage() {
               Data/Hora do jogo
             </label>
 
-            <input
-              type="datetime-local"
-              value={matchDate}
-              onChange={(e) =>
-                setMatchDate(e.target.value)
-              }
-              className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
-            />
-
+           
           </div>
 
           <button
@@ -405,16 +400,7 @@ export default function AdminPage() {
             📋 Jogos Cadastrados
           </h2>
 
-          {updated && (
-
-            <div className="mb-4 bg-blue-500 text-black font-bold rounded-xl p-3 text-center text-sm animate-pulse">
-
-              ✅ Data/hora atualizada com sucesso!
-
-            </div>
-
-          )}
-
+          
           <div className="space-y-3">
 
             {games.map((game) => (
@@ -459,25 +445,73 @@ export default function AdminPage() {
 
                 </div>
 
-                <div className="mt-4">
+                <div className="mt-4 pb-4 space-y-4">
 
-                  <label className="block mb-2 font-semibold text-sm">
-                    Alterar data/hora
-                  </label>
+  <label className="block font-semibold text-sm">
+    Alterar data/hora
+  </label>
 
-                  <input
-                    type="datetime-local"
-                    defaultValue={game.matchDate}
-                    onBlur={(e) =>
-                      atualizarData(
-                        game.id,
-                        e.target.value
-                      )
-                    }
-                    className="bg-zinc-800 rounded-xl p-3 text-sm"
-                  />
+  <input
+  type="text"
+  value={
+    editedDates[game.id] ??
+    game.matchDate
+  }
+  onChange={(e) =>
+    setEditedDates({
+      ...editedDates,
+      [game.id]: e.target.value
+    })
+  }
+  placeholder="2026-07-15T21:30"
+  className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
+/>
+<p className="text-zinc-500 text-xs">
+  Formato: AAAA-MM-DDTHH:MM
+</p>
 
-                </div>
+  <button
+    onClick={async () => {
+
+      setSavingGameId(game.id);
+
+      await atualizarData(
+        game.id,
+        editedDates[game.id] ||
+        game.matchDate
+      );
+
+      setSavingGameId(null);
+
+      setSavedGameId(game.id);
+
+      setTimeout(() => {
+
+        setSavedGameId(null);
+
+      }, 2000);
+
+    }}
+    className="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-xl text-black font-bold text-sm"
+  >
+
+    {savingGameId === game.id
+      ? "Salvando..."
+      : "💾 Confirmar alteração"}
+
+  </button>
+
+  {savedGameId === game.id && (
+
+    <div className="text-green-400 text-sm font-bold">
+
+      ✅ Alteração salva com sucesso!
+
+    </div>
+
+  )}
+
+</div>
 
               </div>
 
