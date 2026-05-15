@@ -264,6 +264,16 @@ export default function BetTable() {
 
   }, []);
 
+// aqui eu estou tirando o bloco meus palpites. 
+  const exibirMeusPalpites = false;
+
+  if (!exibirMeusPalpites) {
+    return null;
+  }
+
+// fim da exclusao do bloco.
+
+
   return (
 
     <div className="bg-zinc-900 rounded-3xl p-5 border border-zinc-800">
