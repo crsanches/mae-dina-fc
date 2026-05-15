@@ -244,9 +244,15 @@ export default function InvitePage() {
 
   useEffect(() => {
 
-    carregarGrupo();
-
-  }, []);
+    async function init() {
+  
+      await carregarGrupo();
+  
+    }
+  
+    init();
+  
+  }, [groupId]);
 
   useEffect(() => {
 
