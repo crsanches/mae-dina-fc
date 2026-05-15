@@ -80,21 +80,34 @@ export default function BetTable() {
     }
 
     const currentGroupId =
-      userSnap.data().groupId;
+  userSnap.data().activeGroupId ||
+  userSnap.data().groupId;  
 
     const allBets: Bet[] = [];
 
     const betsQuery =
-      query(
+  query(
 
-        collection(db, "bets"),
+    collection(db, "bets"),
 
-        orderBy(
-          "createdAt",
-          "desc"
-        )
+    where(
+      "groupId",
+      "==",
+      currentGroupId
+    ),
 
-      );
+    where(
+      "userName",
+      "==",
+      currentUserName
+    ),
+
+    orderBy(
+      "createdAt",
+      "desc"
+    )
+
+  );
 
     const betsSnapshot =
       await getDocs(betsQuery);

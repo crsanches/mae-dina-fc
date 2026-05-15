@@ -152,11 +152,12 @@ export default function GroupCard() {
               );
 
               const groupRef =
-                doc(
-                  db,
-                  "groups",
-                  userData.groupId
-                );
+              doc(
+                db,
+                "groups",
+                userData.activeGroupId ||
+                userData.groupId
+              );
       
               const groupSnap =
                 await getDoc(groupRef);
@@ -176,7 +177,10 @@ export default function GroupCard() {
       
               setInviteLink(
       
-                `${window.location.origin}/invite/${userData.groupId}`
+                `${window.location.origin}/invite/${
+                  userData.activeGroupId ||
+                  userData.groupId
+                }`
       
               );
       
@@ -237,7 +241,7 @@ export default function GroupCard() {
         userRef,
         {
   
-          groupId
+          activeGroupId: groupId
   
         }
       );

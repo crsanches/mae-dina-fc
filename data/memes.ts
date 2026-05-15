@@ -3,5 +3,5 @@ export const memes = [
     "Carlos conseguiu errar TODOS os jogos da rodada.",
     "João acertou um placar e agora está vendendo curso.",
     "Especialistas afirmam que apostar igual o Claudio reduz expectativa de vida.",
-    "VAR analisa se Carlos entende as regras do futebol."
+    "VAR analisa se Carlos sabe o que é futebol."
   ];

@@ -115,7 +115,8 @@ export default function MatchCard({
     const userData =
       userSnap.data();
     
-    const groupId =
+      const groupId =
+      userData.activeGroupId ||
       userData.groupId;
 
     const calculatedPoints =
@@ -220,7 +221,8 @@ export default function MatchCard({
     }
     
     const groupId =
-      userSnap.data().groupId;
+  userSnap.data().activeGroupId ||
+  userSnap.data().groupId;
     
     const betId =
       `${groupId}-${userName}-${teamA}-${teamB}`;

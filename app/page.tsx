@@ -31,7 +31,10 @@ import {
   getDocs,
   onSnapshot,
   orderBy,
-  query
+  query,
+where,
+doc,
+getDoc
 } from "firebase/firestore";
 
 type Game = {
@@ -178,9 +181,47 @@ async function gerarMemeAutomatico(
   currentUser: string
 ) {
 
+  const currentUserAuth =
+    auth.currentUser;
+
+  if (!currentUserAuth) {
+    return;
+  }
+
+  const userRef =
+    doc(
+      db,
+      "users",
+      currentUserAuth.uid
+    );
+
+  const userSnap =
+    await getDoc(userRef);
+
+  if (!userSnap.exists()) {
+    return;
+  }
+
+  const currentGroupId =
+    userSnap.data().activeGroupId ||
+    userSnap.data().groupId;
+
+  const betsQuery =
+    query(
+
+      collection(db, "bets"),
+
+      where(
+        "groupId",
+        "==",
+        currentGroupId
+      )
+
+    );
+
   const betsSnapshot =
     await getDocs(
-      collection(db, "bets")
+      betsQuery
     );
 
   const gamesSnapshot =

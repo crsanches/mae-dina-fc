@@ -32,14 +32,14 @@ export function getAutomaticMeme({
       {
 
         text:
-          "👑 Fontes indicam que você já negocia com a CBF."
+          "👑 Fontes indicam que, pelos seus palpites certeiros, você já negocia com a CBF."
 
       },
 
       {
 
         text:
-          "😳 Suspeita de viagem no tempo detectada."
+          "😳 Suspeita de viagem no tempo detectada: foi ao futuro, copiou os resultados e deu nisso."
 
       },
 

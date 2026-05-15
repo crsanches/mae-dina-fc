@@ -6,6 +6,11 @@ import {
 } from "react";
 
 import {
+  query,
+  where
+} from "firebase/firestore";
+
+import {
   doc,
   getDoc
 } from "firebase/firestore";
@@ -64,12 +69,21 @@ export default function RealRanking() {
       }
 
       const currentGroupId =
-        userSnap.data().groupId;
+  userSnap.data().activeGroupId ||
+  userSnap.data().groupId;  
 
-    const betsSnapshot =
-      await getDocs(
-        collection(db, "bets")
-      );
+  const betsQuery =
+  query(
+    collection(db, "bets"),
+    where(
+      "groupId",
+      "==",
+      currentGroupId
+    )
+  );
+
+const betsSnapshot =
+  await getDocs(betsQuery);
 
     const gamesSnapshot =
       await getDocs(
