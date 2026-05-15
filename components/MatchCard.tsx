@@ -199,12 +199,17 @@ export default function MatchCard({
             return;
           }
   
-          const userName =
-            user.displayName;
-  
-          if (!userName) {
-            return;
-          }
+          await user.reload();
+
+const updatedUser =
+  auth.currentUser;
+
+const userName =
+  updatedUser?.displayName;
+
+if (!userName) {
+  return;
+}
   
           const userRef =
             doc(
