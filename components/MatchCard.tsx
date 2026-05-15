@@ -274,9 +274,8 @@ export default function MatchCard({
 
     if (isLocked) {
 
-      return
-        "🔒 Apostas encerradas";
-
+      return "🔒 Apostas encerradas";
+    
     }
 
     const totalMinutes =
