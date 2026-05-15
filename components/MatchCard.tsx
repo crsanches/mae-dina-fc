@@ -390,7 +390,7 @@ export default function MatchCard({
           {getRemainingTime()}
         </span>
 
-        {alreadyBet ? (
+        {alreadyBet && (
 
 <button
   onClick={() =>
@@ -402,23 +402,21 @@ export default function MatchCard({
   Alterar
 </button>
 
-) : (
+)}
 
-!salvo && (
+{!alreadyBet && !salvo && (
 
-  <button
-    onClick={salvarPalpite}
-    className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
-      isLocked
-        ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-        : "bg-green-500 hover:bg-green-600 text-black"
-    }`}
-    disabled={isLocked}
-  >
-    Salvar
-  </button>
-
-)
+<button
+  onClick={salvarPalpite}
+  className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
+    isLocked
+      ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+      : "bg-green-500 hover:bg-green-600 text-black"
+  }`}
+  disabled={isLocked}
+>
+  Salvar
+</button>
 
 )}
 
