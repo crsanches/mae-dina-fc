@@ -116,6 +116,7 @@ export default function MatchCard({
     
     const userData =
       userSnap.data();
+      console.log(userData);
     
       const groupId =
       userData.activeGroupId ||
@@ -242,6 +243,7 @@ if (!userName) {
   
             const data =
               snapshot.data();
+              
   
             setGolsA(data.golsA);
   

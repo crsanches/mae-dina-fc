@@ -126,6 +126,7 @@ export default function LoginCard() {
   
           const userData =
             userSnap.data();
+            console.log(userData);
   
           if (
             !userData.username
@@ -192,6 +193,7 @@ export default function LoginCard() {
       
       const userData =
         userSnap.data();
+        console.log(userData);
       
       if (
         !userData.username
