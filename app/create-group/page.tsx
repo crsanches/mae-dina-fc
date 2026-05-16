@@ -97,8 +97,8 @@ export default function CreateGroupPage() {
           displayName:
             user.displayName || "Anônimo",
       
-            groupId:
-            groupRef.id,
+            //groupId:
+            //groupRef.id,
           
           activeGroupId:
             groupRef.id,
