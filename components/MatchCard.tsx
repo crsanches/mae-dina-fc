@@ -340,47 +340,89 @@ if (!userName) {
 
         <div className="flex items-center gap-2">
 
-          <input
-            type="number"
-            min={0}
-            max={20}
-            value={golsA}
-            onChange={(e) =>
-              setGolsA(
-                e.target.value
-              )
-            }
-            className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
-            disabled={
-              isLocked || (
-                alreadyBet &&
-                !isEditing
-              )
-            }
-          />
+        <input
+  type="number"
+  min={0}
+  max={99}
+  value={golsA}
+  onChange={(e) => {
 
-          <span className="text-zinc-500 text-lg">
-            x
-          </span>
+    const value =
+      e.target.value;
 
-          <input
-            type="number"
-            min={0}
-            max={20}
-            value={golsB}
-            onChange={(e) =>
-              setGolsB(
-                e.target.value
-              )
-            }
-            className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
-            disabled={
-              isLocked || (
-                alreadyBet &&
-                !isEditing
-              )
-            }
-          />
+    if (value === "") {
+
+      setGolsA("");
+
+      return;
+
+    }
+
+    const number =
+      Number(value);
+
+    if (
+      number >= 0 &&
+      number <= 99
+    ) {
+
+      setGolsA(value);
+
+    }
+
+  }}
+  className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
+  disabled={
+    isLocked || (
+      alreadyBet &&
+      !isEditing
+    )
+  }
+/>
+
+<span className="text-zinc-500 text-lg">
+  x
+</span>
+
+<input
+  type="number"
+  min={0}
+  max={99}
+  value={golsB}
+  onChange={(e) => {
+
+    const value =
+      e.target.value;
+
+    if (value === "") {
+
+      setGolsB("");
+
+      return;
+
+    }
+
+    const number =
+      Number(value);
+
+    if (
+      number >= 0 &&
+      number <= 99
+    ) {
+
+      setGolsB(value);
+
+    }
+
+  }}
+  className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
+  disabled={
+    isLocked || (
+      alreadyBet &&
+      !isEditing
+    )
+  }
+/>
 
         </div>
 
