@@ -203,8 +203,7 @@ async function gerarMemeAutomatico(
   }
 
   const currentGroupId =
-    userSnap.data().activeGroupId ||
-    userSnap.data().groupId;
+    userSnap.data().activeGroupId
 
   const betsQuery =
     query(

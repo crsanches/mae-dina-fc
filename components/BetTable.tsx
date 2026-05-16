@@ -80,8 +80,7 @@ export default function BetTable() {
     }
 
     const currentGroupId =
-  userSnap.data().activeGroupId ||
-  userSnap.data().groupId;  
+  userSnap.data().activeGroupId
 
     const allBets: Bet[] = [];
 

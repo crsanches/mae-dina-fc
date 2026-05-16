@@ -207,8 +207,9 @@ export default function LoginCard() {
       
       }
       
+     
       if (
-        !userData.groupId
+        !userData.activeGroupId
       ) {
       
         router.push(
@@ -218,7 +219,6 @@ export default function LoginCard() {
         return;
       
       }
-
   }
 
   async function entrarComEmail() {

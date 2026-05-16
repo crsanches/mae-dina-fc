@@ -147,7 +147,7 @@ export default function AnalyticsPage() {
       }
 
       const currentGroupId =
-        userSnap.data().groupId;
+      userSnap.data().activeGroupId;
 
       const betsSnapshot =
         await getDocs(

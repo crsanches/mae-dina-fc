@@ -88,7 +88,7 @@ export default function GroupCard() {
                 userSnap.data();
       
                 if (
-                  !userData.groupId &&
+                  
                   !userData.activeGroupId
                 ) {
                   return;

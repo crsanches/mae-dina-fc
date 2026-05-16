@@ -227,8 +227,7 @@ if (!userName) {
           }
   
           const groupId =
-            userSnap.data().activeGroupId ||
-            userSnap.data().groupId;
+            userSnap.data().activeGroupId
   
           const betId =
             `${groupId}-${userName}-${teamA}-${teamB}`;
