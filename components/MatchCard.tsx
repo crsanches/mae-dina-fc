@@ -119,8 +119,8 @@ export default function MatchCard({
       console.log(userData);
     
       const groupId =
-      userData.activeGroupId ||
-      userData.groupId;
+      userData.activeGroupId;
+      //userData.groupId;
 
     const calculatedPoints =
 

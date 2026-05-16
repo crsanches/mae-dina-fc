@@ -87,11 +87,12 @@ export default function GroupCard() {
               const userData =
                 userSnap.data();
       
-              if (
-                !userData.groupId
-              ) {
-                return;
-              }
+                if (
+                  !userData.groupId &&
+                  !userData.activeGroupId
+                ) {
+                  return;
+                }
               console.log(
                 "USER DATA:",
                 userData
@@ -155,8 +156,8 @@ export default function GroupCard() {
               doc(
                 db,
                 "groups",
-                userData.activeGroupId ||
-                userData.groupId
+                userData.activeGroupId
+                //userData.groupId
               );
       
               const groupSnap =
@@ -178,8 +179,8 @@ export default function GroupCard() {
               setInviteLink(
       
                 `${window.location.origin}/invite/${
-                  userData.activeGroupId ||
-                  userData.groupId
+                  userData.activeGroupId
+                  //userData.groupId
                 }`
       
               );

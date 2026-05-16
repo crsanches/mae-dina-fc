@@ -180,8 +180,8 @@ export default function InvitePage() {
             activeGroupId:
               groupId,
 
-            groupId:
-              groupId
+           // groupId:
+           //   groupId
 
           }
         );
@@ -212,8 +212,8 @@ export default function InvitePage() {
           activeGroupId:
             groupId,
 
-          groupId:
-            groupId
+          //groupId:
+          //  groupId
 
         }
       );
