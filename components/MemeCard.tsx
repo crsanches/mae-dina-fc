@@ -7,7 +7,7 @@ type Props = {
   }: Props) {
   
     return (
-      <div className="bg-gradient-to-r from-pink-500 to-yellow-500 rounded-3xl p-5 shadow-lg text-black">
+      <div className="bg-gradient-to-r from-blue-500 to-yellow-500 rounded-3xl p-5 shadow-lg text-black">
   
         <h2 className="text-2xl font-black mb-3">
           🤡 Zoeira da Rodada

@@ -56,6 +56,25 @@ type Game = {
 
 export default function Home() {
 
+  const [isLogged, setIsLogged] =
+  useState(false);
+
+  useEffect(() => {
+
+    const unsubscribe =
+      onAuthStateChanged(
+        auth,
+        (user) => {
+  
+          setIsLogged(!!user);
+  
+        }
+      );
+  
+    return () => unsubscribe();
+  
+  }, []);
+
   const [jogos, setJogos] =
     useState<Game[]>([]);
 
@@ -431,6 +450,41 @@ useEffect(() => {
 
     }, {} as Record<string, typeof jogos[number][]>);
 
+
+    if (!isLogged) {
+
+      return (
+    
+        <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+    
+          <div className="max-w-md text-center">
+    
+            <div className="text-7xl mb-6">
+              ⚽
+            </div>
+    
+            <h1 className="text-5xl font-black mb-4">
+    
+              Mãe Diná FC
+    
+            </h1>
+    
+            <p className="text-zinc-400 mb-8 text-lg">
+    
+              O único bolão onde a humilhação é em tempo real 😂
+    
+            </p>
+    
+            <LoginCard />
+    
+          </div>
+    
+        </main>
+    
+      );
+    
+    }
+
   return (
 
     <main className="min-h-screen bg-zinc-950 text-white pb-20">
@@ -445,8 +499,37 @@ useEffect(() => {
         {/* SUA LIGA */}
         <GroupCard />
 
+        {/* link para fazer as apostas */}
+        <Link
+                  href="/play"
+                  className="bg-yellow-500 hover:bg-green-600 transition text-black font-black rounded-3xl p-5 flex items-center gap-4"
+                >
+
+                  <div className="text-5xl">
+                    🎯
+                  </div>
+
+                  <div>
+
+                    <h2 className="text-2xl font-black">
+                      Fazer Palpites
+                    </h2>
+
+                    <p className="text-black text-sm mt-1 font-semibold">
+                      Entre na área de apostas da rodada 😄
+                    </p>
+
+                  </div>
+
+        </Link>
+
+
         {/* STATUS USUÁRIO */}
         <UserStats />
+
+
+        
+
 
         {/* RANKING */}
         <RealRanking />
@@ -461,8 +544,8 @@ useEffect(() => {
 
           <div>
 
-            <h2 className="text-xl font-black text-purple-400">
-              📊 Análises Fundamentalistas - jamais clique aqui...
+            <h2 className="text-xl font-black text-yellow-400">
+             💹 Análises Fundamentalistas - jamais clique aqui...
             </h2>
 
             <p className="text-zinc-400 text-sm mt-1">
@@ -472,6 +555,8 @@ useEffect(() => {
           </div>
 
         </Link>
+
+
         {/* MEME */}
         {automaticMeme && (
 
@@ -499,62 +584,6 @@ useEffect(() => {
         <MemeCard
           mensagem={memeAleatorio}
         />
-
-        {/* JOGOS ABERTOS */}
-        <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
-
-          <div className="flex items-center justify-between mb-4">
-
-            <h2 className="text-xl font-black">
-              ⚽ Jogos da Rodada
-            </h2>
-
-            <span className="text-zinc-400 text-xs">
-              Faça seus palpites 😎
-            </span>
-
-          </div>
-
-          <div className="space-y-4">
-
-            {Object.entries(jogosAbertosPorFase).map(
-              ([fase, jogosDaFase]) => (
-
-                <div
-                  key={fase}
-                  className="mb-6"
-                >
-
-                  <h3 className="text-lg font-black mb-3 text-blue-400">
-                    {fase}
-                  </h3>
-
-                  <div className="space-y-3">
-
-                    {jogosDaFase.map((jogo) => (
-
-                      <MatchCard
-                        key={`${jogo.teamA}-${jogo.teamB}`}
-                        teamA={jogo.teamA}
-                        teamB={jogo.teamB}
-                        emojiA={jogo.emojiA}
-                        emojiB={jogo.emojiB}
-                        resultadoA={jogo.resultadoA}
-                        resultadoB={jogo.resultadoB}
-                        matchDate={jogo.matchDate}
-                      />
-
-                    ))}
-
-                  </div>
-
-                </div>
-
-            ))}
-
-          </div>
-
-        </div>
 
         {/* MINHAS APOSTAS */}
         <BetTable />
