@@ -26,7 +26,8 @@ import {
 
 import {
 
-  useRouter
+  useRouter,
+  useSearchParams
 
 } from "next/navigation";
 
@@ -40,6 +41,12 @@ export default function ChooseUsernamePage() {
 
   const router =
     useRouter();
+  
+  const searchParams =
+    useSearchParams();
+  
+  const invitedGroupId =
+    searchParams.get("groupId");
 
   async function salvarUsername() {
 
@@ -85,32 +92,42 @@ export default function ChooseUsernamePage() {
           ? userSnap.data()
           : {};
 
-      await setDoc(
+          await setDoc(
 
-        userRef,
-
-        {
-
-          ...oldData,
-
-          uid:
-            user.uid,
-
-          email:
-            user.email || "",
-
-          username:
-            username.trim()
-
-        },
-
-        {
-
-          merge: true
-
-        }
-
-      );
+            userRef,
+          
+            {
+          
+              ...oldData,
+          
+              uid:
+                user.uid,
+          
+              email:
+                user.email || "",
+          
+              username:
+                username.trim(),
+          
+              ...(invitedGroupId && {
+          
+                activeGroupId:
+                  invitedGroupId,
+          
+                groups:
+                  [invitedGroupId]
+          
+              })
+          
+            },
+          
+            {
+          
+              merge: true
+          
+            }
+          
+          );
 
       router.push("/");
 

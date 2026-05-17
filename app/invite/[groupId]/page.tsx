@@ -154,7 +154,7 @@ export default function InvitePage() {
         );
 
         router.push(
-          "/choose-username"
+          `/choose-username?groupId=${groupId}`
         );
 
         return;
