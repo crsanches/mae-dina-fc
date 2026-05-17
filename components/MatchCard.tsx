@@ -75,6 +75,31 @@ export default function MatchCard({
  
 
   async function salvarPalpite() {
+    const gameDate =
+    new Date(matchDate);
+
+  const now =
+    new Date();
+
+  const difference =
+    gameDate.getTime() -
+    now.getTime();
+
+  const oneHour =
+    1000 * 60 * 60;
+
+  const isLocked =
+    difference <= oneHour;
+
+  if (isLocked) {
+
+    alert(
+      "Apostas encerradas 😥"
+    );
+
+    return;
+
+  } 
   
     if (saving) {
       return;
@@ -486,10 +511,10 @@ if (!userName) {
 
         <div className="flex gap-2">
 
-{alreadyBet && !isEditing && (
+{alreadyBet && !isEditing && !isLocked && (
 
   <button
-    onClick={() =>
+    onClick={() =>  
       setIsEditing(true)
     }
     className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
