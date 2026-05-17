@@ -26,8 +26,7 @@ import {
 
 import {
 
-  useRouter,
-  useSearchParams
+  useRouter
 
 } from "next/navigation";
 
@@ -42,12 +41,16 @@ export default function ChooseUsernamePage() {
   const router =
     useRouter();
   
-  const searchParams =
-    useSearchParams();
-  
-  const invitedGroupId =
-    searchParams.get("groupId");
+    const invitedGroupId =
 
+    typeof window !== "undefined"
+  
+      ? new URLSearchParams(
+          window.location.search
+        ).get("groupId")
+  
+      : null;
+      
   async function salvarUsername() {
 
     const user =
