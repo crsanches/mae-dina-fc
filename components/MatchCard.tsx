@@ -366,7 +366,7 @@ if (!userName) {
     <div
       className={`rounded-xl p-3 transition border ${
         isLocked
-          ? "bg-red-950 border-red-700"
+          ? "bg-slate-800 border-slate-300"
           : isEndingSoon
           ? "bg-zinc-800 border-zinc-500"
           : "bg-blue-950 border-blue-700"
@@ -505,9 +505,15 @@ if (!userName) {
 
       <div className="mt-3 flex justify-between items-center">
 
-        <span className="text-zinc-400 text-xs">
-          {getRemainingTime()}
-        </span>
+      <span
+        className={`${
+          isLocked
+            ? "text-red-600 text-sm font-bold"
+            : "text-zinc-400 text-xs"
+        }`}
+      >
+        {getRemainingTime()}
+      </span>
 
         <div className="flex gap-2">
 
