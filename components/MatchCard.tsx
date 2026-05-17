@@ -56,6 +56,9 @@ export default function MatchCard({
 
   const [salvo, setSalvo] =
     useState(false);
+  
+  const [saving, setSaving] =
+    useState(false);
 
   const [points, setPoints] =
     useState(0);
@@ -72,6 +75,12 @@ export default function MatchCard({
  
 
   async function salvarPalpite() {
+  
+    if (saving) {
+      return;
+    }
+    
+    setSaving(true);
 
     const userName =
       auth.currentUser?.displayName;
@@ -146,48 +155,63 @@ export default function MatchCard({
         const betId =
         `${groupId}-${userName}-${teamA}-${teamB}`;
 
-    await setDoc(
-      doc(db, "bets", betId),
-      {
+        try {
 
-        userName,
-
-        match:
-          `${teamA} x ${teamB}`,
-
-        golsA,
-        golsB,
-
-        points:
-          calculatedPoints,
-
-        createdAt:
-          serverTimestamp(),
-          groupId 
-
-      }
-    );
-
-    setPoints(calculatedPoints);
-    setAlreadyBet(true);
-    setIsEditing(false);
-    window.dispatchEvent(
-      new Event("betSaved")
-    );
-
-    setSalvo(true);
-
-    //setGolsA("");
-    //setGolsB("");
-
-    setTimeout(() => {
-
-      setSalvo(false);
-
-    }, 2000);
-
+          await setDoc(
+            doc(db, "bets", betId),
+            {
+        
+              userName,
+        
+              match:
+                `${teamA} x ${teamB}`,
+        
+              golsA,
+              golsB,
+        
+              points:
+                calculatedPoints,
+        
+              createdAt:
+                serverTimestamp(),
+        
+              groupId
+        
+            }
+          );
+        
+          setPoints(calculatedPoints);
+        
+          setAlreadyBet(true);
+        
+          setIsEditing(false);
+        
+          window.dispatchEvent(
+            new Event("betSaved")
+          );
+        
+          setSalvo(true);
+        
+          setTimeout(() => {
+        
+            setSalvo(false);
+        
+          }, 2000);
+        
+        } catch (error) {
+        
+          console.error(error);
+        
+          alert(
+            "Erro ao salvar palpite 😥"
+          );
+        
+        } finally {
+        
+          setSaving(false);
+        
+        }
   }
-
  
 
   useEffect(() => {
@@ -456,7 +480,10 @@ if (!userName) {
       setIsEditing(true)
     }
     className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
-    disabled={isLocked}
+    disabled={
+      isLocked ||
+      saving
+    }
   >
     clique aqui para permitir alteração
   </button>
@@ -474,9 +501,11 @@ if (!userName) {
     }`}
     disabled={isLocked}
   >
-    {alreadyBet
-      ? "Edite e clique aqui para salvar"
-      : "faça seu palpite e clique aqui para salvar"}
+    {saving
+  ? "⏳ Salvando..."
+  : alreadyBet
+    ? "💾 Salvar alteração"
+    : "🎯 Salvar palpite"}
   </button>
 
 )}
