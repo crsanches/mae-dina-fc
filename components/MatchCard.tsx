@@ -369,6 +369,11 @@ if (!userName) {
   min={0}
   max={99}
   value={golsA}
+
+  onFocus={(e) =>
+    e.target.select()
+  }
+
   onChange={(e) => {
 
     const value =
@@ -395,7 +400,9 @@ if (!userName) {
     }
 
   }}
+
   className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
+
   disabled={
     isLocked || (
       alreadyBet &&
@@ -414,6 +421,12 @@ if (!userName) {
   min={0}
   max={99}
   value={golsB}
+
+  onFocus={(e) =>
+    e.target.select()
+  }
+
+  
   onChange={(e) => {
 
     const value =
