@@ -8,6 +8,8 @@ import MemeCard from "../components/MemeCard";
 import LoginCard from "../components/LoginCard";
 import RealRanking from "../components/RealRanking";
 import Link from "next/link";
+import AnalyticsDashboard
+from "../components/AnalyticsDashboard";
 
 import GroupCard
 from "../components/GroupCard";
@@ -533,10 +535,8 @@ useEffect(() => {
 
         {/* RANKING */}
         <RealRanking />
-        <Link
-          href="/analytics"
-          className="bg-zinc-900 border border-zinc-800 hover:border-purple-500 transition rounded-3xl p-5 flex items-center gap-4"
-        >
+        <AnalyticsDashboard/>
+        
 
           <div className="text-5xl">
             🤓
@@ -544,9 +544,7 @@ useEffect(() => {
 
           <div>
 
-            <h2 className="text-xl font-black text-yellow-400">
-             💹 Análises Fundamentalistas - jamais clique aqui...
-            </h2>
+            
 
             <p className="text-zinc-400 text-sm mt-1">
               Especialistas analisam suas tragédias futebolísticas 😄
@@ -554,7 +552,7 @@ useEffect(() => {
 
           </div>
 
-        </Link>
+      
 
 
         {/* MEME */}
