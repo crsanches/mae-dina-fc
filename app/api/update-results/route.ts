@@ -114,6 +114,7 @@ export async function GET() {
   .doc(localGame.id)
   .update({
 
+    
             resultadoA:
               Number(apiGame.intHomeScore),
 
