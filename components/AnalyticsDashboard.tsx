@@ -1245,6 +1245,7 @@ if (
 
               {stats.totalBets}
 
+
             </p>
 
             <p className="text-zinc-400 text-sm mt-2">
