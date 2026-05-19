@@ -10,6 +10,7 @@ import RealRanking from "../components/RealRanking";
 import Link from "next/link";
 import AnalyticsDashboard
 from "../components/AnalyticsDashboard";
+import Footer from '../components/footer'
 
 import GroupCard
 from "../components/GroupCard";
@@ -652,6 +653,11 @@ useEffect(() => {
 
           ))}
 
+        </div>
+
+        <div className="min-h-screen flex flex-col">
+        {/* conteúdo da página - logo bazaglia sanches */}
+        <Footer />
         </div>
 
       </section>
