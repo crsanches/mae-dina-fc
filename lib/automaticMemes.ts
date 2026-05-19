@@ -6,6 +6,7 @@ type MemeData = {
 
 };
 
+
 export function getAutomaticMeme({
 
   isLeader,
