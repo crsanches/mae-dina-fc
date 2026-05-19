@@ -1,3 +1,6 @@
+// para rodar, entrar na pasta scripts e digitar node updateGames.js//
+
+
 const {
     initializeApp
   } = require("firebase/app");
@@ -60,7 +63,7 @@ const {
         {
   
           matchDate:
-            "2026-05-15T21:30",
+            "2026-05-20T21:30",
   
             resultadoA: deleteField(),
             resultadoB: deleteField()

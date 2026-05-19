@@ -22,6 +22,7 @@ const app =
 const db =
   getFirestore(app);
 
+  /*
 const games = [
 
   {
@@ -181,7 +182,61 @@ const games = [
   }
 
 ];
+*/
 
+const games = [
+
+  {
+    teamA: "Palmeiras",
+    emojiA: "🟢",
+  
+    teamB: "Cruzeiro",
+    emojiB: "🔵⚪",
+  
+    phase: "Brasileirão",
+  
+    matchDate:
+      "2026-05-17T21:00"
+  },
+
+  {
+    teamA: "Santos",
+    emojiA: "🟢",
+  
+    teamB: "Coritiba",
+    emojiB: "🔵⚪",
+  
+    phase: "Brasileirão",
+  
+    matchDate:
+      "2026-05-17T21:00"
+  },
+  {
+    teamA: "Bahia",
+    emojiA: "🟢",
+  
+    teamB: "Corinthians",
+    emojiB: "🔵⚪",
+  
+    phase: "Brasileirão",
+  
+    matchDate:
+      "2026-05-17T21:00"
+  },
+  {
+    teamA: "Palmeiras",
+    emojiA: "🟢",
+  
+    teamB: "Botafogo",
+    emojiB: "🔵⚪",
+  
+    phase: "Brasileirão",
+  
+    matchDate:
+      "2026-05-17T21:00"
+  },
+
+];
 async function importGames() {
 
   for (const game of games) {
