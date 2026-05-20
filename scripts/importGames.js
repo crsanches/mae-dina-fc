@@ -187,10 +187,10 @@ const games = [
 const games = [
 
   {
-    teamA: "Palmeiras",
+    teamA: "Atlético Mineiro",
     emojiA: "🟢",
   
-    teamB: "Cruzeiro",
+    teamB: "Palmeiras",
     emojiB: "🔵⚪",
   
     phase: "Brasileirão",
@@ -199,11 +199,12 @@ const games = [
       "2026-05-17T21:00"
   },
 
+  
   {
-    teamA: "Santos",
+    teamA: "Corinthians",
     emojiA: "🟢",
   
-    teamB: "Coritiba",
+    teamB: "Bahia",
     emojiB: "🔵⚪",
   
     phase: "Brasileirão",
@@ -212,29 +213,17 @@ const games = [
       "2026-05-17T21:00"
   },
   {
-    teamA: "Bahia",
+    teamA: "Coritiba",
     emojiA: "🟢",
   
-    teamB: "Corinthians",
+    teamB: "Bragantino",
     emojiB: "🔵⚪",
   
     phase: "Brasileirão",
   
     matchDate:
       "2026-05-17T21:00"
-  },
-  {
-    teamA: "Palmeiras",
-    emojiA: "🟢",
-  
-    teamB: "Botafogo",
-    emojiB: "🔵⚪",
-  
-    phase: "Brasileirão",
-  
-    matchDate:
-      "2026-05-17T21:00"
-  },
+  }
 
 ];
 async function importGames() {
