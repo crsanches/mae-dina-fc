@@ -64,6 +64,7 @@ export async function GET() {
             "x",
             apiGame.strAwayTeam
           );
+          
 
           const localGame = gamesSnapshot.docs.find((g) => {
 
