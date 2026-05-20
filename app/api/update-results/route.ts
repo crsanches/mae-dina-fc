@@ -27,7 +27,7 @@ export async function GET() {
   try {
 
     const response = await fetch(
-      "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4351"
+      "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4351&s=2026"
      
     );
 
@@ -51,6 +51,13 @@ export async function GET() {
       });
 
     for (const apiGame of data.events || []) {
+
+    
+
+      if (
+        apiGame.strLeague !==
+        "Brazilian Serie A"
+      ) continue;
     
         console.log(
             apiGame.strHomeTeam,
