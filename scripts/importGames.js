@@ -190,12 +190,12 @@ const games = [
     teamA: "Cruzeiro",
 
     emojiA:
-      "https://www.thesportsdb.com/images/media/team/badge/yvwvtu1448813215.png",
+      "https://api.sofascore.app/api/v1/team/1954/image",
 
     teamB: "Santos",
 
     emojiB:
-      "https://www.thesportsdb.com/images/media/team/badge/uwtpvp1422030158.png",
+      "https://api.sofascore.app/api/v1/team/1968/image",
 
     phase: "Brasileirão",
 
@@ -207,12 +207,12 @@ const games = [
     teamA: "Internacional",
 
     emojiA:
-      "https://www.thesportsdb.com/images/media/team/badge/xwvutr1421432011.png",
+      "https://api.sofascore.app/api/v1/team/1966/image",
 
     teamB: "Athletico-PR",
 
     emojiB:
-      "https://www.thesportsdb.com/images/media/team/badge/rvwtus1421432058.png",
+      "https://api.sofascore.app/api/v1/team/1967/image",
 
     phase: "Brasileirão",
 
@@ -224,12 +224,12 @@ const games = [
     teamA: "São Paulo",
 
     emojiA:
-      "https://www.thesportsdb.com/images/media/team/badge/qxxwrs1421431864.png",
+      "https://api.sofascore.app/api/v1/team/1981/image",
 
     teamB: "Vasco",
 
     emojiB:
-      "https://www.thesportsdb.com/images/media/team/badge/vwpvrr1421432114.png",
+      "https://api.sofascore.app/api/v1/team/1974/image",
 
     phase: "Brasileirão",
 
@@ -241,12 +241,12 @@ const games = [
     teamA: "Palmeiras",
 
     emojiA:
-      "https://www.thesportsdb.com/images/media/team/badge/d0q2oh1720287148.png",
+      "https://api.sofascore.app/api/v1/team/1963/image",
 
     teamB: "Vitória",
 
     emojiB:
-      "https://www.thesportsdb.com/images/media/team/badge/wtsxrp1421432083.png",
+      "https://api.sofascore.app/api/v1/team/1979/image",
 
     phase: "Brasileirão",
 
@@ -258,12 +258,12 @@ const games = [
     teamA: "Grêmio",
 
     emojiA:
-      "https://www.thesportsdb.com/images/media/team/badge/xqvwrt1421432031.png",
+      "https://api.sofascore.app/api/v1/team/5926/image",
 
     teamB: "Flamengo",
 
     emojiB:
-      "https://www.thesportsdb.com/images/media/team/badge/uyrwrr1421431897.png",
+      "https://api.sofascore.app/api/v1/team/5981/image",
 
     phase: "Brasileirão",
 
@@ -272,7 +272,6 @@ const games = [
   }
 
 ];
-
 
 async function importGames() {
 
