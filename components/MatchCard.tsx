@@ -388,8 +388,9 @@ export default function MatchCard({
 
           <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
 
-            <Image
-              src={emojiA}
+            
+              <img
+              src={`/api/image-proxy?url=${encodeURIComponent(emojiA)}`}
               alt={teamA}
               width={40}
               height={40}
@@ -512,8 +513,8 @@ export default function MatchCard({
 
           <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
 
-            <img
-              src={emojiB}
+          <img
+  src={`/api/image-proxy?url=${encodeURIComponent(emojiB)}`}
               alt={teamB}
               width={40}
               height={40}

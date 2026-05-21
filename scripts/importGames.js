@@ -190,12 +190,12 @@ const games = [
     teamA: "Cruzeiro",
 
     emojiA:
-      "https://api.sofascore.app/api/v1/team/1954/image",
+      "https://img.sofascore.app/api/v1/team/1954/image",
 
     teamB: "Santos",
 
     emojiB:
-      "https://api.sofascore.app/api/v1/team/1968/image",
+      "https://img.sofascore.app/api/v1/team/1968/image",
 
     phase: "Brasileirão",
 
@@ -207,12 +207,12 @@ const games = [
     teamA: "Internacional",
 
     emojiA:
-      "https://api.sofascore.app/api/v1/team/1966/image",
+      "https://img.sofascore.app/api/v1/team/1966/image",
 
     teamB: "Athletico-PR",
 
     emojiB:
-      "https://api.sofascore.app/api/v1/team/1967/image",
+      "https://img.sofascore.app/api/v1/team/1967/image",
 
     phase: "Brasileirão",
 
@@ -224,12 +224,12 @@ const games = [
     teamA: "São Paulo",
 
     emojiA:
-      "https://api.sofascore.app/api/v1/team/1981/image",
+      "https://img.sofascore.app/api/v1/team/1981/image",
 
     teamB: "Vasco",
 
     emojiB:
-      "https://api.sofascore.app/api/v1/team/1974/image",
+      "https://img.sofascore.app/api/v1/team/1974/image",
 
     phase: "Brasileirão",
 
@@ -241,12 +241,12 @@ const games = [
     teamA: "Palmeiras",
 
     emojiA:
-      "https://api.sofascore.app/api/v1/team/1963/image",
+      "https://img.sofascore.app/api/v1/team/1963/image",
 
     teamB: "Vitória",
 
     emojiB:
-      "https://api.sofascore.app/api/v1/team/1979/image",
+      "https://img.sofascore.app/api/v1/team/1979/image",
 
     phase: "Brasileirão",
 
@@ -258,12 +258,12 @@ const games = [
     teamA: "Grêmio",
 
     emojiA:
-      "https://api.sofascore.app/api/v1/team/5926/image",
+      "https://img.sofascore.app/api/v1/team/5926/image",
 
     teamB: "Flamengo",
 
     emojiB:
-      "https://api.sofascore.app/api/v1/team/5981/image",
+      "https:/img.sofascore.app/api/v1/team/5981/image",
 
     phase: "Brasileirão",
 
