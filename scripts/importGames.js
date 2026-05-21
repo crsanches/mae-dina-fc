@@ -186,44 +186,84 @@ const games = [
 
 const games = [
   {
-    teamA: "Cruzeiro",
-    emojiA: "/logos/cruzeiro.png",
-    teamB: "Santos",
-    emojiB: "/logos/santos.png",
+    teamA: "EC Vitória",
+    emojiA: "/logos/vitoria.png",
+    teamB: "Internacional",
+    emojiB: "/logos/internacional.png",
     phase: "Brasileirão",
-    matchDate: "2026-05-23T18:30"
-  },
-  {
-    teamA: "Internacional",
-    emojiA: "/logos/internacional.png",
-    teamB: "Athletico-PR",
-    emojiB: "/logos/athletico-pr.png",
-    phase: "Brasileirão",
-    matchDate: "2026-05-23T18:30"
+    matchDate: "2026-05-23T17:00"
   },
   {
     teamA: "São Paulo",
     emojiA: "/logos/sao-paulo.png",
-    teamB: "Vasco",
-    emojiB: "/logos/vasco.png",
+    teamB: "Botafogo",
+    emojiB: "/logos/botafogo.png",
     phase: "Brasileirão",
-    matchDate: "2026-05-23T21:00"
-  },
-  {
-    teamA: "Palmeiras",
-    emojiA: "/logos/palmeiras.png",
-    teamB: "Vitória",
-    emojiB: "/logos/vitoria.png",
-    phase: "Brasileirão",
-    matchDate: "2026-05-24T11:00"
+    matchDate: "2026-05-23T17:00"
   },
   {
     teamA: "Grêmio",
     emojiA: "/logos/gremio.png",
-    teamB: "Flamengo",
-    emojiB: "/logos/flamengo.png",
+    teamB: "Santos",
+    emojiB: "/logos/santos.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-23T19:00"
+  },
+  {
+    teamA: "Mirassol",
+    emojiA: "/logos/mirassol.png",
+    teamB: "Fluminense",
+    emojiB: "/logos/fluminense.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-23T19:00"
+  },
+  {
+    teamA: "Flamengo",
+    emojiA: "/logos/flamengo.png",
+    teamB: "Palmeiras",
+    emojiB: "/logos/palmeiras.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-23T21:00"
+  },
+  {
+    teamA: "Remo",
+    emojiA: "/logos/remo.png",
+    teamB: "Athletico-PR",
+    emojiB: "/logos/athletico-pr.png",
     phase: "Brasileirão",
     matchDate: "2026-05-24T16:00"
+  },
+  {
+    teamA: "Cruzeiro",
+    emojiA: "/logos/cruzeiro.png",
+    teamB: "Chapecoense",
+    emojiB: "/logos/chapecoense.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-24T16:00"
+  },
+  {
+    teamA: "Corinthians",
+    emojiA: "/logos/corinthians.png",
+    teamB: "Atlético-MG",
+    emojiB: "/logos/atletico-mg.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-24T18:30"
+  },
+  {
+    teamA: "Vasco da Gama",
+    emojiA: "/logos/vasco.png",
+    teamB: "Bragantino",
+    emojiB: "/logos/bragantino.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-24T20:30"
+  },
+  {
+    teamA: "Coritiba",
+    emojiA: "/logos/coritiba.png",
+    teamB: "Bahia",
+    emojiB: "/logos/bahia.png",
+    phase: "Brasileirão",
+    matchDate: "2026-05-25T20:00"
   }
 ];
 
