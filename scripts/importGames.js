@@ -187,45 +187,93 @@ const games = [
 const games = [
 
   {
-    teamA: "Atlético Mineiro",
-    emojiA: "🟢",
-  
-    teamB: "Palmeiras",
-    emojiB: "🔵⚪",
-  
+    teamA: "Cruzeiro",
+
+    emojiA:
+      "https://www.thesportsdb.com/images/media/team/badge/yvwvtu1448813215.png",
+
+    teamB: "Santos",
+
+    emojiB:
+      "https://www.thesportsdb.com/images/media/team/badge/uwtpvp1422030158.png",
+
     phase: "Brasileirão",
-  
+
     matchDate:
-      "2026-05-17T21:00"
+      "2026-05-23T18:30"
   },
 
-  
   {
-    teamA: "Corinthians",
-    emojiA: "🟢",
-  
-    teamB: "Bahia",
-    emojiB: "🔵⚪",
-  
+    teamA: "Internacional",
+
+    emojiA:
+      "https://www.thesportsdb.com/images/media/team/badge/xwvutr1421432011.png",
+
+    teamB: "Athletico-PR",
+
+    emojiB:
+      "https://www.thesportsdb.com/images/media/team/badge/rvwtus1421432058.png",
+
     phase: "Brasileirão",
-  
+
     matchDate:
-      "2026-05-17T21:00"
+      "2026-05-23T18:30"
   },
+
   {
-    teamA: "Coritiba",
-    emojiA: "🟢",
-  
-    teamB: "Bragantino",
-    emojiB: "🔵⚪",
-  
+    teamA: "São Paulo",
+
+    emojiA:
+      "https://www.thesportsdb.com/images/media/team/badge/qxxwrs1421431864.png",
+
+    teamB: "Vasco",
+
+    emojiB:
+      "https://www.thesportsdb.com/images/media/team/badge/vwpvrr1421432114.png",
+
     phase: "Brasileirão",
-  
+
     matchDate:
-      "2026-05-17T21:00"
+      "2026-05-23T21:00"
+  },
+
+  {
+    teamA: "Palmeiras",
+
+    emojiA:
+      "https://www.thesportsdb.com/images/media/team/badge/d0q2oh1720287148.png",
+
+    teamB: "Vitória",
+
+    emojiB:
+      "https://www.thesportsdb.com/images/media/team/badge/wtsxrp1421432083.png",
+
+    phase: "Brasileirão",
+
+    matchDate:
+      "2026-05-24T11:00"
+  },
+
+  {
+    teamA: "Grêmio",
+
+    emojiA:
+      "https://www.thesportsdb.com/images/media/team/badge/xqvwrt1421432031.png",
+
+    teamB: "Flamengo",
+
+    emojiB:
+      "https://www.thesportsdb.com/images/media/team/badge/uyrwrr1421431897.png",
+
+    phase: "Brasileirão",
+
+    matchDate:
+      "2026-05-24T16:00"
   }
 
 ];
+
+
 async function importGames() {
 
   for (const game of games) {
@@ -238,6 +286,12 @@ async function importGames() {
           `${game.teamA} x ${game.teamB}`,
 
         ...game,
+
+        finished: false,
+
+        resultadoA: null,
+
+        resultadoB: null,
 
         createdAt:
           serverTimestamp()
