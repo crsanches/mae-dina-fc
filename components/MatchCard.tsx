@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+
 
 import { calculatePoints }
 from "../lib/calculatePoints";
@@ -389,14 +389,11 @@ export default function MatchCard({
           <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
 
             
-              <img
-              src={`/api/image-proxy?url=${encodeURIComponent(emojiA)}`}
-              alt={teamA}
-              width={40}
-              height={40}
-              className="object-contain"
-          
-            />
+          <img
+            src={emojiA}
+            alt={teamA}
+            className="w-10 h-10 object-contain"
+          />
           </div>
 
         
@@ -514,12 +511,10 @@ export default function MatchCard({
           <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
 
           <img
-  src={`/api/image-proxy?url=${encodeURIComponent(emojiB)}`}
-              alt={teamB}
-              width={40}
-              height={40}
-              className="object-contain"
-            />
+            src={emojiB}
+            alt={teamB}
+            className="w-10 h-10 object-contain"
+          />
 
           </div>
 

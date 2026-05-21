@@ -190,12 +190,12 @@ const games = [
     teamA: "Cruzeiro",
 
     emojiA:
-      "https://img.sofascore.app/api/v1/team/1954/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Cruzeiro/logo.png",
 
     teamB: "Santos",
 
     emojiB:
-      "https://img.sofascore.app/api/v1/team/1968/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Santos/logo.png",
 
     phase: "Brasileirão",
 
@@ -207,12 +207,12 @@ const games = [
     teamA: "Internacional",
 
     emojiA:
-      "https://img.sofascore.app/api/v1/team/1966/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Internacional/logo.png",
 
     teamB: "Athletico-PR",
 
     emojiB:
-      "https://img.sofascore.app/api/v1/team/1967/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Athletico%20Paranaense/logo.png",
 
     phase: "Brasileirão",
 
@@ -224,12 +224,12 @@ const games = [
     teamA: "São Paulo",
 
     emojiA:
-      "https://img.sofascore.app/api/v1/team/1981/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Sao%20Paulo/logo.png",
 
     teamB: "Vasco",
 
     emojiB:
-      "https://img.sofascore.app/api/v1/team/1974/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Vasco/logo.png",
 
     phase: "Brasileirão",
 
@@ -241,12 +241,12 @@ const games = [
     teamA: "Palmeiras",
 
     emojiA:
-      "https://img.sofascore.app/api/v1/team/1963/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Palmeiras/logo.png",
 
     teamB: "Vitória",
 
     emojiB:
-      "https://img.sofascore.app/api/v1/team/1979/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Vitoria/logo.png",
 
     phase: "Brasileirão",
 
@@ -258,12 +258,12 @@ const games = [
     teamA: "Grêmio",
 
     emojiA:
-      "https://img.sofascore.app/api/v1/team/5926/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Gremio/logo.png",
 
     teamB: "Flamengo",
 
     emojiB:
-      "https:/img.sofascore.app/api/v1/team/5981/image",
+      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Flamengo/logo.png",
 
     phase: "Brasileirão",
 
