@@ -3,27 +3,27 @@ const path = require("path");
 const { execSync } = require("child_process");
 
 const times = [
-  { nome: "vitoria", id: 1972 },
-  { nome: "internacional", id: 1966 },
-  { nome: "sao-paulo", id: 312545 },
-  { nome: "botafogo", id: 1958 },
-  { nome: "gremio", id: 5926 },
-  { nome: "santos", id: 1968 },
-  { nome: "mirassol", id: 22032 },
-  { nome: "fluminense", id: 1961 },
-  { nome: "flamengo", id: 5981 },
-  { nome: "palmeiras", id: 1963 },
-  { nome: "remo", id: 6408 },
-  { nome: "athletico-pr", id: 1967 },
-  { nome: "cruzeiro", id: 1954 },
-  { nome: "chapecoense", id: 21845 },
-  { nome: "corinthians", id: 1957 },
-  { nome: "atletico-mg", id: 1977 },
-  { nome: "vasco", id: 1974 },
-  { nome: "bragantino", id: 1999 },
-  { nome: "coritiba", id: 1982 },
-  { nome: "bahia", id: 1955 },
-];
+    { nome: "vitoria", id: 1962 },
+    { nome: "internacional", id: 1966 },
+    { nome: "sao-paulo", id: 312545 },
+    { nome: "botafogo", id: 1958 },
+    { nome: "gremio", id: 5926 },
+    { nome: "santos", id: 1968 },
+    { nome: "mirassol", id: 21982 },
+    { nome: "fluminense", id: 1961 },
+    { nome: "flamengo", id: 5981 },
+    { nome: "palmeiras", id: 1963 },
+    { nome: "remo", id: 2012 },
+    { nome: "athletico-pr", id: 1967 },
+    { nome: "cruzeiro", id: 1954 },
+    { nome: "chapecoense", id: 21845 },
+    { nome: "corinthians", id: 1957 },
+    { nome: "atletico-mg", id: 1977 },
+    { nome: "vasco", id: 1974 },
+    { nome: "bragantino", id: 1999 },
+    { nome: "coritiba", id: 1982 },
+    { nome: "bahia", id: 1955 },
+  ];
 
 const pasta = path.join(__dirname, "public", "logos");
 
