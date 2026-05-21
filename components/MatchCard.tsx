@@ -386,15 +386,24 @@ export default function MatchCard({
 
         <div className="text-center w-20">
 
-          <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
+        <div className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
+            style={{
+              width: "52px",
+              height: "52px"
+            }}
+            >
 
-            
-          <img
-            src={emojiA}
-            alt={teamA}
-            className="w-10 h-10 object-contain"
-          />
-          </div>
+                <img
+                src={emojiA}
+                alt={teamA}
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  objectFit: "contain"
+                }}
+              />
+
+</div>
 
         
 
@@ -508,12 +517,21 @@ export default function MatchCard({
 
         <div className="text-center w-20">
 
-          <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
+        <div className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
+            style={{
+              width: "52px",
+              height: "52px"
+            }}
+            >
 
           <img
             src={emojiB}
             alt={teamB}
-            className="w-10 h-10 object-contain"
+            style={{
+              width: "42px",
+              height: "42px",
+              objectFit: "contain"
+            }}
           />
 
           </div>

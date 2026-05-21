@@ -185,92 +185,46 @@ const games = [
 */
 
 const games = [
-
   {
     teamA: "Cruzeiro",
-
-    emojiA:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Cruzeiro/logo.png",
-
+    emojiA: "https://api.sofascore.app/api/v1/team/1954/image",
     teamB: "Santos",
-
-    emojiB:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Santos/logo.png",
-
+    emojiB: "https://api.sofascore.app/api/v1/team/1968/image",
     phase: "Brasileirão",
-
-    matchDate:
-      "2026-05-23T18:30"
+    matchDate: "2026-05-23T18:30"
   },
-
   {
     teamA: "Internacional",
-
-    emojiA:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Internacional/logo.png",
-
+    emojiA: "https://api.sofascore.app/api/v1/team/1966/image",
     teamB: "Athletico-PR",
-
-    emojiB:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Athletico%20Paranaense/logo.png",
-
+    emojiB: "https://api.sofascore.app/api/v1/team/1967/image",
     phase: "Brasileirão",
-
-    matchDate:
-      "2026-05-23T18:30"
+    matchDate: "2026-05-23T18:30"
   },
-
   {
     teamA: "São Paulo",
-
-    emojiA:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Sao%20Paulo/logo.png",
-
+    emojiA: "https://api.sofascore.app/api/v1/team/312545/image",
     teamB: "Vasco",
-
-    emojiB:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Vasco/logo.png",
-
+    emojiB: "https://api.sofascore.app/api/v1/team/1974/image",
     phase: "Brasileirão",
-
-    matchDate:
-      "2026-05-23T21:00"
+    matchDate: "2026-05-23T21:00"
   },
-
   {
     teamA: "Palmeiras",
-
-    emojiA:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Palmeiras/logo.png",
-
+    emojiA: "https://api.sofascore.app/api/v1/team/1963/image",
     teamB: "Vitória",
-
-    emojiB:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Vitoria/logo.png",
-
+    emojiB: "https://api.sofascore.app/api/v1/team/1972/image",
     phase: "Brasileirão",
-
-    matchDate:
-      "2026-05-24T11:00"
+    matchDate: "2026-05-24T11:00"
   },
-
   {
     teamA: "Grêmio",
-
-    emojiA:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Gremio/logo.png",
-
+    emojiA: "https://api.sofascore.app/api/v1/team/5926/image",
     teamB: "Flamengo",
-
-    emojiB:
-      "https://raw.githubusercontent.com/luizdepra/have-fun/master/football-teams/Brazil/Flamengo/logo.png",
-
+    emojiB: "https://api.sofascore.app/api/v1/team/5981/image",
     phase: "Brasileirão",
-
-    matchDate:
-      "2026-05-24T16:00"
+    matchDate: "2026-05-24T16:00"
   }
-
 ];
 
 async function importGames() {
