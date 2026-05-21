@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { calculatePoints }
 from "../lib/calculatePoints";
 
@@ -21,6 +23,7 @@ import {
 } from "firebase/firestore";
 
 type Props = {
+
   teamA: string;
   teamB: string;
 
@@ -31,6 +34,7 @@ type Props = {
   resultadoB?: number;
 
   matchDate: string;
+
 };
 
 export default function MatchCard({
@@ -56,59 +60,59 @@ export default function MatchCard({
 
   const [salvo, setSalvo] =
     useState(false);
-  
+
   const [saving, setSaving] =
     useState(false);
 
   const [points, setPoints] =
     useState(0);
 
-    const [alreadyBet, setAlreadyBet] =
+  const [alreadyBet, setAlreadyBet] =
     useState(false);
 
-    const currentTime =
+  const [isEditing, setIsEditing] =
+    useState(false);
+
+  const currentTime =
     new Date();
-
-    const [isEditing, setIsEditing] =
-  useState(false);
-
- 
 
   async function salvarPalpite() {
+
     const gameDate =
-    new Date(matchDate);
+      new Date(matchDate);
 
-  const now =
-    new Date();
+    const now =
+      new Date();
 
-  const difference =
-    gameDate.getTime() -
-    now.getTime();
+    const difference =
+      gameDate.getTime() -
+      now.getTime();
 
-  const oneHour =
-    1000 * 60 * 60;
+    const oneHour =
+      1000 * 60 * 60;
 
-  const isLocked =
-    difference <= oneHour;
+    const isLocked =
+      difference <= oneHour;
 
-  if (isLocked) {
+    if (isLocked) {
 
-    alert(
-      "Apostas encerradas 😥"
-    );
+      alert(
+        "Apostas encerradas 😥"
+      );
 
-    return;
+      return;
 
-  } 
-  
+    }
+
     if (saving) {
       return;
     }
-    
+
     setSaving(true);
 
     const userName =
       auth.currentUser?.displayName;
+
     const user =
       auth.currentUser;
 
@@ -117,44 +121,40 @@ export default function MatchCard({
       alert(
         "Faça login primeiro 😄"
       );
+
       return;
+
     }
 
     if (!user) {
-
       return;
-    
     }
-    
+
     const userRef =
       doc(
         db,
         "users",
         user.uid
       );
-    
+
     const userSnap =
       await getDoc(userRef);
-    
-    if (
-      !userSnap.exists()
-    ) {
-    
+
+    if (!userSnap.exists()) {
+
       alert(
         "Usuário sem grupo 😥"
       );
-    
+
       return;
-    
+
     }
-    
+
     const userData =
       userSnap.data();
-      console.log(userData);
-    
-      const groupId =
+
+    const groupId =
       userData.activeGroupId;
-      //userData.groupId;
 
     const calculatedPoints =
 
@@ -177,136 +177,136 @@ export default function MatchCard({
 
         : 0;
 
-        const betId =
-        `${groupId}-${userName}-${teamA}-${teamB}`;
+    const betId =
+      `${groupId}-${userName}-${teamA}-${teamB}`;
 
-        try {
+    try {
 
-          await setDoc(
-            doc(db, "bets", betId),
-            {
-        
-              userName,
-        
-              match:
-                `${teamA} x ${teamB}`,
-        
-              golsA,
-              golsB,
-        
-              points:
-                calculatedPoints,
-        
-              createdAt:
-                serverTimestamp(),
-        
-              groupId
-        
-            }
-          );
-        
-          setPoints(calculatedPoints);
-        
-          setAlreadyBet(true);
-        
-          setIsEditing(false);
-        
-          window.dispatchEvent(
-            new Event("betSaved")
-          );
-        
-          setSalvo(true);
-        
-          setTimeout(() => {
-        
-            setSalvo(false);
-        
-          }, 2000);
-        
-        } catch (error) {
-        
-          console.error(error);
-        
-          alert(
-            "Erro ao salvar palpite 😥"
-          );
-        
-        } finally {
-        
-          setSaving(false);
-        
+      await setDoc(
+        doc(db, "bets", betId),
+        {
+
+          userName,
+
+          match:
+            `${teamA} x ${teamB}`,
+
+          golsA,
+          golsB,
+
+          points:
+            calculatedPoints,
+
+          createdAt:
+            serverTimestamp(),
+
+          groupId
+
         }
+      );
+
+      setPoints(calculatedPoints);
+
+      setAlreadyBet(true);
+
+      setIsEditing(false);
+
+      window.dispatchEvent(
+        new Event("betSaved")
+      );
+
+      setSalvo(true);
+
+      setTimeout(() => {
+
+        setSalvo(false);
+
+      }, 2000);
+
+    } catch (error) {
+
+      console.error(error);
+
+      alert(
+        "Erro ao salvar palpite 😥"
+      );
+
+    } finally {
+
+      setSaving(false);
+
+    }
+
   }
- 
 
   useEffect(() => {
 
     const unsubscribe =
       auth.onAuthStateChanged(
         async (user) => {
-  
+
           if (!user) {
             return;
           }
-  
+
           await user.reload();
 
-const updatedUser =
-  auth.currentUser;
+          const updatedUser =
+            auth.currentUser;
 
-const userName =
-  updatedUser?.displayName;
+          const userName =
+            updatedUser?.displayName;
 
-if (!userName) {
-  return;
-}
-  
+          if (!userName) {
+            return;
+          }
+
           const userRef =
             doc(
               db,
               "users",
               user.uid
             );
-  
+
           const userSnap =
             await getDoc(userRef);
-  
+
           if (!userSnap.exists()) {
             return;
           }
-  
+
           const groupId =
-            userSnap.data().activeGroupId
-  
+            userSnap.data().activeGroupId;
+
           const betId =
             `${groupId}-${userName}-${teamA}-${teamB}`;
-  
+
           const betRef =
             doc(db, "bets", betId);
-  
+
           const snapshot =
             await getDoc(betRef);
-  
+
           if (snapshot.exists()) {
-  
+
             const data =
               snapshot.data();
-              
-  
+
             setGolsA(data.golsA);
-  
+
             setGolsB(data.golsB);
-  
+
             setAlreadyBet(true);
-  
+
           }
-  
+
         }
       );
-  
+
     return () => unsubscribe();
-  
+
   }, [teamA, teamB]);
+
   const gameDate =
     new Date(matchDate);
 
@@ -333,23 +333,32 @@ if (!userName) {
     if (isLocked) {
 
       return "🔒 Apostas encerradas";
-    
+
     }
 
     const totalMinutes =
-
       Math.floor(
         difference / 1000 / 60
       );
 
-    const hours =
-
+    const days =
       Math.floor(
-        totalMinutes / 60
+        totalMinutes / 1440
+      );
+
+    const hours =
+      Math.floor(
+        (totalMinutes % 1440) / 60
       );
 
     const minutes =
       totalMinutes % 60;
+
+    if (days > 0) {
+
+      return `⏰ Fecha em ${days}d ${hours}h`;
+
+    }
 
     if (hours > 0) {
 
@@ -357,7 +366,7 @@ if (!userName) {
 
     }
 
-    return `⏰ Fecha em ${minutes} min`;
+    return `⏰ Fecha em ${minutes}min`;
 
   }
 
@@ -377,9 +386,19 @@ if (!userName) {
 
         <div className="text-center w-20">
 
-          <p className="text-2xl mb-1">
-            {emojiA}
-          </p>
+          <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
+
+            <Image
+              src={emojiA}
+              alt={teamA}
+              width={40}
+              height={40}
+              className="object-contain"
+          
+            />
+          </div>
+
+        
 
           <p className="font-bold text-sm">
             {teamA}
@@ -389,111 +408,119 @@ if (!userName) {
 
         <div className="flex items-center gap-2">
 
-        <input
-  type="number"
-  min={0}
-  max={99}
-  value={golsA}
+          <input
+            type="number"
+            min={0}
+            max={99}
+            value={golsA}
 
-  onFocus={(e) =>
-    e.target.select()
-  }
+            onFocus={(e) =>
+              e.target.select()
+            }
 
-  onChange={(e) => {
+            onChange={(e) => {
 
-    const value =
-      e.target.value;
+              const value =
+                e.target.value;
 
-    if (value === "") {
+              if (value === "") {
 
-      setGolsA("");
+                setGolsA("");
 
-      return;
+                return;
 
-    }
+              }
 
-    const number =
-      Number(value);
+              const number =
+                Number(value);
 
-    if (
-      number >= 0 &&
-      number <= 99
-    ) {
+              if (
+                number >= 0 &&
+                number <= 99
+              ) {
 
-      setGolsA(value);
+                setGolsA(value);
 
-    }
+              }
 
-  }}
+            }}
 
-  className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
+            className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
 
-  disabled={
-    isLocked || (
-      alreadyBet &&
-      !isEditing
-    )
-  }
-/>
+            disabled={
+              isLocked || (
+                alreadyBet &&
+                !isEditing
+              )
+            }
+          />
 
-<span className="text-zinc-500 text-lg">
-  x
-</span>
+          <span className="text-zinc-500 text-lg">
+            x
+          </span>
 
+          <input
+            type="number"
+            min={0}
+            max={99}
+            value={golsB}
 
-<input
-  type="number"
-  min={0}
-  max={99}
-  value={golsB}
+            onFocus={(e) =>
+              e.target.select()
+            }
 
-  onFocus={(e) =>
-    e.target.select()
-  }
+            onChange={(e) => {
 
-  
-  onChange={(e) => {
+              const value =
+                e.target.value;
 
-    const value =
-      e.target.value;
+              if (value === "") {
 
-    if (value === "") {
+                setGolsB("");
 
-      setGolsB("");
+                return;
 
-      return;
+              }
 
-    }
+              const number =
+                Number(value);
 
-    const number =
-      Number(value);
+              if (
+                number >= 0 &&
+                number <= 99
+              ) {
 
-    if (
-      number >= 0 &&
-      number <= 99
-    ) {
+                setGolsB(value);
 
-      setGolsB(value);
+              }
 
-    }
+            }}
 
-  }}
-  className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
-  disabled={
-    isLocked || (
-      alreadyBet &&
-      !isEditing
-    )
-  }
-/>
+            className="w-12 h-12 bg-zinc-950 rounded-lg text-center text-xl"
+
+            disabled={
+              isLocked || (
+                alreadyBet &&
+                !isEditing
+              )
+            }
+          />
 
         </div>
 
         <div className="text-center w-20">
 
-          <p className="text-2xl mb-1">
-            {emojiB}
-          </p>
+          <div className="w-12 h-12 bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center">
+
+            <img
+              src={emojiB}
+              alt={teamB}
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+
+          </div>
 
           <p className="font-bold text-sm">
             {teamB}
@@ -505,56 +532,62 @@ if (!userName) {
 
       <div className="mt-3 flex justify-between items-center">
 
-      <span
-        className={`${
-          isLocked
-            ? "text-red-600 text-sm font-bold"
-            : "text-zinc-400 text-xs"
-        }`}
-      >
-        {getRemainingTime()}
-      </span>
+        <span
+          className={`${
+            isLocked
+              ? "text-red-600 text-sm font-bold"
+              : "text-zinc-400 text-xs"
+          }`}
+        >
+          {getRemainingTime()}
+        </span>
 
         <div className="flex gap-2">
 
-{alreadyBet && !isEditing && !isLocked && (
+          {alreadyBet && !isEditing && !isLocked && (
 
-  <button
-    onClick={() =>  
-      setIsEditing(true)
-    }
-    className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
-    disabled={
-      isLocked ||
-      saving
-    }
-  >
-    clique aqui para permitir alteração
-  </button>
+            <button
+              onClick={() =>
+                setIsEditing(true)
+              }
 
-)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-3 py-2 rounded-lg text-sm"
 
-{(!alreadyBet || isEditing) && !salvo && (
+              disabled={
+                isLocked ||
+                saving
+              }
+            >
+              clique aqui para permitir alteração
+            </button>
 
-  <button
-    onClick={salvarPalpite}
-    className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
-      isLocked
-        ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
-        : "bg-green-500 hover:bg-green-600 text-black"
-    }`}
-    disabled={isLocked}
-  >
-    {saving
-  ? "⏳ Salvando..."
-  : alreadyBet
-    ? "💾 Salvar alteração"
-    : "🎯 Salvar palpite"}
-  </button>
+          )}
 
-)}
+          {(!alreadyBet || isEditing) && !salvo && (
 
-</div>
+            <button
+              onClick={salvarPalpite}
+
+              className={`px-3 py-2 rounded-lg font-bold text-sm transition ${
+                isLocked
+                  ? "bg-zinc-700 text-zinc-400 cursor-not-allowed"
+                  : "bg-green-500 hover:bg-green-600 text-black"
+              }`}
+
+              disabled={isLocked}
+            >
+
+              {saving
+                ? "⏳ Salvando..."
+                : alreadyBet
+                ? "💾 Salvar alteração"
+                : "🎯 Salvar palpite"}
+
+            </button>
+
+          )}
+
+        </div>
 
       </div>
 

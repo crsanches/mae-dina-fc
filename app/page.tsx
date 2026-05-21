@@ -602,58 +602,74 @@ useEffect(() => {
                 className="mb-5"
               >
 
-                <h3 className="text-base font-black mb-3 text-red-400">
-                  {fase}
-                </h3>
+                  <h3 className="text-base font-black mb-3 text-red-400">
+                    {fase}
+                  </h3>
 
-                <div className="space-y-3">
+                  <div className="space-y-3">
+                
+                    {jogosDaFase.map((jogo) => (
 
-                  {jogosDaFase.map((jogo) => (
+                      <div
+                        key={`${jogo.teamA}-${jogo.teamB}`}
+                        className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3 flex justify-between items-center"
+                      >
 
-                    <div
-                      key={`${jogo.teamA}-${jogo.teamB}`}
-                      className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3 flex justify-between items-center"
-                    >
+                        <div>
 
-                      <div>
+                        <p className="font-bold text-sm flex items-center gap-2 flex-wrap">
 
-                        <p className="font-bold text-sm">
+                        <span className="flex items-center gap-1">
 
-                          {jogo.emojiA}
-                          {" "}
-                          {jogo.teamA}
+                          <img
+                            src={jogo.emojiA}
+                            alt={jogo.teamA}
+                            className="w-5 h-5 object-contain inline-block"
+                          />
 
-                          {" x "}
+                          <span>{jogo.teamA}</span>
 
-                          {jogo.emojiB}
-                          {" "}
-                          {jogo.teamB}
+                        </span>
+
+                        <span>x</span>
+
+                        <span className="flex items-center gap-1">
+
+                          <img
+                            src={jogo.emojiB}
+                            alt={jogo.teamB}
+                            className="w-5 h-5 object-contain inline-block"
+                          />
+
+                          <span>{jogo.teamB}</span>
+
+                        </span>
 
                         </p>
 
-                        <p className="text-zinc-400 text-xs">
-                          🔒 Encerrado
+                          <p className="text-zinc-400 text-xs">
+                            🔒 Encerrado
+                          </p>
+
+                        </div>
+
+                        <p className="font-black text-lg">
+                          {jogo.resultadoA}
+                          {" x "}
+                          {jogo.resultadoB}
                         </p>
 
                       </div>
 
-                      <p className="font-black text-lg">
-                        {jogo.resultadoA}
-                        {" x "}
-                        {jogo.resultadoB}
-                      </p>
+                    ))}
 
-                    </div>
-
-                  ))}
+                  </div>
 
                 </div>
 
-              </div>
+            ))}
 
-          ))}
-
-        </div>
+          </div>
 
         <div className="min-h-screen flex flex-col">
         {/* conteúdo da página - logo bazaglia sanches */}
