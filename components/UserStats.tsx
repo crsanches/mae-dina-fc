@@ -120,8 +120,8 @@ export default function UserStats() {
 
         if (
           game.match === bet.match &&
-          game.resultadoA !== undefined &&
-          game.resultadoB !== undefined
+          game.resultadoA != null &&
+          game.resultadoB != null
         ) {
 
           points =
@@ -171,8 +171,8 @@ export default function UserStats() {
 
           if (
             game.match === bet.match &&
-            game.resultadoA !== undefined &&
-            game.resultadoB !== undefined
+            game.resultadoA != null &&
+            game.resultadoB != null
           ) {
 
             resultadoOficial =

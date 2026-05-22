@@ -9,8 +9,13 @@ import {
   collection,
   getDocs,
   updateDoc,
-  doc
+  doc,
+  query,
+  where
 } from "firebase/firestore";
+
+import { calculatePoints }
+from "../../../lib/calculatePoints";
 
 type Game = {
   id: string;
@@ -75,13 +80,13 @@ export default function AdminResultsPage() {
   useEffect(() => {
 
     const timeout = setTimeout(() => {
-  
+
       carregarJogos();
-  
+
     }, 0);
-  
+
     return () => clearTimeout(timeout);
-  
+
   }, []);
 
   async function salvarResultado(
@@ -90,6 +95,7 @@ export default function AdminResultsPage() {
     resultadoB: number
   ) {
 
+    // salva resultado oficial
     await updateDoc(
       doc(db, "games", gameId),
       {
@@ -98,7 +104,66 @@ export default function AdminResultsPage() {
       }
     );
 
-    alert("Resultado salvo 😎");
+    // encontra o jogo
+    const game =
+      games.find(
+        (g) => g.id === gameId
+      );
+
+    if (!game) {
+
+      alert("Jogo não encontrado 😥");
+
+      return;
+
+    }
+
+    // busca apostas do jogo
+    const match =
+      `${game.teamA} x ${game.teamB}`;
+
+    const betsQuery =
+      query(
+        collection(db, "bets"),
+        where("match", "==", match)
+      );
+
+    const betsSnapshot =
+      await getDocs(betsQuery);
+
+    // recalcula pontos
+    for (const betDoc of betsSnapshot.docs) {
+
+      const bet =
+        betDoc.data();
+
+      const points =
+        calculatePoints({
+
+          apostaA:
+            Number(bet.golsA),
+
+          apostaB:
+            Number(bet.golsB),
+
+          resultadoA,
+
+          resultadoB
+
+        });
+
+      await updateDoc(
+        doc(db, "bets", betDoc.id),
+        {
+          points
+        }
+      );
+
+    }
+
+    alert(
+      "Resultado salvo e apostas atualizadas 😎"
+    );
 
     carregarJogos();
 
@@ -109,23 +174,24 @@ export default function AdminResultsPage() {
     <main className="min-h-screen bg-zinc-950 text-white p-6">
 
       <div className="max-w-4xl mx-auto">
-      <div className="mb-6 flex gap-3">
 
-  <Link
-    href="/admin/dashboard"
-    className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
-  >
-    ← Dashboard
-  </Link>
+        <div className="mb-6 flex gap-3">
 
-  <Link
-    href="/"
-    className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-5 py-3 rounded-2xl font-bold"
-  >
-    ⚽ Bolão
-  </Link>
+          <Link
+            href="/admin/dashboard"
+            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+          >
+            ← Dashboard
+          </Link>
 
-</div>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-5 py-3 rounded-2xl font-bold"
+          >
+            ⚽ Bolão
+          </Link>
+
+        </div>
 
         <h1 className="text-4xl font-black mb-8">
           🏆 Resultados Oficiais

@@ -296,8 +296,8 @@ export default function AnalyticsPage() {
 
           if (
             game.match === bet.match &&
-            game.resultadoA !== undefined &&
-            game.resultadoB !== undefined
+            game.resultadoA != null &&
+            game.resultadoB != null
           ) {
 
             const points =
@@ -470,8 +470,8 @@ export default function AnalyticsPage() {
             doc.data();
 
           return (
-            game.resultadoA !== undefined &&
-            game.resultadoB !== undefined
+            game.resultadoA != null &&
+            game.resultadoB != null
           );
 
         })
@@ -503,8 +503,8 @@ export default function AnalyticsPage() {
 
             if (
               bet.match === game.match &&
-              game.resultadoA !== undefined &&
-              game.resultadoB !== undefined
+              game.resultadoA != null &&
+              game.resultadoB != null
             ) {
 
               if (

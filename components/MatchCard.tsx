@@ -158,8 +158,8 @@ export default function MatchCard({
 
     const calculatedPoints =
 
-      resultadoA !== undefined &&
-      resultadoB !== undefined
+      resultadoA != null &&
+      resultadoB != null
 
         ? calculatePoints({
 
@@ -615,8 +615,8 @@ export default function MatchCard({
 
       )}
 
-      {resultadoA !== undefined &&
-       resultadoB !== undefined && (
+      {resultadoA != null &&
+       resultadoB != null && (
 
         <div className="mt-3 pt-3 border-t border-zinc-700">
 

@@ -158,8 +158,8 @@ export default function BetTable() {
           gameDoc.data();
 
         if (
-          game.resultadoA !== undefined &&
-          game.resultadoB !== undefined
+          game.resultadoA != null &&
+          game.resultadoB != null
         ) {
 
           calculatedPoints =

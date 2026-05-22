@@ -117,8 +117,8 @@ const betsSnapshot =
       
           if (
             game.match === bet.match &&
-            game.resultadoA !== undefined &&
-            game.resultadoB !== undefined
+            game.resultadoA != null &&
+            game.resultadoB != null
           ) {
       
             calculatedPoints =

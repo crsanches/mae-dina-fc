@@ -8,6 +8,9 @@ import {
   doc
 } from "firebase/firestore";
 
+import { calculatePoints }
+from "@/lib/calculatePoints";
+
 function normalize(text: string) {
 
     return text
@@ -135,6 +138,52 @@ export async function GET() {
           }
 
         );
+
+      // 🔥 RECALCULAR APOSTAS
+
+const betsSnapshot =
+await adminDb
+  .collection("bets")
+  .where(
+    "match",
+    "==",
+    `${localGame.data().teamA} x ${localGame.data().teamB}`
+  )
+  .get();
+
+for (const betDoc of betsSnapshot.docs) {
+
+const bet = betDoc.data();
+
+const points =
+  calculatePoints({
+
+    apostaA:
+      Number(bet.golsA),
+
+    apostaB:
+      Number(bet.golsB),
+
+    resultadoA:
+      Number(apiGame.intHomeScore),
+
+    resultadoB:
+      Number(apiGame.intAwayScore)
+
+  });
+
+await adminDb
+  .collection("bets")
+  .doc(betDoc.id)
+  .update({
+    points
+  });
+
+console.log(
+  `✅ ${bet.userName}: ${points} pontos`
+);
+
+}
 
       }
 
