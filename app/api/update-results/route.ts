@@ -1,12 +1,7 @@
 import { NextResponse } from "next/server";
 //import { db } from "@/lib/firebase";
 import { adminDb } from "@/lib/firebaseAdmin";
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc
-} from "firebase/firestore";
+
 
 import { calculatePoints }
 from "@/lib/calculatePoints";
@@ -53,22 +48,22 @@ export async function GET() {
 
     const hoje = new Date();
 
-const recentGames = (data.events || []).filter(
-  (game: any) => {
-
-    const gameDate =
-      new Date(game.dateEvent);
-
-    const diffDays =
-      Math.abs(
-        hoje.getTime() -
-        gameDate.getTime()
-      ) / (1000 * 60 * 60 * 24);
-
-    return diffDays <= 3;
-
-  }
-);
+    const recentGames = (data.events || []).filter(
+      (game: { dateEvent: string }) => {
+    
+        const gameDate =
+          new Date(game.dateEvent);
+    
+        const diffDays =
+          Math.abs(
+            hoje.getTime() -
+            gameDate.getTime()
+          ) / (1000 * 60 * 60 * 24);
+    
+        return diffDays <= 3;
+    
+      }
+    );
 
 console.log(
   "JOGOS RECENTES:",
