@@ -35,7 +35,7 @@ function normalize(text: string) {
 }
 
 export async function GET() {
-
+  console.log("🔥 NOVA VERSAO DA API 🔥");
   try {
 
     const response = await fetch(
