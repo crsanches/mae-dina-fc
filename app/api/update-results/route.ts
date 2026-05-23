@@ -13,17 +13,31 @@ from "@/lib/calculatePoints";
 
 function normalize(text: string) {
 
-    return text
-  
-      .normalize("NFD")
-  
-      .replace(/[\u0300-\u036f]/g, "")
-  
-      .toLowerCase()
-  
-      .trim();
-  
-  }
+  return text
+
+    .normalize("NFD")
+
+    .replace(/[\u0300-\u036f]/g, "")
+
+    .toLowerCase()
+
+    .replace(/-/g, " ")
+
+    .replace(/\bec\b/g, "")
+
+    .replace(/\s+/g, " ")
+
+    .replace("athletico paranaense", "athletico pr")
+
+    .replace("atletico mineiro", "atletico mg")
+
+    .replace("vasco da gama", "vasco")
+
+    .replace("ec vitoria", "vitoria")
+
+    .trim();
+
+}
 
 export async function GET() {
 
@@ -36,6 +50,30 @@ export async function GET() {
 
     const data = await response.json();
     console.log(data);
+
+    const hoje = new Date();
+
+const recentGames = (data.events || []).filter(
+  (game: any) => {
+
+    const gameDate =
+      new Date(game.dateEvent);
+
+    const diffDays =
+      Math.abs(
+        hoje.getTime() -
+        gameDate.getTime()
+      ) / (1000 * 60 * 60 * 24);
+
+    return diffDays <= 3;
+
+  }
+);
+
+console.log(
+  "JOGOS RECENTES:",
+  recentGames.length
+);
 
     const gamesSnapshot =
     await adminDb
@@ -53,7 +91,7 @@ export async function GET() {
       
       });
 
-    for (const apiGame of data.events || []) {
+      for (const apiGame of recentGames) {
 
     
 
@@ -101,6 +139,27 @@ export async function GET() {
             );
           
           });
+
+
+          if (localGame) {
+
+            console.log(
+              "✅ MATCH:",
+              apiGame.strHomeTeam,
+              "x",
+              apiGame.strAwayTeam
+            );
+          
+          } else {
+          
+            console.log(
+              "❌ SEM MATCH:",
+              apiGame.strHomeTeam,
+              "x",
+              apiGame.strAwayTeam
+            );
+          
+          }
 
       if (!localGame) continue;
       console.log(
