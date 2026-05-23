@@ -72,7 +72,7 @@ export async function GET() {
             gameDate.getTime()
           ) / (1000 * 60 * 60 * 24);
     
-        return diffDays <= 200;
+        return diffDays <= 7;
     
       }
     );
