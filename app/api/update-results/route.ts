@@ -6,7 +6,9 @@ import { adminDb } from "@/lib/firebaseAdmin";
 import { calculatePoints }
 from "@/lib/calculatePoints";
 
-function normalize(text: string) {
+function normalize(text?: string) {
+
+  if (!text) return "";
 
   return text
 
@@ -261,7 +263,7 @@ console.log(
 
   } catch (error) {
 
-    console.error(error);
+    console.error("ERRO UPDATE RESULTS:", error);
 
     return NextResponse.json({
 
