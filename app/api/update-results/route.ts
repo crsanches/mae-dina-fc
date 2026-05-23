@@ -154,7 +154,6 @@ console.log(
           
           });
 
-
           if (localGame) {
 
             console.log(
