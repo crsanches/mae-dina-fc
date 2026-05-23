@@ -38,6 +38,9 @@ type BetHistory = {
 
 export default function UserStats() {
 
+  const [expandido, setExpandido] =
+  useState(false);
+
   const [data, setData] =
     useState<UserData>({
       position: 0,
@@ -328,11 +331,38 @@ export default function UserStats() {
 
       <div className="mt-6">
 
-        <h3 className="text-lg font-black mb-3">
-          🎯 Seus Palpites
-        </h3>
+      <button
+  onClick={() =>
+    setExpandido(!expandido)
+  }
+  className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition rounded-2xl p-4 mb-3"
+>
 
-        <div className="space-y-3">
+  <div className="text-left">
+
+    <h3 className="text-lg font-black">
+      🎯 Seus Palpites
+    </h3>
+
+    <p className="text-zinc-400 text-sm">
+      {betHistory.length} apostas registradas
+    </p>
+
+  </div>
+
+  <div className="text-2xl">
+
+  {expandido
+  ? "🔮 Fechar previsões"
+  : "🔮 Ver minhas tragédias"}
+
+  </div>
+
+</button>
+
+{expandido && (
+
+<div className="space-y-3">
 
           {betHistory.length === 0 && (
 
@@ -396,7 +426,7 @@ export default function UserStats() {
           ))}
 
         </div>
-
+)}
       </div>
 
     </div>

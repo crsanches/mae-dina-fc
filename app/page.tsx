@@ -11,6 +11,7 @@ import Link from "next/link";
 import AnalyticsDashboard
 from "../components/AnalyticsDashboard";
 import Footer from '../components/footer'
+import CentralCorneta from "../components/CentralCorneta";
 
 import GroupCard
 from "../components/GroupCard";
@@ -80,6 +81,12 @@ export default function Home() {
 
   const [jogos, setJogos] =
     useState<Game[]>([]);
+
+  const [ligaId, setLigaId] =
+    useState("");
+  
+  const [usuariosLiga, setUsuariosLiga] =
+    useState<any[]>([]);
 
   const [memeAleatorio, setMemeAleatorio] =
     useState("");
@@ -392,6 +399,77 @@ useEffect(() => {
 
 }, []);
 
+useEffect(() => {
+
+  const unsubscribe =
+    onAuthStateChanged(
+      auth,
+      async (user) => {
+
+        if (!user) return;
+
+        const userRef =
+          doc(
+            db,
+            "users",
+            user.uid
+          );
+
+        const userSnap =
+          await getDoc(userRef);
+
+        if (!userSnap.exists()) return;
+
+        const activeGroupId =
+          userSnap.data().activeGroupId;
+
+        if (!activeGroupId) return;
+
+        setLigaId(activeGroupId);
+
+        const usersSnapshot =
+          await getDocs(
+            collection(db, "users")
+          );
+
+        const membros =
+          usersSnapshot.docs
+
+            .map((userDoc) => {
+
+              const data =
+                userDoc.data();
+
+              return {
+
+                id: userDoc.id,
+
+                nome:
+                  data.displayName ||
+                  data.username ||
+                  "Jogador",
+
+                activeGroupId:
+                  data.activeGroupId,
+
+              };
+
+            })
+
+            .filter(
+              (usuario) =>
+                usuario.activeGroupId === activeGroupId
+            );
+
+        setUsuariosLiga(membros);
+
+      }
+    );
+
+  return () => unsubscribe();
+
+}, []);
+
 
   const jogosAbertos = jogos.filter((jogo) => {
 
@@ -530,46 +608,50 @@ useEffect(() => {
         {/* STATUS USUÁRIO */}
         <UserStats />
 
-
-        
-
-
         {/* RANKING */}
         <RealRanking />
+
+        {/* central da corneta */}
+         <CentralCorneta
+          ligaId={ligaId} 
+          usuarios={usuariosLiga}/>
+
+         {/* estatisticas da vergonha */}
         <AnalyticsDashboard/>
         
+         {/* central da corneta */}
+        <CentralCorneta
+          ligaId={ligaId} 
+          usuarios={usuariosLiga}/>
 
           <div className="text-5xl">
             🤓
           </div>
 
+
+          {/* memes inseridos aleatoriamente */}
           <div>
-
-            
-
             <p className="text-zinc-400 text-sm mt-1">
               Especialistas analisam suas tragédias futebolísticas 😄
             </p>
 
           </div>
 
-      
 
-
-        {/* MEME */}
+        {/* MEME zoera da rodada */}
         {automaticMeme && (
 
-  <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
+        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
 
-    {automaticMeme.image && (
+         {automaticMeme.image && (
 
-      <img
-        src={automaticMeme.image}
-        alt="Meme"
-        className="rounded-2xl mb-4 w-full"
-      />
+         <img
+            src={automaticMeme.image}
+            alt="Meme"
+            className="rounded-2xl mb-4 w-full"
+          />
 
-    )}
+        )}
 
     <p className="text-lg font-black">
 
