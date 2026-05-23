@@ -46,6 +46,11 @@ export default function CentralCorneta({
   usuarios,
 }) {
 
+
+
+    const [menuAbertoId, setMenuAbertoId] =
+    useState(null);
+
   const [mensagens, setMensagens] =
     useState([]);
 
@@ -177,79 +182,94 @@ export default function CentralCorneta({
 
   }
 
-  async function reagirMensagem(
-    mensagem,
-    emoji
-  ) {
+ async function reagirMensagem(
+  mensagem,
+  emoji
+) {
 
-    try {
+  try {
 
-      const usuarioAtual =
-        auth.currentUser;
+    const usuarioAtual =
+      auth.currentUser;
 
-      if (!usuarioAtual) return;
+    if (!usuarioAtual) return;
 
-      const reactions =
-        mensagem.reactions || {};
+    const reactions =
+      mensagem.reactions || {};
 
-      const novoObjeto = {};
+    const novoObjeto = {};
 
-      // remove reação anterior
-      Object.keys(reactions)
-        .forEach((key) => {
+    // remove reação antiga
+    Object.keys(reactions)
+      .forEach((key) => {
 
-        novoObjeto[key] =
-          reactions[key].filter(
-            (uid) =>
-              uid !==
-              usuarioAtual.uid
-          );
+      novoObjeto[key] =
+        reactions[key].filter(
+          (user) =>
+            user.uid !==
+            usuarioAtual.uid
+        );
+
+    });
+
+    // verifica se já reagiu
+    const jaReagiu =
+      reactions[emoji]?.some(
+        (user) =>
+          user.uid ===
+          usuarioAtual.uid
+      );
+
+    // adiciona nova reação
+    if (!jaReagiu) {
+
+      if (!novoObjeto[emoji]) {
+        novoObjeto[emoji] = [];
+      }
+
+      novoObjeto[emoji].push({
+
+        uid:
+          usuarioAtual.uid,
+
+        nome:
+          usuarioAtual.displayName ||
+
+          usuarioAtual.email ||
+
+          "Jogador"
 
       });
 
-      // verifica se já reagiu
-      const jaReagiu =
-        reactions[emoji]?.includes(
-          usuarioAtual.uid
-        );
-
-      // adiciona nova reação
-      if (!jaReagiu) {
-
-        if (!novoObjeto[emoji]) {
-          novoObjeto[emoji] = [];
-        }
-
-        novoObjeto[emoji].push(
-          usuarioAtual.uid
-        );
-
-      }
-
-      await updateDoc(
-
-        doc(
-          db,
-          "ligas",
-          ligaId,
-          "mensagens",
-          mensagem.id
-        ),
-
-        {
-          reactions:
-            novoObjeto
-        }
-
-      );
-
-    } catch (error) {
-
-      console.error(error);
-
     }
 
+    await updateDoc(
+
+      doc(
+        db,
+        "ligas",
+        ligaId,
+        "mensagens",
+        mensagem.id
+      ),
+
+      {
+        reactions:
+          novoObjeto
+      }
+
+    );
+
+    // FECHA MENU
+    setMenuAbertoId(null);
+
+  } catch (error) {
+
+    console.error(error);
+
   }
+
+}
 
   return (
 
@@ -351,17 +371,90 @@ export default function CentralCorneta({
             className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
           >
 
-            <div className="text-sm text-yellow-400 font-semibold mb-1">
+<div className="flex justify-between items-start gap-3 mb-2">
 
-              {"De: "}
-              {mensagem.autorNome}
+<div className="text-sm text-yellow-400 font-semibold">
 
-              {" →→→ "}
+  {"De: "}
+  {mensagem.autorNome}
 
-              {"Para: "}
-              {mensagem.destinoNome}
+  {" →→→ "}
 
-            </div>
+  {"Para: "}
+  {mensagem.destinoNome}
+
+</div>
+
+<div className="relative shrink-0">
+
+  <button
+    onClick={() =>
+
+      setMenuAbertoId(
+
+        menuAbertoId === mensagem.id
+          ? null
+          : mensagem.id
+
+      )
+
+    }
+    className="
+      bg-zinc-700 hover:bg-zinc-600
+      px-3 py-1 rounded-full
+      border border-zinc-600
+      text-sm flex items-center gap-2
+      transition-all whitespace-nowrap
+    "
+  >
+
+    😈 Reagir
+
+  </button>
+
+  {menuAbertoId === mensagem.id && (
+
+    <div
+      className="
+        absolute right-0 z-50 mt-2
+        bg-zinc-900 border
+        border-zinc-700
+        rounded-2xl p-2
+        flex flex-wrap gap-2
+        w-64 shadow-2xl
+      "
+    >
+
+      {reactionEmojis.map(
+        (emoji) => (
+
+        <button
+          key={emoji}
+          onClick={() =>
+            reagirMensagem(
+              mensagem,
+              emoji
+            )
+          }
+          className="
+            text-2xl hover:scale-125
+            transition-transform
+          "
+        >
+
+          {emoji}
+
+        </button>
+
+      ))}
+
+    </div>
+
+  )}
+
+</div>
+
+</div>
 
             <div className="text-white break-words">
 
@@ -371,74 +464,104 @@ export default function CentralCorneta({
 
             {/* REAÇÕES */}
 
-            <div className="flex flex-wrap gap-2 mt-4">
+{/* REAÇÕES EXISTENTES */}
 
-              {reactionEmojis.map(
-                (emoji) => {
+<div className="flex flex-wrap items-center gap-2 mt-4">
 
-                const total =
-                  mensagem
-                    .reactions?.[
-                      emoji
-                    ]?.length || 0;
+  {Object.entries(
+    mensagem.reactions || {}
+  ).map(([emoji, users]) => {
 
-                const usuarioAtual =
-                  auth.currentUser;
+    if (!users.length) return null;
 
-                const reagiu =
-                  mensagem
-                    .reactions?.[
-                      emoji
-                    ]?.includes(
-                      usuarioAtual?.uid
-                    );
+    const usuarioAtual =
+      auth.currentUser;
 
-                return (
+    const reagiu =
+      users.some(
+        (user) =>
+          user.uid ===
+          usuarioAtual?.uid
+      );
 
-                  <button
-                    key={emoji}
-                    onClick={() =>
-                      reagirMensagem(
-                        mensagem,
-                        emoji
-                      )
-                    }
-                    className={`
-                      px-3 py-1 rounded-full
-                      text-sm border
-                      transition-all
-                      duration-200
+    return (
 
-                      ${
-                        reagiu
+      <div
+        key={emoji}
+        className="relative group"
+      >
 
-                        ? `
-                          bg-yellow-500
-                          text-black
-                          border-yellow-400
-                          scale-105
-                        `
+        <button
+          onClick={() =>
+            reagirMensagem(
+              mensagem,
+              emoji
+            )
+          }
+          className={`
+            px-3 py-1 rounded-full
+            text-sm border
+            transition-all duration-200
 
-                        : `
-                          bg-zinc-700
-                          border-zinc-600
-                          hover:bg-zinc-600
-                        `
-                      }
-                    `}
-                  >
+            ${
+              reagiu
 
-                    {emoji}
-                    {" "}
-                    {total}
+              ? `
+              bg-zinc-600
+              border-zinc-500
+              `
 
-                  </button>
+              : `
+                bg-zinc-700
+                border-zinc-600
+                hover:bg-zinc-600
+              `
+            }
+          `}
+        >
 
-                );
+          {emoji}
+          {" "}
+          {users.length}
 
-              })}
+        </button>
 
-            </div>
+        {/* TOOLTIP */}
+
+        <div
+          className="
+            absolute bottom-full left-1/2
+            -translate-x-1/2 mb-2
+            hidden group-hover:flex
+            flex-col
+            bg-black text-white
+            text-xs rounded-lg
+            px-3 py-2
+            whitespace-nowrap
+            z-50
+            border border-zinc-700
+          "
+        >
+
+          {users.map((user) => (
+
+            <span key={user.uid}>
+
+              {user.nome}
+
+            </span>
+
+          ))}
+
+        </div>
+
+      </div>
+
+    );
+
+  })}
+
+</div>
 
           </div>
 
