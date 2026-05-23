@@ -26,19 +26,23 @@ function normalize(text?: string) {
 
     .trim();
 
-  const aliases: Record<string, string> = {
+  if (value === "athletico paranaense") {
+    value = "athletico pr";
+  }
 
-    "athletico paranaense": "athletico pr",
+  if (value === "atletico mineiro") {
+    value = "atletico mg";
+  }
 
-    "atletico mineiro": "atletico mg",
+  if (value === "vasco da gama") {
+    value = "vasco";
+  }
 
-    "vasco da gama": "vasco",
+  if (value === "ec vitoria") {
+    value = "vitoria";
+  }
 
-    "ec vitoria": "vitoria"
-
-  };
-
-  return aliases[value] || value;
+  return value;
 
 }
 
