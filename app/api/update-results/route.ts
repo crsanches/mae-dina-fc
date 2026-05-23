@@ -10,7 +10,7 @@ function normalize(text?: string) {
 
   if (!text) return "";
 
-  return text
+  let value = text
 
     .normalize("NFD")
 
@@ -24,15 +24,21 @@ function normalize(text?: string) {
 
     .replace(/\s+/g, " ")
 
-    .replace("athletico paranaense", "athletico pr")
-
-    .replace("atletico mineiro", "atletico mg")
-
-    .replace("vasco da gama", "vasco")
-
-    .replace("ec vitoria", "vitoria")
-
     .trim();
+
+  const aliases: Record<string, string> = {
+
+    "athletico paranaense": "athletico pr",
+
+    "atletico mineiro": "atletico mg",
+
+    "vasco da gama": "vasco",
+
+    "ec vitoria": "vitoria"
+
+  };
+
+  return aliases[value] || value;
 
 }
 
@@ -142,6 +148,17 @@ const directMatch =
 const invertedMatch =
   firebaseA === apiAway &&
   firebaseB === apiHome;
+
+  console.log(
+    "COMPARE:",
+    firebaseA,
+    "vs",
+    apiHome,
+    "|",
+    firebaseB,
+    "vs",
+    apiAway
+  );
 
 return directMatch || invertedMatch;
           
