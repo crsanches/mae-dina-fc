@@ -51,7 +51,7 @@ export async function GET() {
   try {
 
     const response = await fetch(
-      "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4351&s=2026"
+      "https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4351"
      
     );
 
