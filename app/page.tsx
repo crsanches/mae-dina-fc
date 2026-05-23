@@ -623,10 +623,6 @@ useEffect(() => {
          {/* estatisticas da vergonha */}
         <AnalyticsDashboard/>
         
-         {/* central da corneta */}
-        <CentralCorneta
-          ligaId={ligaId} 
-          usuarios={usuariosLiga}/>
 
           <div className="text-5xl">
             🤓
