@@ -119,52 +119,38 @@ console.log(
 
             const game = g.data();
           
-            console.log(
-              "FIREBASE:",
-              normalize(game.teamA),
-              "x",
-              normalize(game.teamB)
-            );
-          
-            console.log(
-              "API:",
-              normalize(apiGame.strHomeTeam),
-              "x",
-              normalize(apiGame.strAwayTeam)
-            );
-          
             const firebaseA =
-  normalize(game.teamA);
-
-const firebaseB =
-  normalize(game.teamB);
-
-const apiHome =
-  normalize(apiGame.strHomeTeam);
-
-const apiAway =
-  normalize(apiGame.strAwayTeam);
-
-const directMatch =
-  firebaseA === apiHome &&
-  firebaseB === apiAway;
-
-const invertedMatch =
-  firebaseA === apiAway &&
-  firebaseB === apiHome;
-
-  console.log(
-    "COMPARE:",
-    firebaseA,
-    "vs",
-    apiHome,
-    "|",
-    firebaseB,
-    "vs",
-    apiAway
-  );
-
-return directMatch || invertedMatch;
+              normalize(game.teamA);
+          
+            const firebaseB =
+              normalize(game.teamB);
+          
+            const apiHome =
+              normalize(apiGame.strHomeTeam);
+          
+            const apiAway =
+              normalize(apiGame.strAwayTeam);
+          
+            console.log(
+              "COMPARE:",
+              firebaseA,
+              "vs",
+              apiHome,
+              "|",
+              firebaseB,
+              "vs",
+              apiAway
+            );
+          
+            const directMatch =
+              firebaseA === apiHome &&
+              firebaseB === apiAway;
+          
+            const invertedMatch =
+              firebaseA === apiAway &&
+              firebaseB === apiHome;
+          
+            return directMatch || invertedMatch;
           
           });
 
