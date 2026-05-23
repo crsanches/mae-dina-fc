@@ -51,7 +51,7 @@ export async function GET() {
   try {
 
     const response = await fetch(
-      "https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4351"
+      "https://www.thesportsdb.com/api/v1/json/3/eventspastleague.php?id=4351"
      
     );
 
@@ -154,7 +154,7 @@ console.log(
           
           });
 
-          if (localGame) {
+          if (localGame !== undefined) {
 
             console.log(
               "✅ MATCH:",
@@ -174,7 +174,7 @@ console.log(
           
           }
 
-      if (!localGame) continue;
+          if (localGame === undefined) continue;
       console.log(
 
         apiGame.strHomeTeam,
@@ -188,10 +188,7 @@ console.log(
         apiGame.strAwayTeam
       
       );
-      if (
-        apiGame.intHomeScore !== null &&
-        apiGame.intAwayScore !== null
-      ) {
+      if (apiGame.strStatus === "FT") {
 
         await adminDb
   .collection("games")
