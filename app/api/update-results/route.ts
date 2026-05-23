@@ -60,7 +60,7 @@ export async function GET() {
             gameDate.getTime()
           ) / (1000 * 60 * 60 * 24);
     
-        return diffDays <= 3;
+        return diffDays <= 200;
     
       }
     );
@@ -121,17 +121,27 @@ console.log(
               normalize(apiGame.strAwayTeam)
             );
           
-            return (
-          
-              normalize(game.teamA) ===
-              normalize(apiGame.strHomeTeam)
-          
-              &&
-          
-              normalize(game.teamB) ===
-              normalize(apiGame.strAwayTeam)
-          
-            );
+            const firebaseA =
+  normalize(game.teamA);
+
+const firebaseB =
+  normalize(game.teamB);
+
+const apiHome =
+  normalize(apiGame.strHomeTeam);
+
+const apiAway =
+  normalize(apiGame.strAwayTeam);
+
+const directMatch =
+  firebaseA === apiHome &&
+  firebaseB === apiAway;
+
+const invertedMatch =
+  firebaseA === apiAway &&
+  firebaseB === apiHome;
+
+return directMatch || invertedMatch;
           
           });
 
