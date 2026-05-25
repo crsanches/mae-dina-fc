@@ -14,8 +14,6 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  updateDoc,
-  doc,
 } from "firebase/firestore";
 
 import {
@@ -44,13 +42,11 @@ type Props = {
   usuarios?: Usuario[];
 };
 
-type ReactionUser = {
-  uid: string;
-  nome: string;
-};
-
 type Reactions = {
-  [emoji: string]: ReactionUser[];
+  [emoji: string]: {
+    uid: string;
+    nome: string;
+  }[];
 };
 
 type Mensagem = {
@@ -61,37 +57,11 @@ type Mensagem = {
   destinoNome: string;
   texto: string;
   reactions?: Reactions;
-  createdAt?: any;
+
+  createdAt?: {
+    toDate?: () => Date;
+  };
 };
-
-/*
-========================================
-REACTIONS
-========================================
-*/
-
-const reactionEmojis = [
-  "👍",
-  "❤️",
-  "😂",
-  "🤣",
-  "🔥",
-  "👏",
-  "🤡",
-  "😡",
-  "😭",
-  "👎",
-  "🐐",
-  "🧠",
-  "💩",
-  "🍿",
-  "⚽",
-  "🏆",
-  "🍼",
-  "💸",
-  "🫏",
-  "🚨",
-];
 
 /*
 ========================================
@@ -114,9 +84,6 @@ export default function CentralCorneta({
   STATES
   ========================================
   */
-
-  const [menuAbertoId, setMenuAbertoId] =
-    useState<string | null>(null);
 
   const [mensagens, setMensagens] =
     useState<Mensagem[]>([]);
@@ -165,51 +132,53 @@ export default function CentralCorneta({
       onSnapshot(q, (snapshot) => {
 
         const agora =
-  Date.now();
+          Date.now();
 
-const vinteQuatroHoras =
-  1000 * 60 * 60 * 24;
+        const vinteQuatroHoras =
+          1000 * 60 * 60 * 24;
 
-const lista: Mensagem[] =
+        const lista: Mensagem[] =
 
-  snapshot.docs
+          snapshot.docs
 
-    .map((docItem) => ({
+            .map((docItem) => ({
 
-      id: docItem.id,
+              id: docItem.id,
 
-      ...(docItem.data() as Omit<
-        Mensagem,
-        "id"
-      >),
+              ...(docItem.data() as Omit<
+                Mensagem,
+                "id"
+              >),
 
-    }))
+            }))
 
-    .filter((mensagem) => {
+            .filter((mensagem) => {
 
-      if (
-        !mensagem.createdAt
-      ) {
+              if (
+                !mensagem.createdAt
+              ) {
 
-        return false;
+                return false;
 
-      }
+              }
 
-      const dataMensagem =
+              const dataMensagem =
 
-        mensagem.createdAt
-          ?.toDate?.()
-          ?.getTime?.() || 0;
+                mensagem.createdAt
+                  ?.toDate?.()
+                  ?.getTime?.() || 0;
 
-      return (
+              return (
 
-        agora - dataMensagem <
+                agora - dataMensagem <
 
-        vinteQuatroHoras
+                vinteQuatroHoras
 
-      );
+              );
 
-    });
+            });
+
+        setMensagens(lista);
 
       });
 
@@ -388,109 +357,6 @@ const lista: Mensagem[] =
 
   /*
   ========================================
-  REAGIR
-  ========================================
-  */
-
-  async function reagirMensagem(
-    mensagem: Mensagem,
-    emoji: string
-  ) {
-
-    try {
-
-      const usuarioAtual =
-        auth.currentUser;
-
-      if (!usuarioAtual) return;
-
-      const reactions =
-        mensagem.reactions || {};
-
-      const novoObjeto: Reactions = {};
-
-      Object.keys(reactions)
-        .forEach((key) => {
-
-          novoObjeto[key] =
-            reactions[key].filter(
-
-              (user: ReactionUser) =>
-
-                user.uid !==
-                usuarioAtual.uid
-
-            );
-
-        });
-
-      const jaReagiu =
-
-        reactions[emoji]?.some(
-
-          (user: ReactionUser) =>
-
-            user.uid ===
-            usuarioAtual.uid
-
-        );
-
-      if (!jaReagiu) {
-
-        if (!novoObjeto[emoji]) {
-
-          novoObjeto[emoji] = [];
-
-        }
-
-        novoObjeto[emoji].push({
-
-          uid:
-            usuarioAtual.uid,
-
-          nome:
-
-            usuarioAtual.displayName ||
-
-            usuarioAtual.email ||
-
-            "Jogador",
-
-        });
-
-      }
-
-      await updateDoc(
-
-        doc(
-          db,
-          "ligas",
-          ligaId,
-          "mensagens",
-          mensagem.id
-        ),
-
-        {
-
-          reactions:
-            novoObjeto,
-
-        }
-
-      );
-
-      setMenuAbertoId(null);
-
-    } catch (error) {
-
-      console.error(error);
-
-    }
-
-  }
-
-  /*
-  ========================================
   FECHAR MENU AO CLICAR FORA
   ========================================
   */
@@ -535,47 +401,46 @@ const lista: Mensagem[] =
 
   /*
   ========================================
-  RENDER
-  ========================================
-  */
-
-
- /*
-  ========================================
-  AGRUPANDO MENSAGENS
+  AGRUPAR MENSAGENS
   ========================================
   */
 
   const mensagensAgrupadas =
 
-  mensagens.reduce(
+    mensagens.reduce(
 
-    (acc, mensagem) => {
+      (acc, mensagem) => {
 
-      const chave =
+        const chave =
 
-        mensagem.destinoNome ||
+          mensagem.destinoNome ||
 
-        "Sem alvo";
+          "Sem alvo";
 
-      if (!acc[chave]) {
+        if (!acc[chave]) {
 
-        acc[chave] = [];
+          acc[chave] = [];
 
-      }
+        }
 
-      acc[chave].push(mensagem);
+        acc[chave].push(mensagem);
 
-      return acc;
+        return acc;
 
-    },
+      },
 
-    {} as Record<
-      string,
-      Mensagem[]
-    >
+      {} as Record<
+        string,
+        Mensagem[]
+      >
 
-  );
+    );
+
+  /*
+  ========================================
+  RENDER
+  ========================================
+  */
 
   return (
 
@@ -597,7 +462,7 @@ const lista: Mensagem[] =
 
           <p className="text-zinc-400 text-sm">
 
-            A zoeira é pública e permanente 😈
+            As provocações desaparecem em 24h 😈
 
           </p>
 
@@ -605,334 +470,338 @@ const lista: Mensagem[] =
 
       </div>
 
-      {/* restante do JSX original permanece igual */}
-      <div className="flex flex-col gap-3 mb-4">
+      {/* FORM */}
 
-  <div
-    className="relative"
-    ref={menuUsuariosRef}
-  >
+      <div className="flex flex-col gap-3 mb-6">
 
-    <div
-      className="
-        bg-zinc-950
-        border border-zinc-800
-        rounded-2xl
-        p-3
-        flex items-center
-        justify-between
-        gap-3
-      "
-    >
-
-      <div className="flex flex-col">
-
-        <span className="text-xs text-zinc-500">
-
-          🎯 Alvo da zoeira
-
-        </span>
-
-        <span className="font-bold text-white">
-
-          {
-
-            usuariosFiltrados.find(
-              (u) =>
-
-                (
-                  u.uid ||
-                  u.id
-                ) === destinoId
-
-            )?.username ||
-
-            usuariosFiltrados.find(
-              (u) =>
-
-                (
-                  u.uid ||
-                  u.id
-                ) === destinoId
-
-            )?.displayName ||
-
-            usuariosFiltrados.find(
-              (u) =>
-
-                (
-                  u.uid ||
-                  u.id
-                ) === destinoId
-
-            )?.nome ||
-
-            "Mire no seu alvo 😈"
-
-          }
-
-        </span>
-
-      </div>
-
-      <button
-
-        onClick={() =>
-
-          setMenuUsuariosAberto(
-            !menuUsuariosAberto
-          )
-
-        }
-
-        className="
-          bg-zinc-800
-          hover:bg-zinc-700
-          px-3 py-2
-          rounded-xl
-          text-sm
-          transition-all
-        "
-      >
-
-        🔄
-
-      </button>
-
-    </div>
-
-    {menuUsuariosAberto && (
-
-      <div
-        className="
-          absolute z-50 mt-2
-          w-full
-          max-h-64
-          overflow-y-auto
-          bg-zinc-900
-          border border-zinc-700
-          rounded-2xl
-          p-2
-          shadow-2xl
-          flex flex-col gap-1
-        "
-      >
-
-        {usuariosFiltrados.map(
-          (usuario) => {
-
-            const usuarioId =
-
-              usuario.uid ||
-              usuario.id;
-
-            const usuarioNome =
-
-              usuario.username ||
-
-              usuario.displayName ||
-
-              usuario.nome ||
-
-              usuario.email ||
-
-              "Jogador";
-
-            return (
-
-              <button
-
-                key={usuarioId}
-
-                onClick={() => {
-
-                  setDestinoId(
-                    usuarioId || ""
-                  );
-
-                  setMenuUsuariosAberto(
-                    false
-                  );
-
-                }}
-
-                className="
-                  w-full
-                  text-left
-                  px-4 py-3
-                  rounded-xl
-                  hover:bg-zinc-800
-                  transition-all
-                  text-white
-                "
-              >
-
-                {usuarioNome}
-
-              </button>
-
-            );
-
-          }
-        )}
-
-      </div>
-
-    )}
-
-  </div>
-
-  <textarea
-    value={texto}
-    onChange={(e) =>
-      setTexto(
-        e.target.value
-      )
-    }
-    maxLength={120}
-    rows={2}
-    placeholder="Mande sua provocação..."
-    className="
-      bg-zinc-800
-      border border-zinc-700
-      rounded-lg
-      p-3
-      resize-none
-      text-white
-    "
-  />
-
-  <div className="flex justify-between items-center text-sm text-zinc-400">
-
-    <span>
-      {texto.length}/120
-    </span>
-
-    <button
-      onClick={enviarMensagem}
-      className="
-        bg-yellow-500
-        hover:bg-yellow-400
-        text-black
-        font-bold
-        px-4 py-2
-        rounded-lg
-        transition
-      "
-    >
-
-      Enviar
-
-    </button>
-
-  </div>
-
-</div>
-
-<div className="flex flex-col gap-3">
-
-{Object.entries(
-  mensagensAgrupadas
-).map(
-
-  ([destino, lista]) => (
-
-    <div
-      key={destino}
-      className="
-        bg-zinc-950
-        border border-zinc-800
-        rounded-3xl
-        p-4
-      "
-    >
-
-      <div className="
-        flex items-center gap-3
-        mb-4
-      ">
-
-        <div className="text-4xl">
-          🎯
-        </div>
-
-        <div>
-
-          <h3 className="
-            text-xl
-            font-black
-            text-yellow-400
-          ">
-
-            {destino}
-
-          </h3>
-
-          <p className="
-            text-zinc-500
-            text-sm
-          ">
-
-            recebeu {
-              lista.length
-            } cornetada(s)
-          </p>
-
-        </div>
-
-      </div>
-
-      <div className="
-        flex flex-col gap-3
-      ">
-
-        {lista.map((mensagem) => (
+        <div
+          className="relative"
+          ref={menuUsuariosRef}
+        >
 
           <div
-            key={mensagem.id}
             className="
-              bg-zinc-800
+              bg-zinc-950
+              border border-zinc-800
               rounded-2xl
-              p-4
-              border border-zinc-700
+              p-3
+              flex items-center
+              justify-between
+              gap-3
             "
           >
 
-            <div className="
-              text-sm
-              text-yellow-400
-              font-semibold
-              mb-2
-            ">
+            <div className="flex flex-col">
 
-              {mensagem.autorNome}
-              {" → "}
-              {mensagem.destinoNome}
+              <span className="text-xs text-zinc-500">
+
+                🎯 Alvo da zoeira
+
+              </span>
+
+              <span className="font-bold text-white">
+
+                {
+
+                  usuariosFiltrados.find(
+                    (u) =>
+
+                      (
+                        u.uid ||
+                        u.id
+                      ) === destinoId
+
+                  )?.username ||
+
+                  usuariosFiltrados.find(
+                    (u) =>
+
+                      (
+                        u.uid ||
+                        u.id
+                      ) === destinoId
+
+                  )?.displayName ||
+
+                  usuariosFiltrados.find(
+                    (u) =>
+
+                      (
+                        u.uid ||
+                        u.id
+                      ) === destinoId
+
+                  )?.nome ||
+
+                  "Mire no seu alvo 😈"
+
+                }
+
+              </span>
 
             </div>
 
-            <div className="
-              text-white
-              break-words
-            ">
+            <button
 
-              {mensagem.texto}
+              onClick={() =>
 
-            </div>
+                setMenuUsuariosAberto(
+                  !menuUsuariosAberto
+                )
+
+              }
+
+              className="
+                bg-zinc-800
+                hover:bg-zinc-700
+                px-3 py-2
+                rounded-xl
+                text-sm
+                transition-all
+              "
+            >
+
+              🔄
+
+            </button>
 
           </div>
 
-        ))}
+          {menuUsuariosAberto && (
+
+            <div
+              className="
+                absolute z-50 mt-2
+                w-full
+                max-h-64
+                overflow-y-auto
+                bg-zinc-900
+                border border-zinc-700
+                rounded-2xl
+                p-2
+                shadow-2xl
+                flex flex-col gap-1
+              "
+            >
+
+              {usuariosFiltrados.map(
+                (usuario) => {
+
+                  const usuarioId =
+
+                    usuario.uid ||
+                    usuario.id;
+
+                  const usuarioNome =
+
+                    usuario.username ||
+
+                    usuario.displayName ||
+
+                    usuario.nome ||
+
+                    usuario.email ||
+
+                    "Jogador";
+
+                  return (
+
+                    <button
+
+                      key={usuarioId}
+
+                      onClick={() => {
+
+                        setDestinoId(
+                          usuarioId || ""
+                        );
+
+                        setMenuUsuariosAberto(
+                          false
+                        );
+
+                      }}
+
+                      className="
+                        w-full
+                        text-left
+                        px-4 py-3
+                        rounded-xl
+                        hover:bg-zinc-800
+                        transition-all
+                        text-white
+                      "
+                    >
+
+                      {usuarioNome}
+
+                    </button>
+
+                  );
+
+                }
+              )}
+
+            </div>
+
+          )}
+
+        </div>
+
+        <textarea
+          value={texto}
+          onChange={(e) =>
+            setTexto(
+              e.target.value
+            )
+          }
+          maxLength={120}
+          rows={2}
+          placeholder="Mande sua provocação..."
+          className="
+            bg-zinc-800
+            border border-zinc-700
+            rounded-lg
+            p-3
+            resize-none
+            text-white
+          "
+        />
+
+        <div className="flex justify-between items-center text-sm text-zinc-400">
+
+          <span>
+            {texto.length}/120
+          </span>
+
+          <button
+            onClick={enviarMensagem}
+            className="
+              bg-yellow-500
+              hover:bg-yellow-400
+              text-black
+              font-bold
+              px-4 py-2
+              rounded-lg
+              transition
+            "
+          >
+
+            Enviar
+
+          </button>
+
+        </div>
 
       </div>
 
-    </div>
+      {/* MENSAGENS AGRUPADAS */}
 
-  )
+      <div className="flex flex-col gap-5">
 
-)}
+        {Object.entries(
+          mensagensAgrupadas
+        ).map(
 
-</div>
+          ([destino, lista]) => (
+
+            <div
+              key={destino}
+              className="
+                bg-zinc-950
+                border border-zinc-800
+                rounded-3xl
+                p-4
+              "
+            >
+
+              <div className="
+                flex items-center gap-3
+                mb-4
+              ">
+
+                <div className="text-4xl">
+                  🎯
+                </div>
+
+                <div>
+
+                  <h3 className="
+                    text-xl
+                    font-black
+                    text-yellow-400
+                  ">
+
+                    {destino}
+
+                  </h3>
+
+                  <p className="
+                    text-zinc-500
+                    text-sm
+                  ">
+
+                    recebeu {
+                      lista.length
+                    } cornetada(s)
+
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="
+                flex flex-col gap-3
+              ">
+
+                {lista.map((mensagem) => (
+
+                  <div
+                    key={mensagem.id}
+                    className="
+                      bg-zinc-800
+                      rounded-2xl
+                      p-4
+                      border border-zinc-700
+                    "
+                  >
+
+                    <div className="
+                      text-sm
+                      text-yellow-400
+                      font-semibold
+                      mb-2
+                    ">
+
+                      {mensagem.autorNome}
+                      {" → "}
+                      {mensagem.destinoNome}
+
+                    </div>
+
+                    <div className="
+                      text-white
+                      break-words
+                    ">
+
+                      {mensagem.texto}
+
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            </div>
+
+          )
+
+        )}
+
+      </div>
 
     </div>
 
