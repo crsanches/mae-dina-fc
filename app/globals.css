@@ -68,6 +68,6 @@ input[type="number"] {
 .animate-marquee {
 
   animation:
-    marquee 80s linear infinite;
+    marquee 60s linear infinite;
 
 }
