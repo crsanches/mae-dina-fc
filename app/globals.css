@@ -64,21 +64,10 @@ input[type="number"] {
   }
 
 }
+
 .animate-marquee {
-  will-change: transform;
-  transform: translate3d(0, 0, 0);
-  backface-visibility: hidden;
-  perspective: 1000px;
 
-  animation: marquee 40s linear infinite;
-}
+  animation:
+    marquee 45s linear infinite;
 
-@keyframes marquee {
-  from {
-    transform: translate3d(100%, 0, 0);
-  }
-
-  to {
-    transform: translate3d(-100%, 0, 0);
-  }
 }
