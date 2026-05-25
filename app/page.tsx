@@ -85,12 +85,14 @@ export default function Home() {
   const [ligaId, setLigaId] =
     useState("");
   
-    const [usuariosLiga, setUsuariosLiga] =
-    useState<{
+    type UsuarioLiga = {
       id: string;
       nome: string;
       activeGroupId: string;
-    }[]>([]);
+    };
+    
+    const [usuariosLiga, setUsuariosLiga] =
+      useState<UsuarioLiga[]>([]);
 
   const [memeAleatorio, setMemeAleatorio] =
     useState("");
