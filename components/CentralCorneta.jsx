@@ -44,6 +44,10 @@ export default function CentralCorneta({
   usuarios = [],
 }) {
 
+  const usuariosTipados = Array.isArray(usuarios)
+  ? usuarios
+  : [];
+
   const [menuAbertoId, setMenuAbertoId] =
     useState(null);
 
@@ -108,7 +112,7 @@ export default function CentralCorneta({
 
     ...new Map(
 
-      usuarios.map((u) => [
+      usuariosTipados.map((u) => [
 
         u.uid || u.id,
         u
@@ -189,7 +193,7 @@ export default function CentralCorneta({
       if (!usuarioAtual) return;
 
       const destino =
-        usuarios.find(
+      usuariosTipados.find(
           (u) =>
 
             (
