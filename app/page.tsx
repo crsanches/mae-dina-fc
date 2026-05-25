@@ -1,6 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback
+} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -299,159 +303,160 @@ export default function Home() {
      MEME AUTOMÁTICO
   ========================= */
 
-  const gerarMemeAutomatico = async (
-    currentUser: string,
-    currentGroupId: string
-  ) => {
-
-    try {
-
-      const betsQuery =
-        query(
-          collection(db, "bets"),
-          where(
-            "groupId",
-            "==",
-            currentGroupId
-          )
-        );
-
-      const [
-        betsSnapshot,
-        gamesSnapshot
-      ] = await Promise.all([
-
-        getDocs(betsQuery),
-
-        getDocs(
-          collection(db, "games")
-        )
-
-      ]);
-
-      const ranking: Record<string, number> = {};
-
-      let exactScore = false;
-
-      let crazyBet = false;
-
-      betsSnapshot.forEach((betDoc) => {
-
-        const bet =
-          betDoc.data();
-
-        let points = 0;
-
-        gamesSnapshot.forEach((gameDoc) => {
-
-          const game =
-            gameDoc.data();
-
-          if (
-            `${game.teamA} x ${game.teamB}` === bet.match &&
-            game.resultadoA != null &&
-            game.resultadoB != null
-          ) { 
-
-            points =
-              calculatePoints({
-
-                apostaA:
-                  Number(bet.golsA),
-
-                apostaB:
-                  Number(bet.golsB),
-
-                resultadoA:
-                  Number(game.resultadoA),
-
-                resultadoB:
-                  Number(game.resultadoB),
-
-              });
-
-            if (
-              bet.userName === currentUser &&
-              Number(bet.golsA) === Number(game.resultadoA) &&
-              Number(bet.golsB) === Number(game.resultadoB)
-            ) {
-
-              exactScore = true;
-
-            }
-
-            if (
-              bet.userName === currentUser &&
-              (
-                Number(bet.golsA) >= 6 ||
-                Number(bet.golsB) >= 6
-              )
-            ) {
-
-              crazyBet = true;
-
-            }
-
-          }
-
-        });
-
-        if (!ranking[bet.userName]) {
-
-          ranking[bet.userName] = 0;
-
-        }
-
-        ranking[bet.userName] += points;
-
-      });
-
-      const sorted =
-
-        Object.entries(ranking)
-
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
+  const gerarMemeAutomatico = useCallback(
+    async (
+      currentUser: string,
+      currentGroupId: string
+    ) => {
+  
+      try {
+  
+        const betsQuery =
+          query(
+            collection(db, "bets"),
+            where(
+              "groupId",
+              "==",
+              currentGroupId
+            )
           );
-
-      const isLeader =
-        sorted[0]?.[0] === currentUser;
-
-      const isLastPlace =
-        sorted[
-          sorted.length - 1
-        ]?.[0] === currentUser;
-
-      const meme =
-        getAutomaticMeme({
-
-          isLeader,
-
-          isLastPlace,
-
-          exactScore,
-
-          crazyBet,
-
+  
+        const [
+          betsSnapshot,
+          gamesSnapshot
+        ] = await Promise.all([
+  
+          getDocs(betsQuery),
+  
+          getDocs(
+            collection(db, "games")
+          )
+  
+        ]);
+  
+        const ranking: Record<string, number> = {};
+  
+        let exactScore = false;
+  
+        let crazyBet = false;
+  
+        betsSnapshot.forEach((betDoc) => {
+  
+          const bet =
+            betDoc.data();
+  
+          let points = 0;
+  
+          gamesSnapshot.forEach((gameDoc) => {
+  
+            const game =
+              gameDoc.data();
+  
+            if (
+              `${game.teamA} x ${game.teamB}` === bet.match &&
+              game.resultadoA != null &&
+              game.resultadoB != null
+            ) {
+  
+              points =
+                calculatePoints({
+  
+                  apostaA:
+                    Number(bet.golsA),
+  
+                  apostaB:
+                    Number(bet.golsB),
+  
+                  resultadoA:
+                    Number(game.resultadoA),
+  
+                  resultadoB:
+                    Number(game.resultadoB),
+  
+                });
+  
+              if (
+                bet.userName === currentUser &&
+                Number(bet.golsA) === Number(game.resultadoA) &&
+                Number(bet.golsB) === Number(game.resultadoB)
+              ) {
+  
+                exactScore = true;
+  
+              }
+  
+              if (
+                bet.userName === currentUser &&
+                (
+                  Number(bet.golsA) >= 6 ||
+                  Number(bet.golsB) >= 6
+                )
+              ) {
+  
+                crazyBet = true;
+  
+              }
+  
+            }
+  
+          });
+  
+          if (!ranking[bet.userName]) {
+  
+            ranking[bet.userName] = 0;
+  
+          }
+  
+          ranking[bet.userName] += points;
+  
         });
-
-      if (meme) {
-
-        setAutomaticMeme(meme);
-
+  
+        const sorted =
+          Object.entries(ranking)
+            .sort(
+              (a, b) =>
+                b[1] - a[1]
+            );
+  
+        const isLeader =
+          sorted[0]?.[0] === currentUser;
+  
+        const isLastPlace =
+          sorted[
+            sorted.length - 1
+          ]?.[0] === currentUser;
+  
+        const meme =
+          getAutomaticMeme({
+  
+            isLeader,
+  
+            isLastPlace,
+  
+            exactScore,
+  
+            crazyBet,
+  
+          });
+  
+        if (meme) {
+  
+          setAutomaticMeme(meme);
+  
+        }
+  
+      } catch (error) {
+  
+        console.error(
+          "Erro meme automático:",
+          error
+        );
+  
       }
-
-    } catch (error) {
-
-      console.error(
-        "Erro meme automático:",
-        error
-      );
-
-    }
-
-  };
+  
+    },
+    []
+  );
 
   /* =========================
      FILTERS
