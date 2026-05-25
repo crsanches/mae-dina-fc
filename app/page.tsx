@@ -5,6 +5,7 @@ import {
   useState,
   useCallback
 } from "react";
+
 import dynamic from "next/dynamic";
 import Link from "next/link";
 
@@ -14,10 +15,18 @@ import GroupCard from "../components/GroupCard";
 import Footer from "../components/footer";
 
 import { db, auth } from "../lib/firebase";
-import { getAutomaticMeme } from "../lib/automaticMemes";
-import { calculatePoints } from "../lib/calculatePoints";
 
-import { onAuthStateChanged } from "firebase/auth";
+import {
+  getAutomaticMeme
+} from "../lib/automaticMemes";
+
+import {
+  calculatePoints
+} from "../lib/calculatePoints";
+
+import {
+  onAuthStateChanged
+} from "firebase/auth";
 
 import {
   collection,
@@ -120,8 +129,174 @@ export default function Home() {
       image?: string;
     } | null>(null);
 
-  const [showHeavyComponents, setShowHeavyComponents] =
-    useState(false);
+  const [
+    showHeavyComponents,
+    setShowHeavyComponents
+  ] = useState(false);
+
+  /* =========================
+     MEME AUTOMÁTICO
+  ========================= */
+
+  const gerarMemeAutomatico =
+    useCallback(
+
+      async (
+        currentUser: string,
+        currentGroupId: string
+      ) => {
+
+        try {
+
+          const betsQuery =
+            query(
+              collection(db, "bets"),
+              where(
+                "groupId",
+                "==",
+                currentGroupId
+              )
+            );
+
+          const [
+            betsSnapshot,
+            gamesSnapshot
+          ] = await Promise.all([
+
+            getDocs(betsQuery),
+
+            getDocs(
+              collection(db, "games")
+            ),
+
+          ]);
+
+          const ranking:
+            Record<string, number> = {};
+
+          let exactScore = false;
+
+          let crazyBet = false;
+
+          betsSnapshot.forEach((betDoc) => {
+
+            const bet =
+              betDoc.data();
+
+            let points = 0;
+
+            gamesSnapshot.forEach((gameDoc) => {
+
+              const game =
+                gameDoc.data();
+
+              if (
+                `${game.teamA} x ${game.teamB}` === bet.match &&
+                game.resultadoA != null &&
+                game.resultadoB != null
+              ) {
+
+                points =
+                  calculatePoints({
+
+                    apostaA:
+                      Number(bet.golsA),
+
+                    apostaB:
+                      Number(bet.golsB),
+
+                    resultadoA:
+                      Number(game.resultadoA),
+
+                    resultadoB:
+                      Number(game.resultadoB),
+
+                  });
+
+                if (
+                  bet.userName === currentUser &&
+                  Number(bet.golsA) === Number(game.resultadoA) &&
+                  Number(bet.golsB) === Number(game.resultadoB)
+                ) {
+
+                  exactScore = true;
+
+                }
+
+                if (
+                  bet.userName === currentUser &&
+                  (
+                    Number(bet.golsA) >= 6 ||
+                    Number(bet.golsB) >= 6
+                  )
+                ) {
+
+                  crazyBet = true;
+
+                }
+
+              }
+
+            });
+
+            if (!ranking[bet.userName]) {
+
+              ranking[bet.userName] = 0;
+
+            }
+
+            ranking[bet.userName] += points;
+
+          });
+
+          const sorted =
+            Object.entries(ranking)
+              .sort(
+                (a, b) =>
+                  b[1] - a[1]
+              );
+
+          const isLeader =
+            sorted[0]?.[0] === currentUser;
+
+          const isLastPlace =
+            sorted[
+              sorted.length - 1
+            ]?.[0] === currentUser;
+
+          const meme =
+            getAutomaticMeme({
+
+              isLeader,
+
+              isLastPlace,
+
+              exactScore,
+
+              crazyBet,
+
+            });
+
+          if (meme) {
+
+            setAutomaticMeme(meme);
+
+          }
+
+        } catch (error) {
+
+          console.error(
+            "Erro meme automático:",
+            error
+          );
+
+        }
+
+      },
+
+      []
+
+    );
 
   /* =========================
      AUTH
@@ -131,7 +306,9 @@ export default function Home() {
 
     const unsubscribe =
       onAuthStateChanged(
+
         auth,
+
         async (user) => {
 
           setIsLogged(!!user);
@@ -143,10 +320,6 @@ export default function Home() {
             return;
 
           }
-
-          /* =========================
-             USER DATA
-          ========================= */
 
           const userRef =
             doc(
@@ -170,10 +343,6 @@ export default function Home() {
           }
 
           setLigaId(activeGroupId);
-
-          /* =========================
-             USERS FILTERED QUERY
-          ========================= */
 
           const usersQuery =
             query(
@@ -213,21 +382,18 @@ export default function Home() {
 
           setUsuariosLiga(membros);
 
-          /* =========================
-             MEME AUTOMÁTICO
-          ========================= */
-
-          gerarMemeAutomatico(
+          await gerarMemeAutomatico(
             user.displayName || "",
             activeGroupId
           );
 
         }
+
       );
 
     return () => unsubscribe();
 
-  }, []);
+  }, [gerarMemeAutomatico]);
 
   /* =========================
      GAMES
@@ -235,10 +401,11 @@ export default function Home() {
 
   useEffect(() => {
 
-    const q = query(
-      collection(db, "games"),
-      orderBy("createdAt", "asc")
-    );
+    const q =
+      query(
+        collection(db, "games"),
+        orderBy("createdAt", "asc")
+      );
 
     const unsubscribe =
       onSnapshot(
@@ -247,14 +414,14 @@ export default function Home() {
 
           const games: Game[] = [];
 
-          snapshot.forEach((doc) => {
+          snapshot.forEach((docItem) => {
 
             const data =
-              doc.data();
+              docItem.data();
 
             games.push({
 
-              id: doc.id,
+              id: docItem.id,
 
               teamA: data.teamA,
               teamB: data.teamB,
@@ -283,7 +450,7 @@ export default function Home() {
   }, []);
 
   /* =========================
-     LOAD HEAVY COMPONENTS LATER
+     LOAD HEAVY COMPONENTS
   ========================= */
 
   useEffect(() => {
@@ -300,168 +467,8 @@ export default function Home() {
   }, []);
 
   /* =========================
-     MEME AUTOMÁTICO
-  ========================= */
-
-  const gerarMemeAutomatico = useCallback(
-    async (
-      currentUser: string,
-      currentGroupId: string
-    ) => {
-  
-      try {
-  
-        const betsQuery =
-          query(
-            collection(db, "bets"),
-            where(
-              "groupId",
-              "==",
-              currentGroupId
-            )
-          );
-  
-        const [
-          betsSnapshot,
-          gamesSnapshot
-        ] = await Promise.all([
-  
-          getDocs(betsQuery),
-  
-          getDocs(
-            collection(db, "games")
-          )
-  
-        ]);
-  
-        const ranking: Record<string, number> = {};
-  
-        let exactScore = false;
-  
-        let crazyBet = false;
-  
-        betsSnapshot.forEach((betDoc) => {
-  
-          const bet =
-            betDoc.data();
-  
-          let points = 0;
-  
-          gamesSnapshot.forEach((gameDoc) => {
-  
-            const game =
-              gameDoc.data();
-  
-            if (
-              `${game.teamA} x ${game.teamB}` === bet.match &&
-              game.resultadoA != null &&
-              game.resultadoB != null
-            ) {
-  
-              points =
-                calculatePoints({
-  
-                  apostaA:
-                    Number(bet.golsA),
-  
-                  apostaB:
-                    Number(bet.golsB),
-  
-                  resultadoA:
-                    Number(game.resultadoA),
-  
-                  resultadoB:
-                    Number(game.resultadoB),
-  
-                });
-  
-              if (
-                bet.userName === currentUser &&
-                Number(bet.golsA) === Number(game.resultadoA) &&
-                Number(bet.golsB) === Number(game.resultadoB)
-              ) {
-  
-                exactScore = true;
-  
-              }
-  
-              if (
-                bet.userName === currentUser &&
-                (
-                  Number(bet.golsA) >= 6 ||
-                  Number(bet.golsB) >= 6
-                )
-              ) {
-  
-                crazyBet = true;
-  
-              }
-  
-            }
-  
-          });
-  
-          if (!ranking[bet.userName]) {
-  
-            ranking[bet.userName] = 0;
-  
-          }
-  
-          ranking[bet.userName] += points;
-  
-        });
-  
-        const sorted =
-          Object.entries(ranking)
-            .sort(
-              (a, b) =>
-                b[1] - a[1]
-            );
-  
-        const isLeader =
-          sorted[0]?.[0] === currentUser;
-  
-        const isLastPlace =
-          sorted[
-            sorted.length - 1
-          ]?.[0] === currentUser;
-  
-        const meme =
-          getAutomaticMeme({
-  
-            isLeader,
-  
-            isLastPlace,
-  
-            exactScore,
-  
-            crazyBet,
-  
-          });
-  
-        if (meme) {
-  
-          setAutomaticMeme(meme);
-  
-        }
-  
-      } catch (error) {
-  
-        console.error(
-          "Erro meme automático:",
-          error
-        );
-  
-      }
-  
-    },
-    []
-  );
-
-  /* =========================
      FILTERS
   ========================= */
-
 
   const jogosEncerrados =
     jogos.filter((jogo) => {
@@ -484,19 +491,28 @@ export default function Home() {
     });
 
   const jogosEncerradosPorFase =
-    jogosEncerrados.reduce((acc, jogo) => {
+    jogosEncerrados.reduce(
 
-      if (!acc[jogo.phase]) {
+      (acc, jogo) => {
 
-        acc[jogo.phase] = [];
+        if (!acc[jogo.phase]) {
 
-      }
+          acc[jogo.phase] = [];
 
-      acc[jogo.phase].push(jogo);
+        }
 
-      return acc;
+        acc[jogo.phase].push(jogo);
 
-    }, {} as Record<string, typeof jogos[number][]>);
+        return acc;
+
+      },
+
+      {} as Record<
+        string,
+        typeof jogos[number][]
+      >
+
+    );
 
   /* =========================
      LOGIN SCREEN
@@ -629,7 +645,10 @@ export default function Home() {
             📜 Resultados Oficiais
           </h2>
 
-          {Object.entries(jogosEncerradosPorFase).map(
+          {Object.entries(
+            jogosEncerradosPorFase
+          ).map(
+
             ([fase, jogosDaFase]) => (
 
               <div
@@ -704,8 +723,9 @@ export default function Home() {
 
               </div>
 
-            ))
-          }
+            )
+
+          )}
 
         </div>
 
