@@ -50,16 +50,6 @@ type Stats = {
 
   drawKing: StatItem;
 
-  crazyBetter: StatItem;
-
-  exactMaster: StatItem;
-
-  mostLeaderRounds: StatItem;
-
-  mostLastPlaceRounds: StatItem;
-
-  worstRound: StatItem;
-
   coldStreak: StatItem;
 
   biggestClimb: StatItem;
@@ -88,21 +78,6 @@ export default function AnalyticsPage() {
   const [stats, setStats] =
     useState<Stats>({
 
-      mostLeaderRounds: {
-        user: "-",
-        value: 0
-      },
-
-      mostLastPlaceRounds: {
-        user: "-",
-        value: 0
-      },
-
-      worstRound: {
-        user: "-",
-        value: 0
-      },
-
       coldStreak: {
         user: "-",
         value: 0
@@ -128,16 +103,7 @@ export default function AnalyticsPage() {
         value: 0
       },
 
-      crazyBetter: {
-        user: "-",
-        value: 0
-      },
-
-      exactMaster: {
-        user: "-",
-        value: 0
-      },
-
+  
       totalBets: 0,
 
       totalGames: 0,
@@ -153,6 +119,29 @@ export default function AnalyticsPage() {
 
   const [usersToShow, setUsersToShow] =
     useState<string[]>([]);
+
+    const [analyticsWinners, setAnalyticsWinners] =
+  useState({
+
+    exactMasterWinner: 
+     null as [string, number] | null,
+
+    prophetEntry: 
+     null as [string, number] | null,
+
+    incendiaryEntry: 
+     null as [string, number] | null,
+
+    retranqueiroEntry: 
+     null as [string, number] | null,
+
+    chaosEntry: 
+     null as [string, number] | null,
+
+    almostEntry: 
+     null as [string, number] | null,
+
+  });
 
   useEffect(() => {
 
@@ -200,33 +189,53 @@ export default function AnalyticsPage() {
       const drawCount:
         Record<string, number> = {};
 
-      const crazyCount:
+      
+
+        const exactCount:
         Record<string, number> = {};
 
-      const exactCount:
+        const exactNoDraw:
         Record<string, number> = {};
 
-        const leaderRounds:
+        const exactDraw:
         Record<string, number> = {};
       
-      const lastPlaceRounds:
+        const totalBetsPerUser:
         Record<string, number> = {};
-      
-      const roundPoints:
+        
+        const exactRateMap:
+        Record<string, number> = {};
+        
+        const winnerHits:
+        Record<string, number> = {};
+        
+        const winnerRate:
+        Record<string, number> = {};
+        
+        const totalGoalsBet:
+        Record<string, number> = {};
+        
+        const averageGoals:
+        Record<string, number> = {};
+        
+        const chaosScore:
+        Record<string, number> = {};
+        
+        const almostHits:
+        Record<string, number> = {};
+        
+        const maxZeroStreak:
+        Record<string, number> = {};
+        
+        const biggestClimbMap:
+        Record<string, number> = {};
+        
+        const previousPositions:
+        Record<string, number> = {};
+        
+        const roundPoints:
         Record<string, number[]> = {};
       
-      const maxZeroStreak:
-        Record<string, number> = {};
-      
-      const biggestClimbMap:
-        Record<string, number> = {};
-      
-      const previousPositions:
-        Record<string, number> = {};
-      
-      let worstRoundUser = "-";
-      
-      let worstRoundPoints = 999;
 
       let totalExactScores = 0;
 
@@ -252,6 +261,66 @@ export default function AnalyticsPage() {
 
         const user =
           bet.userName;
+        
+          if (!totalBetsPerUser[user]) {
+            totalBetsPerUser[user] = 0;
+          }
+          
+          if (!winnerHits[user]) {
+            winnerHits[user] = 0;
+          }
+          
+          if (!totalGoalsBet[user]) {
+            totalGoalsBet[user] = 0;
+          }
+          
+          if (!chaosScore[user]) {
+            chaosScore[user] = 0;
+          }
+          
+          if (!almostHits[user]) {
+            almostHits[user] = 0;
+          }
+          
+          totalBetsPerUser[user]++;
+          
+          const golsA =
+            Number(bet.golsA);
+          
+          const golsB =
+            Number(bet.golsB);
+          
+          totalGoalsBet[user] +=
+            golsA + golsB;
+            if (
+              golsA >= 6 ||
+              golsB >= 6
+            ) {
+            
+              totalCrazyBets++;
+            
+            }
+          
+          
+          if (
+            Math.abs(golsA - golsB) >= 5
+          ) {
+            chaosScore[user] += 1;
+          }
+          
+          if (
+            golsA >= 7 ||
+            golsB >= 7
+          ) {
+            chaosScore[user] += 3;
+          }
+          
+          if (
+            golsA === golsB &&
+            golsA >= 4
+          ) {
+            chaosScore[user] += 2;
+          }
 
         if (!ranking[user]) {
           ranking[user] = 0;
@@ -261,12 +330,17 @@ export default function AnalyticsPage() {
           drawCount[user] = 0;
         }
 
-        if (!crazyCount[user]) {
-          crazyCount[user] = 0;
-        }
+        
 
         if (!exactCount[user]) {
           exactCount[user] = 0;
+        }
+        if (!exactNoDraw[user]) {
+          exactNoDraw[user] = 0;
+        }
+        
+        if (!exactDraw[user]) {
+          exactDraw[user] = 0;
         }
 
         if (
@@ -278,16 +352,8 @@ export default function AnalyticsPage() {
 
         }
 
-        if (
-          Number(bet.golsA) >= 6 ||
-          Number(bet.golsB) >= 6
-        ) {
-
-          crazyCount[user]++;
-
-          totalCrazyBets++;
-
-        }
+        
+         
 
         gamesSnapshot.forEach((gameDoc) => {
 
@@ -319,15 +385,102 @@ export default function AnalyticsPage() {
 
             ranking[user] += points;
 
+            const apostaDiff =
+
+              Number(bet.golsA) -
+
+              Number(bet.golsB);
+
+            const resultadoDiff =
+
+              Number(game.resultadoA) -
+
+              Number(game.resultadoB);
+
+            const acertouVencedor =
+
+              (
+                apostaDiff > 0 &&
+                resultadoDiff > 0
+              ) ||
+
+              (
+                apostaDiff < 0 &&
+                resultadoDiff < 0
+              ) ||
+
+              (
+                apostaDiff === 0 &&
+                resultadoDiff === 0
+              );
+
+            if (acertouVencedor) {
+
+              winnerHits[user]++;
+
+            }
+
+            const diffA = Math.abs(
+
+              Number(bet.golsA) -
+
+              Number(game.resultadoA)
+
+            );
+
+            const diffB = Math.abs(
+
+              Number(bet.golsB) -
+
+              Number(game.resultadoB)
+
+            );
+
             if (
-              Number(bet.golsA) === Number(game.resultadoA) &&
-              Number(bet.golsB) === Number(game.resultadoB)
+
+              diffA + diffB <= 2 &&
+
+              !(
+
+                Number(bet.golsA) === Number(game.resultadoA) &&
+
+                Number(bet.golsB) === Number(game.resultadoB)
+
+              )
+
             ) {
 
+              almostHits[user]++;
+
+            }
+
+            if (
+
+              Number(bet.golsA) === Number(game.resultadoA) &&
+            
+              Number(bet.golsB) === Number(game.resultadoB)
+            
+            ) {
+            
               exactCount[user]++;
-
+            
               totalExactScores++;
-
+            
+              const empate =
+            
+                Number(game.resultadoA) ===
+                Number(game.resultadoB);
+            
+              if (empate) {
+            
+                exactDraw[user]++;
+            
+              } else {
+            
+                exactNoDraw[user]++;
+            
+              }
+            
             }
 
           }
@@ -362,25 +515,6 @@ export default function AnalyticsPage() {
             (a, b) =>
               b[1] - a[1]
           )[0];
-
-      const crazyBetterEntry =
-
-        Object.entries(crazyCount)
-
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
-
-      const exactMasterEntry =
-
-        Object.entries(exactCount)
-
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
-
          
 
       const evolution:
@@ -425,10 +559,113 @@ export default function AnalyticsPage() {
 
         Object.entries(ranking)
 
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          );
+        .sort((a, b) => {
+
+          const userA = a[0];
+          const userB = b[0];
+        
+          const pointsA = a[1];
+          const pointsB = b[1];
+        
+          /*
+          ========================
+          1. PONTOS
+          ========================
+          */
+        
+          if (pointsB !== pointsA) {
+        
+            return pointsB - pointsA;
+        
+          }
+        
+          /*
+          ========================
+          2. EXATOS SEM EMPATE
+          ========================
+          */
+        
+          const exactNoDrawA =
+            exactNoDraw[userA] || 0;
+        
+          const exactNoDrawB =
+            exactNoDraw[userB] || 0;
+        
+          if (
+            exactNoDrawB !==
+            exactNoDrawA
+          ) {
+        
+            return (
+              exactNoDrawB -
+              exactNoDrawA
+            );
+        
+          }
+        
+          /*
+          ========================
+          3. EXATOS COM EMPATE
+          ========================
+          */
+        
+          const exactDrawA =
+            exactDraw[userA] || 0;
+        
+          const exactDrawB =
+            exactDraw[userB] || 0;
+        
+          if (
+            exactDrawB !==
+            exactDrawA
+          ) {
+        
+            return (
+              exactDrawB -
+              exactDrawA
+            );
+        
+          }
+        
+          /*
+          ========================
+          4. ACERTOS DE VENCEDOR
+          ========================
+          */
+        
+          const winnerA =
+            winnerHits[userA] || 0;
+        
+          const winnerB =
+            winnerHits[userB] || 0;
+        
+          if (
+            winnerB !==
+            winnerA
+          ) {
+        
+            return (
+              winnerB -
+              winnerA
+            );
+        
+          }
+        
+          /*
+          ========================
+          5. MENOR CAOS
+          ========================
+          */
+        
+          const chaosA =
+            chaosScore[userA] || 0;
+        
+          const chaosB =
+            chaosScore[userB] || 0;
+        
+          return chaosA - chaosB;
+        
+        });
 
       const topUsers =
 
@@ -575,126 +812,7 @@ export default function AnalyticsPage() {
                     b[1] - a[1]
                 );
 
-            const leaderUser =
-              rodadaRanking[0]?.[0];
-
-            const lastUser =
-
-              rodadaRanking[
-                rodadaRanking.length - 1
-              ]?.[0];
-
-            if (leaderUser) {
-
-              if (
-                !leaderRounds[
-                  leaderUser
-                ]
-              ) {
-
-                leaderRounds[
-                  leaderUser
-                ] = 0;
-
-              }
-
-              leaderRounds[
-                leaderUser
-              ]++;
-
-            }
-
-            if (lastUser) {
-
-              if (
-                !lastPlaceRounds[
-                  lastUser
-                ]
-              ) {
-
-                lastPlaceRounds[
-                  lastUser
-                ] = 0;
-
-              }
-
-              lastPlaceRounds[
-                lastUser
-              ]++;
-
-            }
-
-            rodadaRanking.forEach(
-
-              ([user], position) => {
-
-                const previous =
-
-                  previousPositions[
-                    user
-                  ];
-
-                if (
-                  previous !==
-                  undefined
-                ) {
-
-                  const subida =
-                    previous - position;
-
-                  if (
-
-                    !biggestClimbMap[
-                      user
-                    ] ||
-
-                    subida >
-                    biggestClimbMap[
-                      user
-                    ]
-
-                  ) {
-
-                    biggestClimbMap[
-                      user
-                    ] = subida;
-
-                  }
-
-                }
-
-                previousPositions[
-                  user
-                ] = position;
-
-              }
-
-            );
-
-            Object.entries(
-              rodadaAtual
-            )
-
-            .forEach(
-
-              ([user, pts]) => {
-
-                if (
-                  pts <
-                  worstRoundPoints
-                ) {
-
-                  worstRoundPoints =
-                    pts;
-
-                  worstRoundUser =
-                    user;
-
-                }
-
-              }
-
-            );
+            
            
 
           const row: ChartRow = {
@@ -758,258 +876,367 @@ export default function AnalyticsPage() {
         
         );
 
-        const mostLeaderRoundsEntry =
+        Object.keys(totalBetsPerUser)
 
-        Object.entries(
-          leaderRounds
-        )
-      
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
-      
-      const mostLastPlaceRoundsEntry =
-      
-        Object.entries(
-          lastPlaceRounds
-        )
-      
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
-      
-      const coldStreakEntry =
-      
-        Object.entries(
-          maxZeroStreak
-        )
-      
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
-      
-      const biggestClimbEntry =
-      
-        Object.entries(
-          biggestClimbMap
-        )
-      
-          .sort(
-            (a, b) =>
-              b[1] - a[1]
-          )[0];
+  .forEach((user) => {
 
-      setChartData(evolution);
+    exactRateMap[user] =
 
-      setUsersToShow(
-        visibleUsers
-      );
+      (
+        exactCount[user] || 0
+      ) /
 
-      setStats({
+      totalBetsPerUser[user];
 
-        mostLeaderRounds: {
+    winnerRate[user] =
 
-          user:
-            mostLeaderRoundsEntry?.[0] || "-",
+      (
+        winnerHits[user] || 0
+      ) /
 
-          value:
-            mostLeaderRoundsEntry?.[1] || 0
+      totalBetsPerUser[user];
 
-        },
+    averageGoals[user] =
 
-        mostLastPlaceRounds: {
+      (
+        totalGoalsBet[user] || 0
+      ) /
 
-          user:
-            mostLastPlaceRoundsEntry?.[0] || "-",
+      totalBetsPerUser[user];
 
-          value:
-            mostLastPlaceRoundsEntry?.[1] || 0
+  });
 
-        },
+const exactMasterWinner =
 
-        worstRound: {
+  Object.entries(exactRateMap)
 
-          user:
-            worstRoundUser,
+    .filter(
 
-          value:
-            worstRoundPoints
+      ([user, rate]) =>
 
-        },
+        totalBetsPerUser[user] >= 10 &&
 
-        coldStreak: {
+        (exactCount[user] || 0) >= 3 &&
 
-          user:
-            coldStreakEntry?.[0] || "-",
+        rate >= 0.15
 
-          value:
-            coldStreakEntry?.[1] || 0
+    )
 
-        },
+    .sort((a, b) => b[1] - a[1])[0];
 
-        biggestClimb: {
+const prophetEntry =
 
-          user:
-            biggestClimbEntry?.[0] || "-",
+  Object.entries(winnerRate)
 
-          value:
-            biggestClimbEntry?.[1] || 0
+    .filter(
 
-        },  
+      ([user, rate]) =>
 
-        leader: {
+        totalBetsPerUser[user] >= 10 &&
 
-          user:
-            leaderEntry?.[0] || "-",
+        rate >= 0.6
 
-          value:
-            leaderEntry?.[1] || 0
+    )
 
-        },
+    .sort((a, b) => b[1] - a[1])[0];
 
-        lastPlace: {
+const incendiaryEntry =
 
-          user:
-            lastPlaceEntry?.[0] || "-",
+  Object.entries(averageGoals)
 
-          value:
-            lastPlaceEntry?.[1] || 0
+    .filter(([, avg]) => avg >= 4)
 
-        },
+    .sort((a, b) => b[1] - a[1])[0];
 
-        drawKing: {
+const retranqueiroEntry =
 
-          user:
-            drawKingEntry?.[0] || "-",
+  Object.entries(averageGoals)
 
-          value:
-            drawKingEntry?.[1] || 0
+    .filter(([, avg]) => avg <= 2)
 
-        },
+    .sort((a, b) => a[1] - b[1])[0];
 
-        crazyBetter: {
+const chaosEntry =
 
-          user:
-            crazyBetterEntry?.[0] || "-",
+  Object.entries(chaosScore)
 
-          value:
-            crazyBetterEntry?.[1] || 0
+    .filter(([, chaos]) => chaos >= 5)
 
-        },
+    .sort((a, b) => b[1] - a[1])[0];
 
-        exactMaster: {
+const coldStreakEntry =
 
-          user:
-            exactMasterEntry?.[0] || "-",
+  Object.entries(maxZeroStreak)
 
-          value:
-            exactMasterEntry?.[1] || 0
+    .sort((a, b) => b[1] - a[1])[0];
 
-        },
+const biggestClimbEntry =
 
-        totalBets,
+  Object.entries(biggestClimbMap)
 
-        totalGames:
-          gamesSnapshot.size,
+    .sort((a, b) => b[1] - a[1])[0];
 
-        totalExactScores,
+const almostEntry =
 
-        totalCrazyBets
-
-      });
-
-    }
-
-    carregarAnalytics();
-
+    Object.entries(almostHits)
+  
+      .sort((a, b) => b[1] - a[1])[0];
+  
+  setChartData(evolution);
+  
+  setUsersToShow(
+    visibleUsers
+  );
+  
+  setAnalyticsWinners({
+  
+    exactMasterWinner,
+  
+    prophetEntry,
+  
+    incendiaryEntry,
+  
+    retranqueiroEntry,
+  
+    chaosEntry,
+  
+    almostEntry,
+  
+  });
+  
+  setStats({
+  
+    coldStreak: {
+  
+      user:
+        coldStreakEntry?.[0] || "-",
+  
+      value:
+        coldStreakEntry?.[1] || 0
+  
+    },
+  
+    biggestClimb: {
+  
+      user:
+        biggestClimbEntry?.[0] || "-",
+  
+      value:
+        biggestClimbEntry?.[1] || 0
+  
+    },
+  
+    leader: {
+  
+      user:
+        leaderEntry?.[0] || "-",
+  
+      value:
+        leaderEntry?.[1] || 0
+  
+    },
+  
+    lastPlace: {
+  
+      user:
+        lastPlaceEntry?.[0] || "-",
+  
+      value:
+        lastPlaceEntry?.[1] || 0
+  
+    },
+  
+    drawKing: {
+  
+      user:
+        drawKingEntry?.[0] || "-",
+  
+      value:
+        drawKingEntry?.[1] || 0
+  
+    },
+  
+    totalBets,
+  
+    totalGames:
+      gamesSnapshot.size,
+  
+    totalExactScores,
+  
+    totalCrazyBets
+  
+  });
+  
+  }
+  
+  carregarAnalytics();
+  
   }, []);
 
-  const cards = [
+  const cards: {
 
-    {
-      emoji: "👑",
-      title: "Líder Supremo",
-      user: stats.leader.user,
-      value: `${stats.leader.value} pts`,
-      badge: "🏆 Oráculo da Bola"
-    },
+    emoji: string;
+  
+    title: string;
+  
+    user: string;
+  
+    value: string;
+  
+    badge: string;
+  
+  }[] = [];
 
-    {
-      emoji: "🐢",
-      title: "Lanterna da Vergonha",
-      user: stats.lastPlace.user,
-      value: `${stats.lastPlace.value} pts`,
-      badge: "⚽ Técnico do Íbis FC"
-    },
+cards.push({
 
-    {
-      emoji: "🤝",
-      title: "Rei do Empate",
-      user: stats.drawKing.user,
-      value: `${stats.drawKing.value} empates`,
-      badge: "🤝 Fair Play do Futebol"
-    },
+  emoji: "👑",
+  title: "Líder Supremo",
+  user: stats.leader.user,
+  value: `${stats.leader.value} pts`,
+  badge: "🏆 Dono do campeonato"
 
-    {
-      emoji: "💣",
-      title: "Apostador Insano",
-      user: stats.crazyBetter.user,
-      value: `${stats.crazyBetter.value} apostas absurdas`,
-      badge: "🔥 Profeta do Caos"
-    },
+});
 
-    {
-      emoji: "🎯",
-      title: "Mestre dos Placares",
-      user: stats.exactMaster.user,
-      value: `${stats.exactMaster.value} acertos`,
-      badge: "🏹 Sniper em Ação"
-    },
+if (stats.totalGames >= 5) {
 
-    {
-      emoji: "👑",
-      title: "Ditador do Ranking",
-      user: stats.mostLeaderRounds.user,
-      value: `${stats.mostLeaderRounds.value} rodadas líder`,
-      badge: "🏆 Dono da liderança"
-    },
+  cards.push({
 
-    {
-      emoji: "🪑",
-      title: "Cadeira Cativa",
-      user: stats.mostLastPlaceRounds.user,
-      value: `${stats.mostLastPlaceRounds.value} rodadas em último`,
-      badge: "⚽ Morador do porão"
-    },
+    emoji: "🐢",
+    title: "Lanterna da Vergonha",
+    user: stats.lastPlace.user,
+    value: `${stats.lastPlace.value} pts`,
+    badge: "⚽ Técnico do Íbis FC"
 
-    {
-      emoji: "💀",
-      title: "Pior da Rodada",
-      user: stats.worstRound.user,
-      value: `${stats.worstRound.value} ponto(s)`,
-      badge: "🧠 Mestre do desastre"
-    },
+  });
 
-    {
-      emoji: "🥶",
-      title: "Geladeira FC",
-      user: stats.coldStreak.user,
-      value: `${stats.coldStreak.value} rodadas sem pontuar`,
-      badge: "❄️ Congelado"
-    },
+}
 
-    {
-      emoji: "🚀",
-      title: "Arrancada Heroica",
-      user: stats.biggestClimb.user,
-      value: `${stats.biggestClimb.value} posições subidas`,
-      badge: "📈 Saiu do abismo"
-    },
+if (analyticsWinners.exactMasterWinner) {
 
-  ];
+  cards.push({
+
+    emoji: "🎯",
+    title: "Mestre dos Placares",
+    user: analyticsWinners
+    .exactMasterWinner?.[0],
+    value:
+      `${Math.round( analyticsWinners
+        .exactMasterWinner[1] * 100)}% de precisão`,
+    badge: "🏹 Sniper do futebol"
+
+  });
+
+}
+
+if ( analyticsWinners.prophetEntry) {
+
+  cards.push({
+
+    emoji: "🧠",
+    title: "Profeta",
+    user: analyticsWinners
+    .prophetEntry[0],
+    value:
+      `${Math.round( analyticsWinners
+        .prophetEntry[1] * 100)}% de acertos`,
+    badge: "🔮 Vidente esportivo"
+
+  });
+
+}
+
+if (stats.coldStreak.value >= 3) {
+
+  cards.push({
+
+    emoji: "🥶",
+    title: "Geladeira FC",
+    user: stats.coldStreak.user,
+    value:
+      `${stats.coldStreak.value} jogos sem pontuar`,
+    badge: "❄️ Congelado"
+
+  });
+
+}
+
+{/*
+
+if (stats.totalGames >= 10) {
+
+  cards.push({
+
+    emoji: "🚀",
+    title: "Arrancada Heroica",
+    user: stats.biggestClimb.user,
+    value:
+      `${stats.biggestClimb.value} posições subidas`,
+    badge: "📈 Saiu do abismo"
+
+  });
+}
+*/
+}
+
+if ( analyticsWinners.chaosEntry) {
+
+  cards.push({
+
+    emoji: "💣",
+    title: "Agente do Caos",
+    user:  analyticsWinners.chaosEntry[0],
+    value:
+      `${ analyticsWinners.chaosEntry[1]} pontos de insanidade`,
+    badge: "🔥 Futebol sem limites"
+
+  });
+
+}
+
+if ( analyticsWinners.incendiaryEntry) {
+
+  cards.push({
+
+    emoji: "🔥",
+    title: "Incendiário",
+    user:  analyticsWinners.incendiaryEntry[0],
+    value:
+      `${ analyticsWinners.incendiaryEntry[1].toFixed(1)} gols/jogo`,
+    badge: "⚽ Viciado em goleada"
+
+  });
+
+}
+
+if ( analyticsWinners.retranqueiroEntry) {
+
+  cards.push({
+
+    emoji: "🧱",
+    title: "Retranqueiro",
+    user:  analyticsWinners.retranqueiroEntry[0],
+    value:
+      `${ analyticsWinners.retranqueiroEntry[1].toFixed(1)} gols/jogo`,
+    badge: "🚌 Estacionou o ônibus"
+
+  });
+
+}
+
+if (analyticsWinners.almostEntry) {
+
+  cards.push({
+
+    emoji: "🎯",
+    title: "Bateu na Trave",
+    user:  analyticsWinners.almostEntry[0],
+    value:
+      `${ analyticsWinners.almostEntry[1]} quase acertos`,
+    badge: "😩 Quase foi"
+
+  });
+
+}
 
   const colors = [
 
@@ -1041,36 +1268,24 @@ export default function AnalyticsPage() {
   
     insights.push(
   
-      `${stats.coldStreak.user} está há ${stats.coldStreak.value} rodadas sem pontuar e entrou oficialmente em crise.`
+      `${stats.coldStreak.user} está há ${stats.coldStreak.value} jogos sem pontuar e entrou oficialmente em crise.`
   
     );
   
   }
-  
   if (
-    stats.crazyBetter.value >= 3
+    analyticsWinners.chaosEntry
   ) {
   
     insights.push(
   
-      `${stats.crazyBetter.user} segue realizando apostas incompatíveis com a realidade.`
+      `${analyticsWinners.chaosEntry[0]} segue produzindo apostas incompatíveis com qualquer realidade conhecida.`
   
     );
   
   }
-  
-  if (
-    stats.mostLastPlaceRounds.value >= 3
-  ) {
-  
-    insights.push(
-  
-      `${stats.mostLastPlaceRounds.user} já alugou um apartamento no último lugar.`
-  
-    );
-  
-  }
-  
+
+
   if (
     stats.biggestClimb.value >= 2
   ) {
@@ -1112,35 +1327,15 @@ const achievements: {
 if (
   stats.coldStreak.value >= 5
 ) 
-/*{
-
-  achievements.push({
-
-    user:
-      stats.coldStreak.user,
-
-    title:
-      "Rei do Gelo",
-
-    emoji:
-      "🥶",
-
-    description:
-      `${stats.coldStreak.value} rodadas sem pontuar`
-
-  });
-
-}
-*/
 
 if (
-  stats.crazyBetter.value >= 5
+  analyticsWinners.chaosEntry
 ) {
 
   achievements.push({
 
     user:
-      stats.crazyBetter.user,
+      analyticsWinners.chaosEntry[0],
 
     title:
       "Agente do Caos",
@@ -1149,17 +1344,16 @@ if (
       "💣",
 
     description:
-      `${stats.crazyBetter.value} apostas insanas`
+      `${analyticsWinners.chaosEntry[1]} pontos de insanidade`
 
   });
 
 }
 
+/* {
 if (
   stats.exactMaster.value >= 3
 )
-/* {
-
   achievements.push({
 
     user:
@@ -1179,11 +1373,11 @@ if (
 }
 */
 
+
+/*{
 if (
   stats.mostLeaderRounds.value >= 5
 ) 
-/*{
-
   achievements.push({
 
     user:

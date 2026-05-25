@@ -14,6 +14,8 @@ import {
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
 
 import {
@@ -42,11 +44,13 @@ type Props = {
   usuarios?: Usuario[];
 };
 
+type ReactionUser = {
+  uid: string;
+  nome: string;
+};
+
 type Reactions = {
-  [emoji: string]: {
-    uid: string;
-    nome: string;
-  }[];
+  [emoji: string]: ReactionUser[];
 };
 
 type Mensagem = {
@@ -62,6 +66,35 @@ type Mensagem = {
     toDate?: () => Date;
   };
 };
+
+/*
+========================================
+EMOJIS
+========================================
+*/
+
+const reactionEmojis = [
+  "👍",
+  "❤️",
+  "😂",
+  "🤣",
+  "🔥",
+  "👏",
+  "🤡",
+  "😡",
+  "😭",
+  "👎",
+  "🐐",
+  "🧠",
+  "💩",
+  "🍿",
+  "⚽",
+  "🏆",
+  "🍼",
+  "💸",
+  "🫏",
+  "🚨",
+];
 
 /*
 ========================================
@@ -84,6 +117,9 @@ export default function CentralCorneta({
   STATES
   ========================================
   */
+
+  const [menuAbertoId, setMenuAbertoId] =
+    useState<string | null>(null);
 
   const [mensagens, setMensagens] =
     useState<Mensagem[]>([]);
@@ -350,6 +386,109 @@ export default function CentralCorneta({
       alert(
         "Erro ao enviar mensagem"
       );
+
+    }
+
+  }
+
+  /*
+  ========================================
+  REAGIR
+  ========================================
+  */
+
+  async function reagirMensagem(
+    mensagem: Mensagem,
+    emoji: string
+  ) {
+
+    try {
+
+      const usuarioAtual =
+        auth.currentUser;
+
+      if (!usuarioAtual) return;
+
+      const reactions =
+        mensagem.reactions || {};
+
+      const novoObjeto: Reactions = {};
+
+      Object.keys(reactions)
+        .forEach((key) => {
+
+          novoObjeto[key] =
+            reactions[key].filter(
+
+              (user) =>
+
+                user.uid !==
+                usuarioAtual.uid
+
+            );
+
+        });
+
+      const jaReagiu =
+
+        reactions[emoji]?.some(
+
+          (user) =>
+
+            user.uid ===
+            usuarioAtual.uid
+
+        );
+
+      if (!jaReagiu) {
+
+        if (!novoObjeto[emoji]) {
+
+          novoObjeto[emoji] = [];
+
+        }
+
+        novoObjeto[emoji].push({
+
+          uid:
+            usuarioAtual.uid,
+
+          nome:
+
+            usuarioAtual.displayName ||
+
+            usuarioAtual.email ||
+
+            "Jogador",
+
+        });
+
+      }
+
+      await updateDoc(
+
+        doc(
+          db,
+          "ligas",
+          ligaId,
+          "mensagens",
+          mensagem.id
+        ),
+
+        {
+
+          reactions:
+            novoObjeto,
+
+        }
+
+      );
+
+      setMenuAbertoId(null);
+
+    } catch (error) {
+
+      console.error(error);
 
     }
 
@@ -786,6 +925,143 @@ export default function CentralCorneta({
                     ">
 
                       {mensagem.texto}
+
+                    </div>
+
+                    {/* REAÇÕES EXISTENTES */}
+
+                    <div className="
+                      flex
+                      flex-wrap
+                      gap-2
+                      mt-4
+                    ">
+
+                      {Object.entries(
+                        mensagem.reactions || {}
+                      )
+
+                        .filter(
+                          ([, users]) =>
+                            users.length > 0
+                        )
+
+                        .map(
+                          ([emoji, users]) => (
+
+                            <div
+                              key={emoji}
+                              className="
+                                bg-zinc-700
+                                border border-zinc-600
+                                rounded-full
+                                px-3 py-1
+                                text-sm
+                                flex items-center gap-2
+                              "
+                            >
+
+                              <span>{emoji}</span>
+
+                              <span className="
+                                text-zinc-300
+                                text-xs
+                                font-bold
+                              ">
+
+                                {users.length}
+
+                              </span>
+
+                            </div>
+
+                          )
+
+                        )}
+
+                    </div>
+
+                    {/* BOTÃO REAGIR */}
+
+                    <div className="
+                      relative
+                      mt-3
+                    ">
+
+                      <button
+
+                        onClick={() =>
+
+                          setMenuAbertoId(
+
+                            menuAbertoId === mensagem.id
+                              ? null
+                              : mensagem.id
+
+                          )
+
+                        }
+
+                        className="
+                          bg-zinc-700
+                          hover:bg-zinc-600
+                          px-3 py-2
+                          rounded-full
+                          border border-zinc-600
+                          text-sm
+                          transition-all
+                        "
+                      >
+
+                        😈 Reagir
+
+                      </button>
+
+                      {menuAbertoId === mensagem.id && (
+
+                        <div
+                          className="
+                            absolute left-0
+                            z-50 mt-2
+                            bg-zinc-900
+                            border border-zinc-700
+                            rounded-2xl
+                            p-3
+                            flex flex-wrap
+                            gap-2
+                            w-72
+                            shadow-2xl
+                          "
+                        >
+
+                          {reactionEmojis.map(
+                            (emoji) => (
+
+                              <button
+                                key={emoji}
+                                onClick={() =>
+                                  reagirMensagem(
+                                    mensagem,
+                                    emoji
+                                  )
+                                }
+                                className="
+                                  text-2xl
+                                  hover:scale-125
+                                  transition-transform
+                                "
+                              >
+
+                                {emoji}
+
+                              </button>
+
+                            )
+                          )}
+
+                        </div>
+
+                      )}
 
                     </div>
 
