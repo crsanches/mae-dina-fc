@@ -457,26 +457,25 @@ export default function Home() {
      FILTERS
   ========================= */
 
-  /*const jogosAbertos =
-    jogos.filter((jogo) => {
+  // const jogosAbertos =
+//   jogos.filter((jogo) => {
 
-      const gameDate =
-        new Date(jogo.matchDate);
+//     const gameDate =
+//       new Date(jogo.matchDate);
 
-      const now =
-        new Date();
+//     const now =
+//       new Date();
 
-      const difference =
-        gameDate.getTime() -
-        now.getTime();
+//     const difference =
+//       gameDate.getTime() -
+//       now.getTime();
 
-      const oneHour =
-        1000 * 60 * 60;
+//     const oneHour =
+//       1000 * 60 * 60;
 
-      return difference > oneHour;
+//     return difference > oneHour;
 
-    });
-    */
+//   });
 
   const jogosEncerrados =
     jogos.filter((jogo) => {
