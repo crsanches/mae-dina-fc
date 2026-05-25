@@ -299,10 +299,10 @@ export default function Home() {
      MEME AUTOMÁTICO
   ========================= */
 
-  async function gerarMemeAutomatico(
+  const gerarMemeAutomatico = async (
     currentUser: string,
     currentGroupId: string
-  ) {
+  ) => {
 
     try {
 
@@ -451,7 +451,7 @@ export default function Home() {
 
     }
 
-  }
+  };
 
   /* =========================
      FILTERS
