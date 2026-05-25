@@ -66,6 +66,8 @@ input[type="number"] {
   }
 }
 
+
+
 .animate-marquee {
   animation: marquee 45s linear infinite;
 
