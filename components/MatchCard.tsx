@@ -185,24 +185,44 @@ export default function MatchCard({
       await setDoc(
         doc(db, "bets", betId),
         {
-
-          userName,
-
+      
+          uid:
+            user.uid,
+      
+          username:
+      
+            userData.username ||
+      
+            "Jogador",
+      
+          nome:
+      
+            user.displayName ||
+      
+            "Jogador",
+      
+          userName:
+            user.displayName ||
+      
+           
+            "Jogador",
+      
           match:
             `${teamA} x ${teamB}`,
-
+      
           golsA,
           golsB,
-
+      
           points:
             calculatedPoints,
-
+      
           createdAt:
             serverTimestamp(),
-
+      
           groupId
-
+      
         }
+      
       );
 
       setPoints(calculatedPoints);

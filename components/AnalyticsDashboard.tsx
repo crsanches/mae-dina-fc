@@ -1111,7 +1111,8 @@ const achievements: {
 
 if (
   stats.coldStreak.value >= 5
-) {
+) 
+/*{
 
   achievements.push({
 
@@ -1130,6 +1131,7 @@ if (
   });
 
 }
+*/
 
 if (
   stats.crazyBetter.value >= 5
@@ -1155,7 +1157,8 @@ if (
 
 if (
   stats.exactMaster.value >= 3
-) {
+)
+/* {
 
   achievements.push({
 
@@ -1174,10 +1177,12 @@ if (
   });
 
 }
+*/
 
 if (
   stats.mostLeaderRounds.value >= 5
-) {
+) 
+/*{
 
   achievements.push({
 
@@ -1196,6 +1201,7 @@ if (
   });
 
 }
+*/
 
 if (
   stats.drawKing.value >= 10

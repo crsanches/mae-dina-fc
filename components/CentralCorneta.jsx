@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState,  useRef, } from "react";
 
 import {
   addDoc,
@@ -17,38 +17,34 @@ import {
 import { auth, db } from "../lib/firebase";
 
 const reactionEmojis = [
-
-    "👍", // curti
-    "❤️", // amei
-    "😂", // ri muito
-    "🤣", // gargalhei
-    "🔥", // brabo
-    "👏", // aplausos
-    "🤡", // pipocou
-    "😡", // revoltado
-    "😭", // chorou
-    "👎", // discordo
-    "🐐", // goat / craque
-    "🧠", // gênio
-    "💩", // fala merda
-    "🍿", // treta
-    "⚽", // futebol raiz
-    "🏆", // campeão
-    "🍼", // freguês
-    "💸", // comprou o juiz
-    "🫏", // bagre
-    "🚨", // polêmica
-  
-  ];
+  "👍",
+  "❤️",
+  "😂",
+  "🤣",
+  "🔥",
+  "👏",
+  "🤡",
+  "😡",
+  "😭",
+  "👎",
+  "🐐",
+  "🧠",
+  "💩",
+  "🍿",
+  "⚽",
+  "🏆",
+  "🍼",
+  "💸",
+  "🫏",
+  "🚨",
+];
 
 export default function CentralCorneta({
   ligaId,
-  usuarios,
+  usuarios = [],
 }) {
 
-
-
-    const [menuAbertoId, setMenuAbertoId] =
+  const [menuAbertoId, setMenuAbertoId] =
     useState(null);
 
   const [mensagens, setMensagens] =
@@ -59,6 +55,13 @@ export default function CentralCorneta({
 
   const [destinoId, setDestinoId] =
     useState("");
+
+    const [menuUsuariosAberto, setMenuUsuariosAberto] =
+    useState(false);
+
+    const menuUsuariosRef =
+  useRef(null);
+
 
   useEffect(() => {
 
@@ -101,6 +104,69 @@ export default function CentralCorneta({
 
   }, [ligaId]);
 
+  const usuariosFiltrados = [
+
+    ...new Map(
+
+      usuarios.map((u) => [
+
+        u.uid || u.id,
+        u
+
+      ])
+
+    ).values()
+
+  ]
+
+    .filter(
+
+      (u) =>
+
+        (
+          u.uid ||
+          u.id
+        ) &&
+
+        (
+          u.uid ||
+          u.id
+        ) !== auth.currentUser?.uid
+
+    )
+
+    .sort((a, b) =>
+
+      (
+
+        a.username ||
+
+        a.displayName ||
+
+        a.nome ||
+
+        a.email ||
+
+        ""
+
+      ).localeCompare(
+
+        b.username ||
+
+        b.displayName ||
+
+        b.nome ||
+
+        b.email ||
+
+        ""
+
+      )
+
+    );
+
+  
+
   async function enviarMensagem() {
 
     if (!texto.trim()) return;
@@ -120,10 +186,17 @@ export default function CentralCorneta({
       const usuarioAtual =
         auth.currentUser;
 
+      if (!usuarioAtual) return;
+
       const destino =
         usuarios.find(
           (u) =>
-            u.id === destinoId
+
+            (
+              u.uid ||
+              u.id
+            ) === destinoId
+
         );
 
       await addDoc(
@@ -151,7 +224,15 @@ export default function CentralCorneta({
           destinoId,
 
           destinoNome:
+
+            destino?.username ||
+
+            destino?.displayName ||
+
             destino?.nome ||
+
+            destino?.email ||
+
             "Jogador",
 
           texto:
@@ -167,7 +248,6 @@ export default function CentralCorneta({
       );
 
       setTexto("");
-
       setDestinoId("");
 
     } catch (error) {
@@ -182,94 +262,134 @@ export default function CentralCorneta({
 
   }
 
- async function reagirMensagem(
-  mensagem,
-  emoji
-) {
+  async function reagirMensagem(
+    mensagem,
+    emoji
+  ) {
 
-  try {
+    try {
 
-    const usuarioAtual =
-      auth.currentUser;
+      const usuarioAtual =
+        auth.currentUser;
 
-    if (!usuarioAtual) return;
+      if (!usuarioAtual) return;
 
-    const reactions =
-      mensagem.reactions || {};
+      const reactions =
+        mensagem.reactions || {};
 
-    const novoObjeto = {};
+      const novoObjeto = {};
 
-    // remove reação antiga
-    Object.keys(reactions)
-      .forEach((key) => {
+      Object.keys(reactions)
+        .forEach((key) => {
 
-      novoObjeto[key] =
-        reactions[key].filter(
+          novoObjeto[key] =
+            reactions[key].filter(
+              (user) =>
+                user.uid !==
+                usuarioAtual.uid
+            );
+
+        });
+
+      const jaReagiu =
+        reactions[emoji]?.some(
           (user) =>
-            user.uid !==
+            user.uid ===
             usuarioAtual.uid
         );
 
-    });
+      if (!jaReagiu) {
 
-    // verifica se já reagiu
-    const jaReagiu =
-      reactions[emoji]?.some(
-        (user) =>
-          user.uid ===
-          usuarioAtual.uid
-      );
+        if (!novoObjeto[emoji]) {
+          novoObjeto[emoji] = [];
+        }
 
-    // adiciona nova reação
-    if (!jaReagiu) {
+        novoObjeto[emoji].push({
 
-      if (!novoObjeto[emoji]) {
-        novoObjeto[emoji] = [];
+          uid:
+            usuarioAtual.uid,
+
+          nome:
+
+            usuarioAtual.displayName ||
+
+            usuarioAtual.email ||
+
+            "Jogador",
+
+        });
+
       }
 
-      novoObjeto[emoji].push({
+      await updateDoc(
 
-        uid:
-          usuarioAtual.uid,
+        doc(
+          db,
+          "ligas",
+          ligaId,
+          "mensagens",
+          mensagem.id
+        ),
 
-        nome:
-          usuarioAtual.displayName ||
+        {
 
-          usuarioAtual.email ||
+          reactions:
+            novoObjeto,
 
-          "Jogador"
+        }
 
-      });
+      );
+
+      setMenuAbertoId(null);
+
+    } catch (error) {
+
+      console.error(error);
 
     }
 
-    await updateDoc(
-
-      doc(
-        db,
-        "ligas",
-        ligaId,
-        "mensagens",
-        mensagem.id
-      ),
-
-      {
-        reactions:
-          novoObjeto
-      }
-
-    );
-
-    // FECHA MENU
-    setMenuAbertoId(null);
-
-  } catch (error) {
-
-    console.error(error);
-
   }
 
-}
+  useEffect(() => {
+
+    function handleClickOutside(
+      event
+    ) {
+  
+      if (
+  
+        menuUsuariosRef.current &&
+  
+        !menuUsuariosRef.current.contains(
+          event.target
+        )
+  
+      ) {
+  
+        setMenuUsuariosAberto(
+          false
+        );
+  
+      }
+  
+    }
+  
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
+  
+    return () => {
+  
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
+  
+    };
+  
+  }, []);
+
 
   return (
 
@@ -299,36 +419,181 @@ export default function CentralCorneta({
 
       </div>
 
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-3 mb-4">
 
-        <select
-          value={destinoId}
-          onChange={(e) =>
-            setDestinoId(
-              e.target.value
-            )
-          }
-          className="bg-zinc-800 border border-zinc-700 rounded-lg p-2"
-        >
+      <div
+        className="relative"
+        ref={menuUsuariosRef}
+      >
 
-          <option value="">
-            Escolha o alvo da zoeira
-          </option>
+<div
+  className="
+    bg-zinc-950
+    border border-zinc-800
+    rounded-2xl
+    p-3
+    flex items-center
+    justify-between
+    gap-3
+  "
+>
 
-          {usuarios.map((usuario) => (
+  <div className="flex flex-col">
 
-            <option
-              key={usuario.id}
-              value={usuario.id}
-            >
+    <span className="text-xs text-zinc-500">
 
-              {usuario.nome}
+      🎯 Alvo da zoeira
 
-            </option>
+    </span>
 
-          ))}
+    <span className="font-bold text-white">
 
-        </select>
+      {
+
+        usuariosFiltrados.find(
+          (u) =>
+
+            (
+              u.uid ||
+              u.id
+            ) === destinoId
+
+        )?.username ||
+
+        usuariosFiltrados.find(
+          (u) =>
+
+            (
+              u.uid ||
+              u.id
+            ) === destinoId
+
+        )?.displayName ||
+
+        usuariosFiltrados.find(
+          (u) =>
+
+            (
+              u.uid ||
+              u.id
+            ) === destinoId
+
+        )?.nome ||
+
+        "Mire no seu alvo 😈"
+
+      }
+
+    </span>
+
+  </div>
+
+  <button
+
+    onClick={() =>
+
+      setMenuUsuariosAberto(
+        !menuUsuariosAberto
+      )
+
+    }
+
+    className="
+      bg-zinc-800
+      hover:bg-zinc-700
+      px-3 py-2
+      rounded-xl
+      text-sm
+      transition-all
+    "
+  >
+
+    🔄
+
+  </button>
+
+</div>
+
+{menuUsuariosAberto && (
+
+  <div
+    className="
+      absolute z-50 mt-2
+      w-full
+      max-h-64
+      overflow-y-auto
+      bg-zinc-900
+      border border-zinc-700
+      rounded-2xl
+      p-2
+      shadow-2xl
+      flex flex-col gap-1
+    "
+  >
+
+    {usuariosFiltrados.map(
+      (usuario) => {
+
+        const usuarioId =
+
+          usuario.uid ||
+          usuario.id;
+
+        const usuarioNome =
+
+          usuario.username ||
+
+          usuario.displayName ||
+
+          usuario.nome ||
+
+          usuario.email ||
+
+          "Jogador";
+
+        return (
+
+          <button
+
+            key={usuarioId}
+
+            onClick={() => {
+
+              setDestinoId(
+                usuarioId
+              );
+
+              setMenuUsuariosAberto(
+                false
+              );
+
+            }}
+
+            className="
+              w-full
+              text-left
+              px-4 py-3
+              rounded-xl
+              hover:bg-zinc-800
+              transition-all
+              text-white
+            "
+          >
+
+            {usuarioNome}
+
+          </button>
+
+        );
+
+      }
+    )}
+
+  </div>
+
+)}
+
+</div>
 
         <textarea
           value={texto}
@@ -340,7 +605,14 @@ export default function CentralCorneta({
           maxLength={120}
           rows={2}
           placeholder="Mande sua provocação..."
-          className="bg-zinc-800 border border-zinc-700 rounded-lg p-2 resize-none"
+          className="
+            bg-zinc-800
+            border border-zinc-700
+            rounded-lg
+            p-3
+            resize-none
+            text-white
+          "
         />
 
         <div className="flex justify-between items-center text-sm text-zinc-400">
@@ -351,7 +623,15 @@ export default function CentralCorneta({
 
           <button
             onClick={enviarMensagem}
-            className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-lg transition"
+            className="
+              bg-yellow-500
+              hover:bg-yellow-400
+              text-black
+              font-bold
+              px-4 py-2
+              rounded-lg
+              transition
+            "
           >
 
             Enviar
@@ -368,93 +648,108 @@ export default function CentralCorneta({
 
           <div
             key={mensagem.id}
-            className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
+            className="
+              bg-zinc-800
+              rounded-2xl
+              p-4
+              border border-zinc-700
+            "
           >
 
-<div className="flex justify-between items-start gap-3 mb-2">
+            <div className="flex justify-between items-start gap-3 mb-2">
 
-<div className="text-sm text-yellow-400 font-semibold">
+              <div className="text-sm text-yellow-400 font-semibold">
 
-  {"De: "}
-  {mensagem.autorNome}
+                {"De: "}
+                {mensagem.autorNome}
 
-  {" →→→ "}
+                {" →→→ "}
 
-  {"Para: "}
-  {mensagem.destinoNome}
+                {"Para: "}
+                {mensagem.destinoNome}
 
-</div>
+              </div>
 
-<div className="relative shrink-0">
+              <div className="relative shrink-0">
 
-  <button
-    onClick={() =>
+                <button
+                  onClick={() =>
 
-      setMenuAbertoId(
+                    setMenuAbertoId(
 
-        menuAbertoId === mensagem.id
-          ? null
-          : mensagem.id
+                      menuAbertoId === mensagem.id
+                        ? null
+                        : mensagem.id
 
-      )
+                    )
 
-    }
-    className="
-      bg-zinc-700 hover:bg-zinc-600
-      px-3 py-1 rounded-full
-      border border-zinc-600
-      text-sm flex items-center gap-2
-      transition-all whitespace-nowrap
-    "
-  >
+                  }
+                  className="
+                    bg-zinc-700
+                    hover:bg-zinc-600
+                    px-3 py-1
+                    rounded-full
+                    border border-zinc-600
+                    text-sm
+                    flex items-center gap-2
+                    transition-all
+                    whitespace-nowrap
+                  "
+                >
 
-    😈 Reagir
+                  😈 Reagir
 
-  </button>
+                </button>
 
-  {menuAbertoId === mensagem.id && (
+                {menuAbertoId === mensagem.id && (
 
-    <div
-      className="
-        absolute right-0 z-50 mt-2
-        bg-zinc-900 border
-        border-zinc-700
-        rounded-2xl p-2
-        flex flex-wrap gap-2
-        w-64 shadow-2xl
-      "
-    >
+                  <div
+                    className="
+                      absolute right-0
+                      z-50 mt-2
+                      bg-zinc-900
+                      border border-zinc-700
+                      rounded-2xl
+                      p-2
+                      flex flex-wrap
+                      gap-2
+                      w-64
+                      shadow-2xl
+                    "
+                  >
 
-      {reactionEmojis.map(
-        (emoji) => (
+                    {reactionEmojis.map(
+                      (emoji) => (
 
-        <button
-          key={emoji}
-          onClick={() =>
-            reagirMensagem(
-              mensagem,
-              emoji
-            )
-          }
-          className="
-            text-2xl hover:scale-125
-            transition-transform
-          "
-        >
+                        <button
+                          key={emoji}
+                          onClick={() =>
+                            reagirMensagem(
+                              mensagem,
+                              emoji
+                            )
+                          }
+                          className="
+                            text-2xl
+                            hover:scale-125
+                            transition-transform
+                          "
+                        >
 
-          {emoji}
+                          {emoji}
 
-        </button>
+                        </button>
 
-      ))}
+                      )
+                    )}
 
-    </div>
+                  </div>
 
-  )}
+                )}
 
-</div>
+              </div>
 
-</div>
+            </div>
 
             <div className="text-white break-words">
 
@@ -462,106 +757,112 @@ export default function CentralCorneta({
 
             </div>
 
-            {/* REAÇÕES */}
+            <div className="flex flex-wrap items-center gap-2 mt-4">
 
-{/* REAÇÕES EXISTENTES */}
+              {Object.entries(
+                mensagem.reactions || {}
+              ).map(
+                ([emoji, users]) => {
 
-<div className="flex flex-wrap items-center gap-2 mt-4">
+                  if (!users.length)
+                    return null;
 
-  {Object.entries(
-    mensagem.reactions || {}
-  ).map(([emoji, users]) => {
+                  const usuarioAtual =
+                    auth.currentUser;
 
-    if (!users.length) return null;
+                  const reagiu =
+                    users.some(
+                      (user) =>
+                        user.uid ===
+                        usuarioAtual?.uid
+                    );
 
-    const usuarioAtual =
-      auth.currentUser;
+                  return (
 
-    const reagiu =
-      users.some(
-        (user) =>
-          user.uid ===
-          usuarioAtual?.uid
-      );
+                    <div
+                      key={emoji}
+                      className="relative group"
+                    >
 
-    return (
+                      <button
+                        onClick={() =>
+                          reagirMensagem(
+                            mensagem,
+                            emoji
+                          )
+                        }
+                        className={`
+                          px-3 py-1
+                          rounded-full
+                          text-sm
+                          border
+                          transition-all duration-200
 
-      <div
-        key={emoji}
-        className="relative group"
-      >
+                          ${
+                            reagiu
 
-        <button
-          onClick={() =>
-            reagirMensagem(
-              mensagem,
-              emoji
-            )
-          }
-          className={`
-            px-3 py-1 rounded-full
-            text-sm border
-            transition-all duration-200
+                              ? `
+                                bg-zinc-600
+                                border-zinc-500
+                              `
 
-            ${
-              reagiu
+                              : `
+                                bg-zinc-700
+                                border-zinc-600
+                                hover:bg-zinc-600
+                              `
+                          }
+                        `}
+                      >
 
-              ? `
-              bg-zinc-600
-              border-zinc-500
-              `
+                        {emoji} {users.length}
 
-              : `
-                bg-zinc-700
-                border-zinc-600
-                hover:bg-zinc-600
-              `
-            }
-          `}
-        >
+                      </button>
 
-          {emoji}
-          {" "}
-          {users.length}
+                      <div
+                        className="
+                          absolute bottom-full
+                          left-1/2
+                          -translate-x-1/2
+                          mb-2
+                          hidden
+                          group-hover:flex
+                          flex-col
+                          bg-black
+                          text-white
+                          text-xs
+                          rounded-lg
+                          px-3 py-2
+                          whitespace-nowrap
+                          z-50
+                          border border-zinc-700
+                        "
+                      >
 
-        </button>
+                        {users.map(
+                          (user) => (
 
-        {/* TOOLTIP */}
+                            <span
+                              key={user.uid}
+                            >
 
-        <div
-          className="
-            absolute bottom-full left-1/2
-            -translate-x-1/2 mb-2
-            hidden group-hover:flex
-            flex-col
-            bg-black text-white
-            text-xs rounded-lg
-            px-3 py-2
-            whitespace-nowrap
-            z-50
-            border border-zinc-700
-          "
-        >
+                              {user.nome}
 
-          {users.map((user) => (
+                            </span>
 
-            <span key={user.uid}>
+                          )
+                        )}
 
-              {user.nome}
+                      </div>
 
-            </span>
+                    </div>
 
-          ))}
+                  );
 
-        </div>
+                }
+              )}
 
-      </div>
-
-    );
-
-  })}
-
-</div>
+            </div>
 
           </div>
 

@@ -612,7 +612,7 @@ useEffect(() => {
         {/* STATUS USUÁRIO */}
         <UserStats />
 
-        {/* RANKING */}
+        {/* RANKING - ranking mundial da vergonha*/}
         <RealRanking />
 
         {/* central da corneta */}
