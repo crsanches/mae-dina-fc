@@ -1,36 +1,19 @@
 "use client";
 
-import Header from "../components/Header";
-import MatchCard from "../components/MatchCard";
-import BetTable from "../components/BetTable";
-import UserStats from "../components/UserStats";
-import MemeCard from "../components/MemeCard";
-import LoginCard from "../components/LoginCard";
-import RealRanking from "../components/RealRanking";
-import Link from "next/link";
-import AnalyticsDashboard
-from "../components/AnalyticsDashboard";
-import Footer from '../components/footer'
-import CentralCorneta from "../components/CentralCorneta";
-import MemeTicker
-from "../components/MemeTicker";
-
-import GroupCard
-from "../components/GroupCard";
-
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import Link from "next/link";
 
-import { db, auth} from "../lib/firebase";
-import {getAutomaticMeme} from "../lib/automaticMemes";
+import Header from "../components/Header";
+import LoginCard from "../components/LoginCard";
+import GroupCard from "../components/GroupCard";
+import Footer from "../components/footer";
 
-import {
-  calculatePoints
-} from "../lib/calculatePoints";
+import { db, auth } from "../lib/firebase";
+import { getAutomaticMeme } from "../lib/automaticMemes";
+import { calculatePoints } from "../lib/calculatePoints";
 
-import {
-  onAuthStateChanged
-} from "firebase/auth";
-
+import { onAuthStateChanged } from "firebase/auth";
 
 import {
   collection,
@@ -38,10 +21,53 @@ import {
   onSnapshot,
   orderBy,
   query,
-where,
-doc,
-getDoc
+  where,
+  doc,
+  getDoc,
 } from "firebase/firestore";
+
+/* =========================
+   LAZY LOAD COMPONENTS
+========================= */
+
+const UserStats = dynamic(
+  () => import("../components/UserStats"),
+  {
+    ssr: false,
+  }
+);
+
+const RealRanking = dynamic(
+  () => import("../components/RealRanking"),
+  {
+    ssr: false,
+  }
+);
+
+const AnalyticsDashboard = dynamic(
+  () => import("../components/AnalyticsDashboard"),
+  {
+    ssr: false,
+  }
+);
+
+const CentralCorneta = dynamic(
+  () => import("../components/CentralCorneta"),
+  {
+    ssr: false,
+  }
+);
+
+const BetTable = dynamic(
+  () => import("../components/BetTable"),
+  {
+    ssr: false,
+  }
+);
+
+/* =========================
+   TYPES
+========================= */
 
 type Game = {
   id: string;
@@ -60,390 +86,106 @@ type Game = {
   resultadoB?: number;
 };
 
+type UsuarioLiga = {
+  id: string;
+  nome: string;
+  activeGroupId: string;
+};
+
 export default function Home() {
 
+  /* =========================
+     STATES
+  ========================= */
+
   const [isLogged, setIsLogged] =
-  useState(false);
+    useState(false);
+
+  const [ligaId, setLigaId] =
+    useState("");
+
+  const [usuariosLiga, setUsuariosLiga] =
+    useState<UsuarioLiga[]>([]);
+
+  const [jogos, setJogos] =
+    useState<Game[]>([]);
+
+  const [automaticMeme, setAutomaticMeme] =
+    useState<{
+      text: string;
+      image?: string;
+    } | null>(null);
+
+  const [showHeavyComponents, setShowHeavyComponents] =
+    useState(false);
+
+  /* =========================
+     AUTH
+  ========================= */
 
   useEffect(() => {
 
     const unsubscribe =
       onAuthStateChanged(
         auth,
-        (user) => {
-  
+        async (user) => {
+
           setIsLogged(!!user);
-  
-        }
-      );
-  
-    return () => unsubscribe();
-  
-  }, []);
 
-  const [jogos, setJogos] =
-    useState<Game[]>([]);
+          if (!user) {
 
-  const [ligaId, setLigaId] =
-    useState("");
-  
-    type UsuarioLiga = {
-      id: string;
-      nome: string;
-      activeGroupId: string;
-    };
-    
-    const [usuariosLiga, setUsuariosLiga] =
-      useState<UsuarioLiga[]>([]);
+            setAutomaticMeme(null);
 
-      const [memesTicker, setMemesTicker] =
-      useState<
-        {
-          text: string;
-          image?: string;
-        }[]
-      >([]);
-  
-    const [automaticMeme, setAutomaticMeme] =
-  useState<{
-    text: string;
-    image?: string;
-  } | null>(null);
+            return;
 
-    useEffect(() => {
-
-      const q = query(
-    
-        collection(db, "games"),
-    
-        orderBy("createdAt", "asc")
-    
-      );
-    
-      const unsubscribe =
-        onSnapshot(
-    
-          q,
-    
-          (snapshot) => {
-    
-            const games: Game[] = [];
-    
-            snapshot.forEach((doc) => {
-    
-              const data = doc.data();
-    
-              games.push({
-    
-                id: doc.id,
-    
-                teamA: data.teamA,
-                teamB: data.teamB,
-    
-                emojiA: data.emojiA,
-                emojiB: data.emojiB,
-    
-                phase: data.phase,
-    
-                matchDate: data.matchDate,
-    
-                resultadoA: data.resultadoA,
-                resultadoB: data.resultadoB
-    
-              });
-    
-            });
-    
-            setJogos(games);
-    
           }
-    
-        );
-    
-      return () => unsubscribe();
-    
-    }, []);
-    
-    useEffect(() => {
 
-      const unsubscribe =
-        onSnapshot(
-    
-          collection(db, "memes"),
-    
-          (snapshot) => {
-    
-            const memes: {
-              text: string;
-              image?: string;
-            }[] = [];
-    
-            const currentUser =
-              auth.currentUser?.displayName;
-    
-            snapshot.forEach((doc) => {
-    
-              const data = doc.data();
-    
-              if (
-                data.active &&
-                (
-                  !data.targetUser ||
-                  data.targetUser === currentUser
-                )
-              ) {
-    
-                memes.push({
-    
-                  text: data.text,
-                  image: data.image
-    
-                });
-    
-              }
-    
-            });
-    
-            setMemesTicker(memes);
-    
+          /* =========================
+             USER DATA
+          ========================= */
+
+          const userRef =
+            doc(
+              db,
+              "users",
+              user.uid
+            );
+
+          const userSnap =
+            await getDoc(userRef);
+
+          if (!userSnap.exists()) {
+            return;
           }
-    
-        );
-    
-      return () => unsubscribe();
-    
-    }, []);
-  
-async function gerarMemeAutomatico(
-  currentUser: string
-) {
 
-  const currentUserAuth =
-    auth.currentUser;
-
-  if (!currentUserAuth) {
-    return;
-  }
-
-  const userRef =
-    doc(
-      db,
-      "users",
-      currentUserAuth.uid
-    );
-
-  const userSnap =
-    await getDoc(userRef);
-
-  if (!userSnap.exists()) {
-    return;
-  }
-
-  const currentGroupId =
-    userSnap.data().activeGroupId
-
-  const betsQuery =
-    query(
-
-      collection(db, "bets"),
-
-      where(
-        "groupId",
-        "==",
-        currentGroupId
-      )
-
-    );
-
-  const betsSnapshot =
-    await getDocs(
-      betsQuery
-    );
-
-  const gamesSnapshot =
-    await getDocs(
-      collection(db, "games")
-    );
-
-  const ranking:
-    Record<string, number> = {};
-
-  let exactScore = false;
-
-  let crazyBet = false;
-
-  betsSnapshot.forEach((betDoc) => {
-
-    const bet =
-      betDoc.data();
-
-    let points = 0;
-
-    gamesSnapshot.forEach((gameDoc) => {
-
-      const game =
-        gameDoc.data();
-
-      if (
-        game.match === bet.match &&
-        game.resultadoA != null &&
-        game.resultadoB != null
-      ) {
-
-        points =
-          calculatePoints({
-
-            apostaA:
-              Number(bet.golsA),
-
-            apostaB:
-              Number(bet.golsB),
-
-            resultadoA:
-              Number(game.resultadoA),
-
-            resultadoB:
-              Number(game.resultadoB)
-
-          });
-
-        if (
-          bet.userName === currentUser &&
-          Number(bet.golsA) === Number(game.resultadoA) &&
-          Number(bet.golsB) === Number(game.resultadoB)
-        ) {
-
-          exactScore = true;
-
-        }
-
-        if (
-          bet.userName === currentUser &&
-          (
-            Number(bet.golsA) >= 6 ||
-            Number(bet.golsB) >= 6
-          )
-        ) {
-
-          crazyBet = true;
-
-        }
-
-      }
-
-    });
-
-    if (!ranking[bet.userName]) {
-
-      ranking[bet.userName] = 0;
-
-    }
-
-    ranking[bet.userName] += points;
-
-  });
-
-  const sorted =
-
-    Object.entries(ranking)
-
-      .sort(
-        (a, b) =>
-          b[1] - a[1]
-      );
-
-  const isLeader =
-    sorted[0]?.[0] === currentUser;
-
-  const isLastPlace =
-    sorted[
-      sorted.length - 1
-    ]?.[0] === currentUser;
-
-  const meme =
-    getAutomaticMeme({
-
-      isLeader,
-
-      isLastPlace,
-
-      exactScore,
-
-      crazyBet
-
-    });
-
-  if (meme) {
-
-    setAutomaticMeme(meme);
-
-  }
-
-}
-
-useEffect(() => {
-
-  const unsubscribe =
-    onAuthStateChanged(
-      auth,
-      (user) => {
-
-        if (!user) {
-
-          setAutomaticMeme(null);
-
-          return;
-
-        }
-
-        gerarMemeAutomatico(
-          user.displayName || ""
-        );
-
-      }
-    );
-
-  return () => unsubscribe();
-
-}, []);
-
-useEffect(() => {
-
-  const unsubscribe =
-    onAuthStateChanged(
-      auth,
-      async (user) => {
-
-        if (!user) return;
-
-        const userRef =
-          doc(
-            db,
-            "users",
-            user.uid
-          );
-
-        const userSnap =
-          await getDoc(userRef);
-
-        if (!userSnap.exists()) return;
-
-        const activeGroupId =
-          userSnap.data().activeGroupId;
-
-        if (!activeGroupId) return;
-
-        setLigaId(activeGroupId);
-
-        const usersSnapshot =
-          await getDocs(
-            collection(db, "users")
-          );
-
-        const membros =
-          usersSnapshot.docs
-
-            .map((userDoc) => {
+          const activeGroupId =
+            userSnap.data().activeGroupId;
+
+          if (!activeGroupId) {
+            return;
+          }
+
+          setLigaId(activeGroupId);
+
+          /* =========================
+             USERS FILTERED QUERY
+          ========================= */
+
+          const usersQuery =
+            query(
+              collection(db, "users"),
+              where(
+                "activeGroupId",
+                "==",
+                activeGroupId
+              )
+            );
+
+          const usersSnapshot =
+            await getDocs(usersQuery);
+
+          const membros =
+            usersSnapshot.docs.map((userDoc) => {
 
               const data =
                 userDoc.data();
@@ -453,6 +195,7 @@ useEffect(() => {
                 id: userDoc.id,
 
                 nome:
+                  data.nome ||
                   data.displayName ||
                   data.username ||
                   "Jogador",
@@ -462,75 +205,306 @@ useEffect(() => {
 
               };
 
-            })
+            });
 
-            .filter(
-              (usuario) =>
-                usuario.activeGroupId === activeGroupId
-            );
+          setUsuariosLiga(membros);
 
-        setUsuariosLiga(membros);
+          /* =========================
+             MEME AUTOMÁTICO
+          ========================= */
 
-      }
+          gerarMemeAutomatico(
+            user.displayName || "",
+            activeGroupId
+          );
+
+        }
+      );
+
+    return () => unsubscribe();
+
+  }, []);
+
+  /* =========================
+     GAMES
+  ========================= */
+
+  useEffect(() => {
+
+    const q = query(
+      collection(db, "games"),
+      orderBy("createdAt", "asc")
     );
 
-  return () => unsubscribe();
+    const unsubscribe =
+      onSnapshot(
+        q,
+        (snapshot) => {
 
-}, []);
+          const games: Game[] = [];
 
+          snapshot.forEach((doc) => {
 
-  const jogosAbertos = jogos.filter((jogo) => {
+            const data =
+              doc.data();
 
-    const gameDate =
-      new Date(jogo.matchDate);
+            games.push({
 
-    const now = new Date();
+              id: doc.id,
 
-    const difference =
-      gameDate.getTime() - now.getTime();
+              teamA: data.teamA,
+              teamB: data.teamB,
 
-    const oneHour =
-      1000 * 60 * 60;
+              emojiA: data.emojiA,
+              emojiB: data.emojiB,
 
-    return difference > oneHour;
+              phase: data.phase,
 
-  });
+              matchDate: data.matchDate,
 
-  const jogosEncerrados = jogos.filter((jogo) => {
+              resultadoA: data.resultadoA,
+              resultadoB: data.resultadoB,
 
-    const gameDate =
-      new Date(jogo.matchDate);
+            });
 
-    const now = new Date();
+          });
 
-    const difference =
-      gameDate.getTime() - now.getTime();
+          setJogos(games);
 
-    const oneHour =
-      1000 * 60 * 60;
+        }
+      );
 
-    return difference <= oneHour;
+    return () => unsubscribe();
 
-  });
+  }, []);
 
-  const jogosAbertosPorFase =
-    jogosAbertos.reduce((acc, jogo) => {
+  /* =========================
+     LOAD HEAVY COMPONENTS LATER
+  ========================= */
 
-      if (!acc[jogo.phase]) {
-        acc[jogo.phase] = [];
+  useEffect(() => {
+
+    const timer =
+      setTimeout(() => {
+
+        setShowHeavyComponents(true);
+
+      }, 1200);
+
+    return () => clearTimeout(timer);
+
+  }, []);
+
+  /* =========================
+     MEME AUTOMÁTICO
+  ========================= */
+
+  async function gerarMemeAutomatico(
+    currentUser: string,
+    currentGroupId: string
+  ) {
+
+    try {
+
+      const betsQuery =
+        query(
+          collection(db, "bets"),
+          where(
+            "groupId",
+            "==",
+            currentGroupId
+          )
+        );
+
+      const [
+        betsSnapshot,
+        gamesSnapshot
+      ] = await Promise.all([
+
+        getDocs(betsQuery),
+
+        getDocs(
+          collection(db, "games")
+        )
+
+      ]);
+
+      const ranking: Record<string, number> = {};
+
+      let exactScore = false;
+
+      let crazyBet = false;
+
+      betsSnapshot.forEach((betDoc) => {
+
+        const bet =
+          betDoc.data();
+
+        let points = 0;
+
+        gamesSnapshot.forEach((gameDoc) => {
+
+          const game =
+            gameDoc.data();
+
+          if (
+            `${game.teamA} x ${game.teamB}` === bet.match &&
+            game.resultadoA != null &&
+            game.resultadoB != null
+          ) { 
+
+            points =
+              calculatePoints({
+
+                apostaA:
+                  Number(bet.golsA),
+
+                apostaB:
+                  Number(bet.golsB),
+
+                resultadoA:
+                  Number(game.resultadoA),
+
+                resultadoB:
+                  Number(game.resultadoB),
+
+              });
+
+            if (
+              bet.userName === currentUser &&
+              Number(bet.golsA) === Number(game.resultadoA) &&
+              Number(bet.golsB) === Number(game.resultadoB)
+            ) {
+
+              exactScore = true;
+
+            }
+
+            if (
+              bet.userName === currentUser &&
+              (
+                Number(bet.golsA) >= 6 ||
+                Number(bet.golsB) >= 6
+              )
+            ) {
+
+              crazyBet = true;
+
+            }
+
+          }
+
+        });
+
+        if (!ranking[bet.userName]) {
+
+          ranking[bet.userName] = 0;
+
+        }
+
+        ranking[bet.userName] += points;
+
+      });
+
+      const sorted =
+
+        Object.entries(ranking)
+
+          .sort(
+            (a, b) =>
+              b[1] - a[1]
+          );
+
+      const isLeader =
+        sorted[0]?.[0] === currentUser;
+
+      const isLastPlace =
+        sorted[
+          sorted.length - 1
+        ]?.[0] === currentUser;
+
+      const meme =
+        getAutomaticMeme({
+
+          isLeader,
+
+          isLastPlace,
+
+          exactScore,
+
+          crazyBet,
+
+        });
+
+      if (meme) {
+
+        setAutomaticMeme(meme);
+
       }
 
-      acc[jogo.phase].push(jogo);
+    } catch (error) {
 
-      return acc;
+      console.error(
+        "Erro meme automático:",
+        error
+      );
 
-    }, {} as Record<string, typeof jogos[number][]>);
+    }
+
+  }
+
+  /* =========================
+     FILTERS
+  ========================= */
+
+  /*const jogosAbertos =
+    jogos.filter((jogo) => {
+
+      const gameDate =
+        new Date(jogo.matchDate);
+
+      const now =
+        new Date();
+
+      const difference =
+        gameDate.getTime() -
+        now.getTime();
+
+      const oneHour =
+        1000 * 60 * 60;
+
+      return difference > oneHour;
+
+    });
+    */
+
+  const jogosEncerrados =
+    jogos.filter((jogo) => {
+
+      const gameDate =
+        new Date(jogo.matchDate);
+
+      const now =
+        new Date();
+
+      const difference =
+        gameDate.getTime() -
+        now.getTime();
+
+      const oneHour =
+        1000 * 60 * 60;
+
+      return difference <= oneHour;
+
+    });
 
   const jogosEncerradosPorFase =
     jogosEncerrados.reduce((acc, jogo) => {
 
       if (!acc[jogo.phase]) {
+
         acc[jogo.phase] = [];
+
       }
 
       acc[jogo.phase].push(jogo);
@@ -539,40 +513,43 @@ useEffect(() => {
 
     }, {} as Record<string, typeof jogos[number][]>);
 
+  /* =========================
+     LOGIN SCREEN
+  ========================= */
 
-    if (!isLogged) {
+  if (!isLogged) {
 
-      return (
-    
-        <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
-    
-          <div className="max-w-md text-center">
-    
-            <div className="text-7xl mb-6">
-              ⚽
-            </div>
-    
-            <h1 className="text-5xl font-black mb-4">
-    
-              Mãe Diná FC
-    
-            </h1>
-    
-            <p className="text-zinc-400 mb-8 text-lg">
-    
-              O único bolão onde a humilhação é em tempo real 😂
-    
-            </p>
-    
-            <LoginCard />
-    
+    return (
+
+      <main className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+
+        <div className="max-w-md text-center">
+
+          <div className="text-7xl mb-6">
+            ⚽
           </div>
-    
-        </main>
-    
-      );
-    
-    }
+
+          <h1 className="text-5xl font-black mb-4">
+            Mãe Diná FC
+          </h1>
+
+          <p className="text-zinc-400 mb-8 text-lg">
+            O único bolão onde a humilhação é em tempo real 😂
+          </p>
+
+          <LoginCard />
+
+        </div>
+
+      </main>
+
+    );
+
+  }
+
+  /* =========================
+     MAIN
+  ========================= */
 
   return (
 
@@ -580,109 +557,87 @@ useEffect(() => {
 
       <Header />
 
-      {/*AQUI RODA O MEME NO TOPO DA TELA 
-      <MemeTicker
-        memes={memesTicker}
-      />*/}
-
-  
       <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3 pt-56">
 
-        {/* LOGIN */}
         <LoginCard />
-       
-        {/* SUA LIGA */}
+
         <GroupCard />
 
-        {/* link para fazer as apostas */}
+        {/* APOSTAS */}
+
         <Link
-                  href="/play"
-                  className="bg-yellow-500 hover:bg-green-600 transition text-black font-black rounded-3xl p-5 flex items-center gap-4"
-                >
-
-                  <div className="text-5xl">
-                    🎯
-                  </div>
-
-                  <div>
-
-                    <h2 className="text-2xl font-black">
-                      Fazer Palpites
-                    </h2>
-
-                    <p className="text-black text-sm mt-1 font-semibold">
-                      Entre na área de apostas da rodada 😄
-                    </p>
-
-                  </div>
-
-        </Link>
-
-
-        {/* STATUS USUÁRIO */}
-        <UserStats />
-
-        {/* RANKING - ranking mundial da vergonha*/}
-        <RealRanking />
-
-        {/* central da corneta */}
-         <CentralCorneta
-          ligaId={ligaId} 
-          usuarios={usuariosLiga}/>
-
-         {/* estatisticas da vergonha */}
-        <AnalyticsDashboard/>
-        
+          href="/play"
+          className="bg-yellow-500 hover:bg-green-600 transition text-black font-black rounded-3xl p-5 flex items-center gap-4"
+        >
 
           <div className="text-5xl">
-            🤓
+            🎯
           </div>
 
-
-          {/* memes inseridos aleatoriamente */}
           <div>
-            <p className="text-zinc-400 text-sm mt-1">
-              Especialistas analisam suas tragédias futebolísticas 😄
+
+            <h2 className="text-2xl font-black">
+              Fazer Palpites
+            </h2>
+
+            <p className="text-black text-sm mt-1 font-semibold">
+              Entre na área de apostas da rodada 😄
             </p>
 
           </div>
 
+        </Link>
 
-        {/* MEME zoera da rodada */}
-        {automaticMeme && (
+        {/* COMPONENTES PESADOS */}
 
-        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
+        {showHeavyComponents && (
 
-         {automaticMeme.image && (
+          <>
 
-         <img
-            src={automaticMeme.image}
-            alt="Meme"
-            className="rounded-2xl mb-4 w-full"
-          />
+            <UserStats />
+
+            <RealRanking />
+
+            <CentralCorneta
+              ligaId={ligaId}
+              usuarios={usuariosLiga}
+            />
+
+            <AnalyticsDashboard />
+
+            <BetTable />
+
+          </>
 
         )}
 
-    <p className="text-lg font-black">
+        {/* MEME */}
 
-      🤖 {automaticMeme.text}
+        {automaticMeme && (
 
-    </p>
+          <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
 
-  </div>
+            {automaticMeme.image && (
 
-)}
-      
-                
-       {/* <MemeCard
-          mensagem={memeAleatorio}
-         />*/}
+              <img
+                src={automaticMeme.image}
+                alt="Meme"
+                loading="lazy"
+                className="rounded-2xl mb-4 w-full"
+              />
 
+            )}
 
-        {/* MINHAS APOSTAS */}
-        <BetTable />
+            <p className="text-lg font-black">
+              🤖 {automaticMeme.text}
+            </p>
 
-        {/* JOGOS ENCERRADOS */}
+          </div>
+
+        )}
+
+        {/* RESULTADOS */}
+
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
           <h2 className="text-xl font-black mb-4">
@@ -697,79 +652,79 @@ useEffect(() => {
                 className="mb-5"
               >
 
-                  <h3 className="text-base font-black mb-3 text-red-400">
-                    {fase}
-                  </h3>
+                <h3 className="text-base font-black mb-3 text-red-400">
+                  {fase}
+                </h3>
 
-                  <div className="space-y-3">
-                
-                    {jogosDaFase.map((jogo) => (
+                <div className="space-y-3">
 
-                      <div
-                        key={`${jogo.teamA}-${jogo.teamB}`}
-                        className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3 flex justify-between items-center"
-                      >
+                  {jogosDaFase.map((jogo) => (
 
-                        <div>
+                    <div
+                      key={`${jogo.teamA}-${jogo.teamB}`}
+                      className="bg-zinc-800 border border-zinc-700 rounded-2xl p-3 flex justify-between items-center"
+                    >
+
+                      <div>
 
                         <p className="font-bold text-sm flex items-center gap-2 flex-wrap">
 
-                        <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1">
 
-                          <img
-                            src={jogo.emojiA}
-                            alt={jogo.teamA}
-                            className="w-5 h-5 object-contain inline-block"
-                          />
+                            <img
+                              src={jogo.emojiA}
+                              alt={jogo.teamA}
+                              loading="lazy"
+                              className="w-5 h-5 object-contain inline-block"
+                            />
 
-                          <span>{jogo.teamA}</span>
+                            <span>{jogo.teamA}</span>
 
-                        </span>
+                          </span>
 
-                        <span>x</span>
+                          <span>x</span>
 
-                        <span className="flex items-center gap-1">
+                          <span className="flex items-center gap-1">
 
-                          <img
-                            src={jogo.emojiB}
-                            alt={jogo.teamB}
-                            className="w-5 h-5 object-contain inline-block"
-                          />
+                            <img
+                              src={jogo.emojiB}
+                              alt={jogo.teamB}
+                              loading="lazy"
+                              className="w-5 h-5 object-contain inline-block"
+                            />
 
-                          <span>{jogo.teamB}</span>
+                            <span>{jogo.teamB}</span>
 
-                        </span>
+                          </span>
 
                         </p>
 
-                          <p className="text-zinc-400 text-xs">
-                            🔒 Encerrado
-                          </p>
-
-                        </div>
-
-                        <p className="font-black text-lg">
-                          {jogo.resultadoA}
-                          {" x "}
-                          {jogo.resultadoB}
+                        <p className="text-zinc-400 text-xs">
+                          🔒 Encerrado
                         </p>
 
                       </div>
 
-                    ))}
+                      <p className="font-black text-lg">
+                        {jogo.resultadoA}
+                        {" x "}
+                        {jogo.resultadoB}
+                      </p>
 
-                  </div>
+                    </div>
+
+                  ))}
 
                 </div>
 
-            ))}
+              </div>
 
-          </div>
+            ))
+          }
 
-        <div className="min-h-screen flex flex-col">
-        {/* conteúdo da página - logo bazaglia sanches */}
-        <Footer />
         </div>
+
+        <Footer />
 
       </section>
 
