@@ -535,6 +535,349 @@ export default function CentralCorneta({
       </div>
 
       {/* restante do JSX original permanece igual */}
+      <div className="flex flex-col gap-3 mb-4">
+
+  <div
+    className="relative"
+    ref={menuUsuariosRef}
+  >
+
+    <div
+      className="
+        bg-zinc-950
+        border border-zinc-800
+        rounded-2xl
+        p-3
+        flex items-center
+        justify-between
+        gap-3
+      "
+    >
+
+      <div className="flex flex-col">
+
+        <span className="text-xs text-zinc-500">
+
+          🎯 Alvo da zoeira
+
+        </span>
+
+        <span className="font-bold text-white">
+
+          {
+
+            usuariosFiltrados.find(
+              (u) =>
+
+                (
+                  u.uid ||
+                  u.id
+                ) === destinoId
+
+            )?.username ||
+
+            usuariosFiltrados.find(
+              (u) =>
+
+                (
+                  u.uid ||
+                  u.id
+                ) === destinoId
+
+            )?.displayName ||
+
+            usuariosFiltrados.find(
+              (u) =>
+
+                (
+                  u.uid ||
+                  u.id
+                ) === destinoId
+
+            )?.nome ||
+
+            "Mire no seu alvo 😈"
+
+          }
+
+        </span>
+
+      </div>
+
+      <button
+
+        onClick={() =>
+
+          setMenuUsuariosAberto(
+            !menuUsuariosAberto
+          )
+
+        }
+
+        className="
+          bg-zinc-800
+          hover:bg-zinc-700
+          px-3 py-2
+          rounded-xl
+          text-sm
+          transition-all
+        "
+      >
+
+        🔄
+
+      </button>
+
+    </div>
+
+    {menuUsuariosAberto && (
+
+      <div
+        className="
+          absolute z-50 mt-2
+          w-full
+          max-h-64
+          overflow-y-auto
+          bg-zinc-900
+          border border-zinc-700
+          rounded-2xl
+          p-2
+          shadow-2xl
+          flex flex-col gap-1
+        "
+      >
+
+        {usuariosFiltrados.map(
+          (usuario) => {
+
+            const usuarioId =
+
+              usuario.uid ||
+              usuario.id;
+
+            const usuarioNome =
+
+              usuario.username ||
+
+              usuario.displayName ||
+
+              usuario.nome ||
+
+              usuario.email ||
+
+              "Jogador";
+
+            return (
+
+              <button
+
+                key={usuarioId}
+
+                onClick={() => {
+
+                  setDestinoId(
+                    usuarioId || ""
+                  );
+
+                  setMenuUsuariosAberto(
+                    false
+                  );
+
+                }}
+
+                className="
+                  w-full
+                  text-left
+                  px-4 py-3
+                  rounded-xl
+                  hover:bg-zinc-800
+                  transition-all
+                  text-white
+                "
+              >
+
+                {usuarioNome}
+
+              </button>
+
+            );
+
+          }
+        )}
+
+      </div>
+
+    )}
+
+  </div>
+
+  <textarea
+    value={texto}
+    onChange={(e) =>
+      setTexto(
+        e.target.value
+      )
+    }
+    maxLength={120}
+    rows={2}
+    placeholder="Mande sua provocação..."
+    className="
+      bg-zinc-800
+      border border-zinc-700
+      rounded-lg
+      p-3
+      resize-none
+      text-white
+    "
+  />
+
+  <div className="flex justify-between items-center text-sm text-zinc-400">
+
+    <span>
+      {texto.length}/120
+    </span>
+
+    <button
+      onClick={enviarMensagem}
+      className="
+        bg-yellow-500
+        hover:bg-yellow-400
+        text-black
+        font-bold
+        px-4 py-2
+        rounded-lg
+        transition
+      "
+    >
+
+      Enviar
+
+    </button>
+
+  </div>
+
+</div>
+
+<div className="flex flex-col gap-3">
+
+  {mensagens.map((mensagem) => (
+
+    <div
+      key={mensagem.id}
+      className="
+        bg-zinc-800
+        rounded-2xl
+        p-4
+        border border-zinc-700
+      "
+    >
+
+      <div className="flex justify-between items-start gap-3 mb-2">
+
+        <div className="text-sm text-yellow-400 font-semibold">
+
+          {"De: "}
+          {mensagem.autorNome}
+
+          {" →→→ "}
+
+          {"Para: "}
+          {mensagem.destinoNome}
+
+        </div>
+
+        <div className="relative shrink-0">
+
+          <button
+            onClick={() =>
+
+              setMenuAbertoId(
+
+                menuAbertoId === mensagem.id
+                  ? null
+                  : mensagem.id
+
+              )
+
+            }
+            className="
+              bg-zinc-700
+              hover:bg-zinc-600
+              px-3 py-1
+              rounded-full
+              border border-zinc-600
+              text-sm
+              flex items-center gap-2
+              transition-all
+              whitespace-nowrap
+            "
+          >
+
+            😈 Reagir
+
+          </button>
+
+          {menuAbertoId === mensagem.id && (
+
+            <div
+              className="
+                absolute right-0
+                z-50 mt-2
+                bg-zinc-900
+                border border-zinc-700
+                rounded-2xl
+                p-2
+                flex flex-wrap
+                gap-2
+                w-64
+                shadow-2xl
+              "
+            >
+
+              {reactionEmojis.map(
+                (emoji) => (
+
+                  <button
+                    key={emoji}
+                    onClick={() =>
+                      reagirMensagem(
+                        mensagem,
+                        emoji
+                      )
+                    }
+                    className="
+                      text-2xl
+                      hover:scale-125
+                      transition-transform
+                    "
+                  >
+
+                    {emoji}
+
+                  </button>
+
+                )
+              )}
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+      <div className="text-white break-words">
+
+        {mensagem.texto}
+
+      </div>
+
+    </div>
+
+  ))}
+
+</div>
 
     </div>
 
