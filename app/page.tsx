@@ -12,6 +12,8 @@ import AnalyticsDashboard
 from "../components/AnalyticsDashboard";
 import Footer from '../components/footer'
 import CentralCorneta from "../components/CentralCorneta";
+import MemeTicker
+from "../components/MemeTicker";
 
 import GroupCard
 from "../components/GroupCard";
@@ -94,8 +96,13 @@ export default function Home() {
     const [usuariosLiga, setUsuariosLiga] =
       useState<UsuarioLiga[]>([]);
 
-  const [memeAleatorio, setMemeAleatorio] =
-    useState("");
+      const [memesTicker, setMemesTicker] =
+      useState<
+        {
+          text: string;
+          image?: string;
+        }[]
+      >([]);
   
     const [automaticMeme, setAutomaticMeme] =
   useState<{
@@ -157,60 +164,55 @@ export default function Home() {
     
     }, []);
     
-useEffect(() => {
+    useEffect(() => {
 
-  const unsubscribe =
-    onSnapshot(
-
-      collection(db, "memes"),
-
-      (snapshot) => {
-
-        const memes: string[] = [];
-
-  const currentUser =
-  auth.currentUser?.displayName;
-
-        snapshot.forEach((doc) => {
-
-          const data = doc.data();
-
-          if (
-            data.active &&
-            (
-              !data.targetUser ||
-              data.targetUser === currentUser
-            )
-          ) {
-
-            memes.push(data.text);
-
+      const unsubscribe =
+        onSnapshot(
+    
+          collection(db, "memes"),
+    
+          (snapshot) => {
+    
+            const memes: {
+              text: string;
+              image?: string;
+            }[] = [];
+    
+            const currentUser =
+              auth.currentUser?.displayName;
+    
+            snapshot.forEach((doc) => {
+    
+              const data = doc.data();
+    
+              if (
+                data.active &&
+                (
+                  !data.targetUser ||
+                  data.targetUser === currentUser
+                )
+              ) {
+    
+                memes.push({
+    
+                  text: data.text,
+                  image: data.image
+    
+                });
+    
+              }
+    
+            });
+    
+            setMemesTicker(memes);
+    
           }
-
-        });
-
-        if (memes.length > 0) {
-
-          const randomIndex =
-
-            Math.floor(
-              Math.random() *
-              memes.length
-            );
-
-          setMemeAleatorio(
-            memes[randomIndex]
-          );
-
-        }
-
-      }
-
-    );
-
-  return () => unsubscribe();
-
-}, []);
+    
+        );
+    
+      return () => unsubscribe();
+    
+    }, []);
   
 async function gerarMemeAutomatico(
   currentUser: string
@@ -578,7 +580,13 @@ useEffect(() => {
 
       <Header />
 
-      <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3">
+      {/*AQUI RODA O MEME NO TOPO DA TELA 
+      <MemeTicker
+        memes={memesTicker}
+      />*/}
+
+  
+      <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3 pt-56">
 
         {/* LOGIN */}
         <LoginCard />
@@ -664,9 +672,12 @@ useEffect(() => {
   </div>
 
 )}
-        <MemeCard
+      
+                
+       {/* <MemeCard
           mensagem={memeAleatorio}
-        />
+         />*/}
+
 
         {/* MINHAS APOSTAS */}
         <BetTable />

@@ -1430,11 +1430,7 @@ if (
 
         <div className="mb-6">
 
-        <h2 className="text-2xl font-black mb-4">
-
-          🏅 Conquistas da Vergonha
-
-        </h2>
+      
 
         <div className="grid md:grid-cols-2 gap-4">
 
@@ -1477,50 +1473,130 @@ if (
 
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div
+  className="
+    fixed
+    top-[72px]
+    left-0
+    right-0
+    z-50
+    px-3
+    drop-shadow-2xl
+  "
+>
 
-          {cards.map((card) => (
+  <div className="
+    bg-zinc-950/95
+    border
+    border-zinc-800
+    rounded-3xl
+    overflow-hidden
+    shadow-2xl
+    backdrop-blur-md
+  ">
 
-            <div
-              key={card.title}
-              className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6"
-            >
+    <div className="
+      px-5
+      pt-4
+      pb-2
+      border-b
+      border-zinc-800
+      bg-gradient-to-r
+      from-yellow-900/40
+      to-purple-900/40
+    ">
 
-              <div className="text-5xl mb-4">
+      <h2 className="text-2xl font-black">
 
-                {card.emoji}
+        🏅 Conquistas da Vergonha
 
-              </div>
+      </h2>
 
-              <h2 className="text-xl font-black mb-2">
+    </div>
 
-                {card.title}
+    <div className="
+      flex
+      gap-4
+      py-4
+      px-4
+      animate-marquee
+      w-max
+    ">
 
-              </h2>
+      {[...cards, ...cards].map((card, index) => (
 
-              <p className="text-green-400 text-2xl font-black">
+        <div
+          key={`${card.title}-${index}`}
+          className="
+            min-w-[320px]
+            bg-zinc-900
+            border
+            border-zinc-700
+            rounded-3xl
+            p-5
+            flex
+            items-center
+            gap-4
+            shadow-xl
+          "
+        >
 
-                {card.user}
+          <div className="text-5xl">
+            {card.emoji}
+          </div>
 
-              </p>
+          <div>
 
-              <p className="text-zinc-400 text-sm mt-2">
+            <h2 className="font-black text-lg text-white">
 
-                {card.value}
+              {card.title}
 
-              </p>
+            </h2>
 
-              <div className="mt-4 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-4 py-2 text-sm font-bold text-purple-200">
+            <p className="text-green-400 font-black text-xl">
 
-                {card.badge}
+              {card.user}
 
-              </div>
+            </p>
+
+            <p className="text-zinc-400 text-sm">
+
+              {card.value}
+
+            </p>
+
+            <div className="
+              mt-2
+              inline-flex
+              items-center
+              gap-2
+              bg-purple-900
+              border
+              border-purple-700
+              rounded-full
+              px-3
+              py-1
+              text-xs
+              font-bold
+              text-purple-200
+            ">
+
+              {card.badge}
 
             </div>
 
-          ))}
+          </div>
 
         </div>
+
+      ))}
+
+    </div>
+
+  </div>
+
+</div>
+
 
       </div>
 

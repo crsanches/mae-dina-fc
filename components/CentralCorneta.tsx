@@ -61,6 +61,7 @@ type Mensagem = {
   destinoNome: string;
   texto: string;
   reactions?: Reactions;
+  createdAt?: any;
 };
 
 /*
@@ -163,20 +164,52 @@ export default function CentralCorneta({
     const unsubscribe =
       onSnapshot(q, (snapshot) => {
 
-        const lista: Mensagem[] =
+        const agora =
+  Date.now();
 
-          snapshot.docs.map((docItem) => ({
+const vinteQuatroHoras =
+  1000 * 60 * 60 * 24;
 
-            id: docItem.id,
+const lista: Mensagem[] =
 
-            ...(docItem.data() as Omit<
-              Mensagem,
-              "id"
-            >),
+  snapshot.docs
 
-          }));
+    .map((docItem) => ({
 
-        setMensagens(lista);
+      id: docItem.id,
+
+      ...(docItem.data() as Omit<
+        Mensagem,
+        "id"
+      >),
+
+    }))
+
+    .filter((mensagem) => {
+
+      if (
+        !mensagem.createdAt
+      ) {
+
+        return false;
+
+      }
+
+      const dataMensagem =
+
+        mensagem.createdAt
+          ?.toDate?.()
+          ?.getTime?.() || 0;
+
+      return (
+
+        agora - dataMensagem <
+
+        vinteQuatroHoras
+
+      );
+
+    });
 
       });
 
@@ -506,6 +539,44 @@ export default function CentralCorneta({
   ========================================
   */
 
+
+ /*
+  ========================================
+  AGRUPANDO MENSAGENS
+  ========================================
+  */
+
+  const mensagensAgrupadas =
+
+  mensagens.reduce(
+
+    (acc, mensagem) => {
+
+      const chave =
+
+        mensagem.destinoNome ||
+
+        "Sem alvo";
+
+      if (!acc[chave]) {
+
+        acc[chave] = [];
+
+      }
+
+      acc[chave].push(mensagem);
+
+      return acc;
+
+    },
+
+    {} as Record<
+      string,
+      Mensagem[]
+    >
+
+  );
+
   return (
 
     <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-700 mt-4">
@@ -760,122 +831,106 @@ export default function CentralCorneta({
 
 <div className="flex flex-col gap-3">
 
-  {mensagens.map((mensagem) => (
+{Object.entries(
+  mensagensAgrupadas
+).map(
+
+  ([destino, lista]) => (
 
     <div
-      key={mensagem.id}
+      key={destino}
       className="
-        bg-zinc-800
-        rounded-2xl
+        bg-zinc-950
+        border border-zinc-800
+        rounded-3xl
         p-4
-        border border-zinc-700
       "
     >
 
-      <div className="flex justify-between items-start gap-3 mb-2">
+      <div className="
+        flex items-center gap-3
+        mb-4
+      ">
 
-        <div className="text-sm text-yellow-400 font-semibold">
-
-          {"De: "}
-          {mensagem.autorNome}
-
-          {" →→→ "}
-
-          {"Para: "}
-          {mensagem.destinoNome}
-
+        <div className="text-4xl">
+          🎯
         </div>
 
-        <div className="relative shrink-0">
+        <div>
 
-          <button
-            onClick={() =>
+          <h3 className="
+            text-xl
+            font-black
+            text-yellow-400
+          ">
 
-              setMenuAbertoId(
+            {destino}
 
-                menuAbertoId === mensagem.id
-                  ? null
-                  : mensagem.id
+          </h3>
 
-              )
+          <p className="
+            text-zinc-500
+            text-sm
+          ">
 
-            }
-            className="
-              bg-zinc-700
-              hover:bg-zinc-600
-              px-3 py-1
-              rounded-full
-              border border-zinc-600
-              text-sm
-              flex items-center gap-2
-              transition-all
-              whitespace-nowrap
-            "
-          >
-
-            😈 Reagir
-
-          </button>
-
-          {menuAbertoId === mensagem.id && (
-
-            <div
-              className="
-                absolute right-0
-                z-50 mt-2
-                bg-zinc-900
-                border border-zinc-700
-                rounded-2xl
-                p-2
-                flex flex-wrap
-                gap-2
-                w-64
-                shadow-2xl
-              "
-            >
-
-              {reactionEmojis.map(
-                (emoji) => (
-
-                  <button
-                    key={emoji}
-                    onClick={() =>
-                      reagirMensagem(
-                        mensagem,
-                        emoji
-                      )
-                    }
-                    className="
-                      text-2xl
-                      hover:scale-125
-                      transition-transform
-                    "
-                  >
-
-                    {emoji}
-
-                  </button>
-
-                )
-              )}
-
-            </div>
-
-          )}
+            recebeu {
+              lista.length
+            } cornetada(s)
+          </p>
 
         </div>
 
       </div>
 
-      <div className="text-white break-words">
+      <div className="
+        flex flex-col gap-3
+      ">
 
-        {mensagem.texto}
+        {lista.map((mensagem) => (
+
+          <div
+            key={mensagem.id}
+            className="
+              bg-zinc-800
+              rounded-2xl
+              p-4
+              border border-zinc-700
+            "
+          >
+
+            <div className="
+              text-sm
+              text-yellow-400
+              font-semibold
+              mb-2
+            ">
+
+              {mensagem.autorNome}
+              {" → "}
+              {mensagem.destinoNome}
+
+            </div>
+
+            <div className="
+              text-white
+              break-words
+            ">
+
+              {mensagem.texto}
+
+            </div>
+
+          </div>
+
+        ))}
 
       </div>
 
     </div>
 
-  ))}
+  )
+
+)}
 
 </div>
 
