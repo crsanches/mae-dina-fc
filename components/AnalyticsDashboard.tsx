@@ -1675,7 +1675,7 @@ if (
     right-0
     z-50
     px-3
-    drop-shadow-2xl
+    drop-shadow-md
   "
 >
 
@@ -1685,8 +1685,8 @@ if (
     border-zinc-800
     rounded-3xl
     overflow-hidden
-    shadow-2xl
-    backdrop-blur-md
+    shadow-md
+    bg-black/70
   ">
 
     <div className="

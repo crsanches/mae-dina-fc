@@ -31,7 +31,7 @@ export default function MemeTicker({
       bg-black/90
       border-b
       border-zinc-800
-      backdrop-blur-md
+      bg-black/70
     ">
 
       <div className="

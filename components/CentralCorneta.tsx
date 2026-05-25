@@ -718,7 +718,7 @@ export default function CentralCorneta({
                 border border-zinc-700
                 rounded-2xl
                 p-2
-                shadow-2xl
+                shadow-md
                 flex flex-col gap-1
               "
             >
@@ -1030,7 +1030,7 @@ export default function CentralCorneta({
                             flex flex-wrap
                             gap-2
                             w-72
-                            shadow-2xl
+                            shadow-md
                           "
                         >
 
