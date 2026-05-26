@@ -28,9 +28,23 @@ import { calculatePoints }
 from "../lib/calculatePoints";
 
 type RankingUser = {
+
   username: string;
+
   nome: string;
+
   points: number;
+
+  exatos: number;
+
+  aproximacaoVencedor: number;
+
+  aproximacaoEmpate: number;
+
+  acertosParciais: number;
+
+  ultimoHorarioAposta: number;
+
 };
 
 export default function RealRanking() {
@@ -99,182 +113,438 @@ export default function RealRanking() {
     // =========================
 
     const rankingMap:
-      Record<
-        string,
-        {
-          username: string;
-          nome: string;
-          points: number;
-        }
-      > = {};
+  Record<string, RankingUser> = {};
 
-    // =========================
-    // LOOP DAS APOSTAS
-    // =========================
+// =========================
+// REMOVE APOSTAS DUPLICADAS
+// MANTÉM SOMENTE A MAIS RECENTE
+// =========================
 
-    for (
-      const betDoc
-      of betsSnapshot.docs
-    ) {
+const latestBetsMap:
+  Record<string, any> = {};
 
-      const bet =
-        betDoc.data();
+betsSnapshot.forEach((betDoc) => {
 
-      if (
-        bet.groupId !==
-        currentGroupId
-      ) {
-        continue;
-      }
+  const bet = betDoc.data();
 
-      // =========================
-      // USER / NOME
-      // =========================
+  const key =
+    `${bet.userName}__${bet.match}`;
 
-      const nome =
+  const current =
+    latestBetsMap[key];
 
-        bet.nome ||
+  const currentTime =
+    current?.createdAt?.seconds || 0;
 
-        bet.userName ||
+  const newTime =
+    bet.createdAt?.seconds || 0;
 
-        "Anônimo";
+  if (
+    !current ||
+    newTime > currentTime
+  ) {
 
-      let username =
+    latestBetsMap[key] = bet;
 
-        bet.username ||
+  }
 
-        nome;
+});
 
-      // ==================================
-      // FALLBACK PARA APOSTAS ANTIGAS
-      // ==================================
+const uniqueBets =
+  Object.values(latestBetsMap);
 
-      if (
-        !bet.username &&
-        bet.uid
-      ) {
+// =========================
+// LOOP DAS APOSTAS
+// =========================
 
-        try {
+for (
+  const bet
+  of uniqueBets
+) {
 
-          const oldUserRef =
-            doc(
-              db,
-              "users",
-              bet.uid
-            );
+  const nome =
 
-          const oldUserSnap =
-            await getDoc(
-              oldUserRef
-            );
+    bet.nome ||
 
-          if (
-            oldUserSnap.exists()
-          ) {
+    bet.userName ||
 
-            const userData =
-              oldUserSnap.data();
+    "Anônimo";
 
-            username =
+  let username =
 
-              userData.username ||
+    bet.username ||
 
-              nome;
+    nome;
 
-          }
+  // =========================
+  // FALLBACK USERNAME
+  // =========================
 
-        } catch (error) {
+  if (
+    !bet.username &&
+    bet.uid
+  ) {
 
-          console.log(
-            "Erro ao buscar usuário:",
-            error
-          );
+    try {
 
-        }
+      const oldUserRef =
+        doc(
+          db,
+          "users",
+          bet.uid
+        );
 
-      }
-
-      // =========================
-      // CALCULA PONTOS
-      // =========================
-
-      let calculatedPoints = 0;
-
-      gamesSnapshot.forEach((gameDoc) => {
-
-        const game =
-          gameDoc.data();
-
-        if (
-          game.match === bet.match &&
-          game.resultadoA != null &&
-          game.resultadoB != null
-        ) {
-
-          calculatedPoints =
-            calculatePoints({
-
-              apostaA:
-                Number(bet.golsA),
-
-              apostaB:
-                Number(bet.golsB),
-
-              resultadoA:
-                Number(game.resultadoA),
-
-              resultadoB:
-                Number(game.resultadoB)
-
-            });
-
-        }
-
-      });
-
-      // =========================
-      // SOMA PONTOS
-      // =========================
+      const oldUserSnap =
+        await getDoc(
+          oldUserRef
+        );
 
       if (
-        rankingMap[nome] ===
-        undefined
+        oldUserSnap.exists()
       ) {
 
-        rankingMap[nome] = {
+        const userData =
+          oldUserSnap.data();
 
-          username,
-          nome,
+        username =
 
-          points: 0
+          userData.username ||
 
-        };
+          nome;
 
       }
 
-      rankingMap[nome].points +=
-        calculatedPoints;
+    } catch (error) {
+
+      console.log(
+        "Erro ao buscar usuário:",
+        error
+      );
 
     }
 
-    // =========================
-    // ORDENA
-    // =========================
+  }
 
-    const rankingArray =
+  // =========================
+  // BUSCA JOGO
+  // =========================
 
-      Object.values(
-        rankingMap
-      )
+  let gameFound: any = null;
 
-        .sort(
-          (a, b) =>
-            b.points - a.points
+  gamesSnapshot.forEach((gameDoc) => {
+
+    const game =
+      gameDoc.data();
+
+    if (
+      game.match === bet.match &&
+      game.resultadoA != null &&
+      game.resultadoB != null
+    ) {
+
+      gameFound = game;
+
+    }
+
+  });
+
+  if (!gameFound) {
+    continue;
+  }
+
+  // =========================
+  // PONTOS
+  // =========================
+
+  const calculatedPoints =
+    calculatePoints({
+
+      apostaA:
+        Number(bet.golsA),
+
+      apostaB:
+        Number(bet.golsB),
+
+      resultadoA:
+        Number(gameFound.resultadoA),
+
+      resultadoB:
+        Number(gameFound.resultadoB)
+
+    });
+
+  // =========================
+  // EXATO
+  // =========================
+
+  const exato =
+
+    Number(bet.golsA) ===
+    Number(gameFound.resultadoA) &&
+
+    Number(bet.golsB) ===
+    Number(gameFound.resultadoB);
+
+  // =========================
+  // DISTÂNCIA
+  // =========================
+
+  const distancia =
+
+    Math.abs(
+      Number(bet.golsA) -
+      Number(gameFound.resultadoA)
+    ) +
+
+    Math.abs(
+      Number(bet.golsB) -
+      Number(gameFound.resultadoB)
+    );
+
+  // =========================
+  // ACERTOS PARCIAIS
+  // =========================
+
+  let acertosParciais = 0;
+
+  if (
+    Number(bet.golsA) ===
+    Number(gameFound.resultadoA)
+  ) {
+
+    acertosParciais += 1;
+
+  }
+
+  if (
+    Number(bet.golsB) ===
+    Number(gameFound.resultadoB)
+  ) {
+
+    acertosParciais += 1;
+
+  }
+
+  if (exato) {
+
+    acertosParciais = 0;
+
+  }
+
+  // =========================
+  // CRIA USER
+  // =========================
+
+  if (!rankingMap[nome]) {
+
+    rankingMap[nome] = {
+
+      username,
+
+      nome,
+
+      points: 0,
+
+      exatos: 0,
+
+      aproximacaoVencedor: 0,
+
+      aproximacaoEmpate: 0,
+
+      acertosParciais: 0,
+
+      ultimoHorarioAposta: 0
+
+    };
+
+  }
+
+  // =========================
+  // SOMA PONTOS
+  // =========================
+
+  rankingMap[nome].points +=
+    calculatedPoints;
+
+  // =========================
+  // EXATOS
+  // =========================
+
+  if (exato) {
+
+    rankingMap[nome]
+      .exatos += 1;
+
+  }
+
+  // =========================
+  // ACERTOS PARCIAIS
+  // =========================
+
+  rankingMap[nome]
+    .acertosParciais +=
+      acertosParciais;
+
+  // =========================
+  // ACERTOU VENCEDOR
+  // =========================
+
+  const acertouVencedor =
+
+    (
+      Number(bet.golsA) >
+      Number(bet.golsB) &&
+
+      Number(gameFound.resultadoA) >
+      Number(gameFound.resultadoB)
+    ) ||
+
+    (
+      Number(bet.golsA) <
+      Number(bet.golsB) &&
+
+      Number(gameFound.resultadoA) <
+      Number(gameFound.resultadoB)
+    );
+
+  // =========================
+  // ACERTOU EMPATE
+  // =========================
+
+  const acertouEmpate =
+
+    Number(bet.golsA) ===
+    Number(bet.golsB) &&
+
+    Number(gameFound.resultadoA) ===
+    Number(gameFound.resultadoB);
+
+  // =========================
+  // APROXIMAÇÃO VENCEDOR
+  // =========================
+
+  if (acertouVencedor) {
+
+    rankingMap[nome]
+      .aproximacaoVencedor +=
+        distancia;
+
+  }
+
+  // =========================
+  // APROXIMAÇÃO EMPATE
+  // =========================
+
+  if (acertouEmpate) {
+
+    rankingMap[nome]
+      .aproximacaoEmpate +=
+        distancia;
+
+  }
+
+  // =========================
+  // HORÁRIO
+  // =========================
+
+  const horario =
+    bet.createdAt?.seconds || 0;
+
+  if (
+    horario <
+      rankingMap[nome]
+        .ultimoHorarioAposta ||
+
+    rankingMap[nome]
+      .ultimoHorarioAposta === 0
+  ) {
+
+    rankingMap[nome]
+      .ultimoHorarioAposta =
+        horario;
+
+  }
+
+}
+
+// =========================
+// ORDENA
+// =========================
+
+const rankingArray =
+
+  Object.values(
+    rankingMap
+  )
+
+    .sort((a, b) => {
+
+      if (
+        b.points !== a.points
+      ) {
+
+        return (
+          b.points - a.points
         );
 
-    setRanking(
-      rankingArray
-    );
+      }
+
+      if (
+        b.exatos !== a.exatos
+      ) {
+
+        return (
+          b.exatos - a.exatos
+        );
+
+      }
+
+      if (
+        a.aproximacaoVencedor !==
+        b.aproximacaoVencedor
+      ) {
+
+        return (
+          a.aproximacaoVencedor -
+          b.aproximacaoVencedor
+        );
+
+      }
+
+      if (
+        a.aproximacaoEmpate !==
+        b.aproximacaoEmpate
+      ) {
+
+        return (
+          a.aproximacaoEmpate -
+          b.aproximacaoEmpate
+        );
+
+      }
+
+      if (
+        b.acertosParciais !==
+        a.acertosParciais
+      ) {
+
+        return (
+          b.acertosParciais -
+          a.acertosParciais
+        );
+
+      }
+
+      return (
+        a.ultimoHorarioAposta -
+        b.ultimoHorarioAposta
+      );
+
+    });
+
+setRanking(
+  rankingArray
+);
 
   }
 
