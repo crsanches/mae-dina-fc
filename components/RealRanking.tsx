@@ -49,14 +49,25 @@ type RankingUser = {
 
 type Game = {
 
-  teamA?: string;
+  teamA: string;
 
-  teamB?: string;
+  teamB: string;
 
-  resultadoA?: number;
+  resultadoA: number;
 
-  resultadoB?: number;
+  resultadoB: number;
 
+};
+
+type BetData = {
+  userName: string;
+  match: string;
+  golsA: string;
+  golsB: string;
+  createdAt?: { seconds: number };
+  nome?: string;
+  username?: string;
+  uid?: string;
 };
 
 export default function RealRanking() {
@@ -133,22 +144,11 @@ export default function RealRanking() {
 // =========================
 
 const latestBetsMap:
-  Record<string, {
-    userName: string;
-    match: string;
-    golsA: string;
-    golsB: string;
-    createdAt?: {
-      seconds: number;
-    };
-    nome?: string;
-    username?: string;
-    uid?: string;
-  }> = {};
+Record<string, BetData> =  {};
 
-betsSnapshot.forEach((betDoc) => {
+  betsSnapshot.forEach((betDoc) => {
 
-  const bet = betDoc.data();
+    const bet = betDoc.data() as BetData;
 
   const key =
     `${bet.userName}__${bet.match}`;
@@ -275,12 +275,13 @@ bet.match &&
   if (!gameFound) {
     continue;
   }
+  const game = gameFound as Game;
 
   const resultadoA =
-  Number(gameFound.resultadoA);
+  Number(game.resultadoA);
 
 const resultadoB =
-  Number(gameFound.resultadoB);
+  Number(game.resultadoB);
 
   // =========================
   // PONTOS
