@@ -47,6 +47,18 @@ type RankingUser = {
 
 };
 
+type Game = {
+
+  teamA?: string;
+
+  teamB?: string;
+
+  resultadoA?: number;
+
+  resultadoB?: number;
+
+};
+
 export default function RealRanking() {
 
   const [ranking, setRanking] =
@@ -121,7 +133,18 @@ export default function RealRanking() {
 // =========================
 
 const latestBetsMap:
-  Record<string, any> = {};
+  Record<string, {
+    userName: string;
+    match: string;
+    golsA: string;
+    golsB: string;
+    createdAt?: {
+      seconds: number;
+    };
+    nome?: string;
+    username?: string;
+    uid?: string;
+  }> = {};
 
 betsSnapshot.forEach((betDoc) => {
 
@@ -229,15 +252,16 @@ for (
   // BUSCA JOGO
   // =========================
 
-  let gameFound: any = null;
+  let gameFound: Game | null = null;
 
   gamesSnapshot.forEach((gameDoc) => {
 
     const game =
-      gameDoc.data();
+    gameDoc.data() as Game;
 
     if (
-      game.match === bet.match &&
+      `${game.teamA} x ${game.teamB}` ===
+bet.match &&
       game.resultadoA != null &&
       game.resultadoB != null
     ) {
@@ -251,6 +275,12 @@ for (
   if (!gameFound) {
     continue;
   }
+
+  const resultadoA =
+  Number(gameFound.resultadoA);
+
+const resultadoB =
+  Number(gameFound.resultadoB);
 
   // =========================
   // PONTOS
@@ -266,10 +296,10 @@ for (
         Number(bet.golsB),
 
       resultadoA:
-        Number(gameFound.resultadoA),
+        resultadoA,
 
       resultadoB:
-        Number(gameFound.resultadoB)
+        resultadoB
 
     });
 
@@ -280,10 +310,10 @@ for (
   const exato =
 
     Number(bet.golsA) ===
-    Number(gameFound.resultadoA) &&
+    resultadoA &&
 
     Number(bet.golsB) ===
-    Number(gameFound.resultadoB);
+    resultadoB;
 
   // =========================
   // DISTÂNCIA
@@ -293,12 +323,12 @@ for (
 
     Math.abs(
       Number(bet.golsA) -
-      Number(gameFound.resultadoA)
+      resultadoA
     ) +
 
     Math.abs(
       Number(bet.golsB) -
-      Number(gameFound.resultadoB)
+      resultadoB
     );
 
   // =========================
@@ -309,7 +339,7 @@ for (
 
   if (
     Number(bet.golsA) ===
-    Number(gameFound.resultadoA)
+    resultadoA
   ) {
 
     acertosParciais += 1;
@@ -318,7 +348,7 @@ for (
 
   if (
     Number(bet.golsB) ===
-    Number(gameFound.resultadoB)
+    resultadoB
   ) {
 
     acertosParciais += 1;
@@ -395,16 +425,16 @@ for (
       Number(bet.golsA) >
       Number(bet.golsB) &&
 
-      Number(gameFound.resultadoA) >
-      Number(gameFound.resultadoB)
+      resultadoA >
+      resultadoB
     ) ||
 
     (
       Number(bet.golsA) <
       Number(bet.golsB) &&
 
-      Number(gameFound.resultadoA) <
-      Number(gameFound.resultadoB)
+      resultadoA <
+      resultadoB
     );
 
   // =========================
@@ -416,8 +446,8 @@ for (
     Number(bet.golsA) ===
     Number(bet.golsB) &&
 
-    Number(gameFound.resultadoA) ===
-    Number(gameFound.resultadoB);
+    resultadoA ===
+    resultadoB;
 
   // =========================
   // APROXIMAÇÃO VENCEDOR
