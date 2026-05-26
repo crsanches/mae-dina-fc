@@ -801,6 +801,13 @@ export default function AuditoriaPage() {
       4️⃣ Maior número de acertos parciais de gols
     </p>
 
+    <p>
+    🎯 A soma dos valores para desempate não incluem o acerto do número de gols, que é um adicional além do total de desempate
+    </p>
+
+    <p>
+    🎯 No total de desempate, quanto menor, melhor. Ele mostra a distância entre o palpite e o resultado. A distância é zero quando você acerta.
+    </p>
   </div>
 
 </div>
