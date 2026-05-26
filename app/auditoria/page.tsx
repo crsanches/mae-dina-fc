@@ -783,32 +783,49 @@ export default function AuditoriaPage() {
 
   <div className="space-y-3 text-zinc-300 leading-6">
 
+  <p>
+    1️⃣ Maior número de placares exatos
+  </p>
+
+  <p>
+    2️⃣ Menor distância acumulada dos resultados
+    em jogos onde acertou o vencedor
+  </p>
+
+  <p>
+    3️⃣ Menor distância acumulada dos resultados
+    em jogos empatados
+  </p>
+
+  <p>
+    4️⃣ Maior número de acertos parciais de gols
+  </p>
+
+  <div className="pt-2 border-t border-zinc-700 space-y-3">
+
     <p>
-      1️⃣ Maior número de placares exatos
+      🎯 O total exibido no desempate representa
+      apenas a soma das distâncias entre os palpites
+      e os resultados reais.
     </p>
 
     <p>
-      2️⃣ Menor distância acumulada dos resultados
-      em jogos onde acertou o vencedor
+      🎯 Os acertos parciais de gols são utilizados
+      separadamente como critério adicional de desempate.
     </p>
 
     <p>
-      3️⃣ Menor distância acumulada dos resultados
-      em jogos empatados
+      🎯 Quanto menor o valor do desempate,
+      melhor foi a precisão média dos palpites.
     </p>
 
     <p>
-      4️⃣ Maior número de acertos parciais de gols
+      🎯 A distância é zero quando o placar exato é acertado.
     </p>
 
-    <p>
-    🎯 A soma dos valores para desempate não incluem o acerto do número de gols, que é um adicional além do total de desempate
-    </p>
-
-    <p>
-    🎯 No total de desempate, quanto menor, melhor. Ele mostra a distância entre o palpite e o resultado. A distância é zero quando você acerta.
-    </p>
   </div>
+
+</div>
 
 </div>
 
