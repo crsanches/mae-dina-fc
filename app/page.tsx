@@ -180,8 +180,18 @@ export default function Home() {
 
           betsSnapshot.forEach((betDoc) => {
 
-            const bet =
-              betDoc.data();
+            const bet = betDoc.data() as {
+              userName: string;
+              match: string;
+              golsA: string;
+              golsB: string;
+              createdAt?: {
+                seconds: number;
+              };
+              nome?: string;
+              username?: string;
+              uid?: string;
+            };
 
             let points = 0;
 
