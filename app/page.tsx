@@ -691,7 +691,7 @@ export default function Home() {
                 src="/logos/casa_mae_joana.png"
                 alt="Auditoria"
                 className="
-                  w-58
+                  w-48
                   object-contain
                   drop-shadow-2xl
                 "
