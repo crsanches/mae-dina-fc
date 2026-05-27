@@ -6,6 +6,10 @@ import {
 } from "react";
 
 import {
+  buildRanking
+} from "../lib/buildRanking";
+
+import {
   query,
   where,
   doc,
@@ -198,6 +202,14 @@ for (
     bet.username ||
 
     nome;
+
+
+    const rankingArray =
+    await buildRanking(
+      currentGroupId
+    );
+  
+  setRanking(rankingArray);
 
   // =========================
   // FALLBACK USERNAME

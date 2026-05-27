@@ -1,45 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-import { db } from "../lib/firebase";
+import {
+  useEffect,
+  useState
+} from "react";
 
 import {
   collection,
   doc,
   getDoc,
-  getDocs,
-  onSnapshot,
-  query,
-  where
+  onSnapshot
 } from "firebase/firestore";
 
-import { calculatePoints }
-from "../lib/calculatePoints";
-
-import { auth }
-from "../lib/firebase";
+import {
+  auth,
+  db
+} from "../lib/firebase";
 
 import {
   onAuthStateChanged
 } from "firebase/auth";
 
+import {
+  buildRanking
+} from "../lib/buildRanking";
+
 type UserData = {
+
   position: number;
+
   points: number;
+
 };
 
 type BetHistory = {
+
   jogo: string;
+
   aposta: string;
+
   resultado: string;
+
   pontos: number;
+
 };
 
 export default function UserStats() {
 
   const [expandido, setExpandido] =
-  useState(false);
+    useState(false);
 
   const [data, setData] =
     useState<UserData>({
@@ -50,191 +59,191 @@ export default function UserStats() {
   const [betHistory, setBetHistory] =
     useState<BetHistory[]>([]);
 
-  async function carregarStats(
-    currentUser: string
-  ) {
+  // =========================
+  // LOAD STATS
+  // =========================
 
-    const firebaseUser =
-      auth.currentUser;
+  async function carregarStats() {
 
-    if (!firebaseUser) {
-      return;
-    }
+    try {
 
-    const userRef =
-      doc(
-        db,
-        "users",
-        firebaseUser.uid
-      );
+      const firebaseUser =
+        auth.currentUser;
 
-    const userSnap =
-      await getDoc(userRef);
+      if (!firebaseUser) {
+        return;
+      }
 
-    if (
-      !userSnap.exists()
-    ) {
-      return;
-    }
+      // =========================
+      // USER
+      // =========================
 
-    const currentGroupId =
-      userSnap.data().activeGroupId
+      const userRef =
+        doc(
+          db,
+          "users",
+          firebaseUser.uid
+        );
 
-    const betsQuery =
-      query(
+      const userSnap =
+        await getDoc(userRef);
 
-        collection(db, "bets"),
+      if (!userSnap.exists()) {
+        return;
+      }
 
-        where(
-          "groupId",
-          "==",
+      const userData =
+        userSnap.data();
+
+      const currentGroupId =
+        userData.activeGroupId;
+
+        const currentUsername =
+
+          userData.apelido ||
+
+          userData.username ||
+
+          userData.nome ||
+
+          firebaseUser.displayName ||
+
+          "";
+
+      // =========================
+      // RANKING OFICIAL
+      // =========================
+
+      const ranking =
+        await buildRanking(
           currentGroupId
-        )
+        );
 
-      );
 
-    const betsSnapshot =
-      await getDocs(
-        betsQuery
-      );
+        const possibleNames = [
 
-    const gamesSnapshot =
-      await getDocs(
-        collection(db, "games")
-      );
+          userData.nome,
+        
+          userData.username,
+        
+          userData.apelido,
+        
+          firebaseUser.displayName
+        
+        ].filter(Boolean);
+        
+      
 
-    const ranking:
-      Record<string, number> = {};
+      // =========================
+      // LOCALIZA USUÁRIO
+      // =========================
 
-    const history:
-      BetHistory[] = [];
+      const currentUserData =
+        ranking.find((u) =>
 
-    betsSnapshot.forEach((betDoc) => {
+          possibleNames.includes(
+            u.username
+          ) ||
 
-      const bet =
-        betDoc.data();
+          possibleNames.includes(
+            u.nome
+          )
+        );
 
-      let points = 0;
+    
+      // =========================
+      // NÃO ENCONTROU
+      // =========================
 
-      gamesSnapshot.forEach((gameDoc) => {
+      if (!currentUserData) {
 
-        const game =
-          gameDoc.data();
+        setData({
 
-        if (
-          game.match === bet.match &&
-          game.resultadoA != null &&
-          game.resultadoB != null
-        ) {
+          position: 0,
 
-          points =
-            calculatePoints({
+          points: 0
 
-              apostaA:
-                Number(bet.golsA),
+        });
 
-              apostaB:
-                Number(bet.golsB),
+        setBetHistory([]);
 
-              resultadoA:
-                Number(game.resultadoA),
+        return;
 
-              resultadoB:
-                Number(game.resultadoB)
+      }
 
-            });
+      // =========================
+      // POSIÇÃO
+      // =========================
 
-        }
+      const position =
+
+      ranking.findIndex((u) =>
+
+      possibleNames.includes(
+        u.username
+      ) ||
+  
+      possibleNames.includes(
+        u.nome
+      )
+  
+    ) + 1;
+
+     
+
+      // =========================
+      // HISTORY
+      // =========================
+
+      const history =
+
+        currentUserData.jogos.map(
+          (jogo) => ({
+
+            jogo:
+              jogo.jogo,
+
+            aposta:
+              jogo.palpite,
+
+            resultado:
+              jogo.resultado,
+
+            pontos:
+              jogo.total
+
+          })
+        );
+
+      // =========================
+      // SET STATE
+      // =========================
+
+      setBetHistory(history);
+
+      setData({
+
+        position,
+
+        points:
+          currentUserData.points
 
       });
 
-      if (
-        ranking[bet.userName] ===
-        undefined
-      ) {
+    } catch (error) {
 
-        ranking[bet.userName] = 0;
+      console.error(
+        "Erro ao carregar stats:",
+        error
+      );
 
-      }
-
-      ranking[bet.userName] +=
-        points;
-
-      if (
-        bet.userName === currentUser
-      ) {
-
-        let resultadoOficial =
-          "-";
-
-        gamesSnapshot.forEach((gameDoc) => {
-
-          const game =
-            gameDoc.data();
-
-          if (
-            game.match === bet.match &&
-            game.resultadoA != null &&
-            game.resultadoB != null
-          ) {
-
-            resultadoOficial =
-              `${game.resultadoA} x ${game.resultadoB}`;
-
-          }
-
-        });
-
-        history.push({
-
-          jogo:
-            bet.match,
-
-          aposta:
-            `${bet.golsA} x ${bet.golsB}`,
-
-          resultado:
-            resultadoOficial,
-
-          pontos:
-            points
-
-        });
-
-      }
-
-    });
-
-    const sorted =
-
-      Object.entries(ranking)
-
-        .sort(
-          (a, b) =>
-            b[1] - a[1]
-        );
-
-    const position =
-
-      sorted.findIndex(
-        ([user]) =>
-          user === currentUser
-      ) + 1;
-
-    const points =
-      ranking[currentUser] || 0;
-
-    setBetHistory(history);
-
-    setData({
-
-      position,
-
-      points
-
-    });
+    }
 
   }
+
+  // =========================
+  // EFFECT
+  // =========================
 
   useEffect(() => {
 
@@ -243,14 +252,19 @@ export default function UserStats() {
 
     const unsubscribeAuth =
       onAuthStateChanged(
+
         auth,
+
         (user) => {
 
           if (!user) {
 
             setData({
+
               position: 0,
+
               points: 0
+
             });
 
             setBetHistory([]);
@@ -262,19 +276,21 @@ export default function UserStats() {
           unsubscribeBets =
             onSnapshot(
 
-              collection(db, "bets"),
+              collection(
+                db,
+                "bets"
+              ),
 
               () => {
 
-                carregarStats(
-                  user.displayName || ""
-                );
+                carregarStats();
 
               }
 
             );
 
         }
+
       );
 
     return () => {
@@ -293,12 +309,18 @@ export default function UserStats() {
 
   }, []);
 
+
+  
+  // =========================
+  // RENDER
+  // =========================
+
   return (
 
     <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-5">
 
       <h2 className="text-xl font-black mb-4">
-      💀 Sua Situação
+        💀 Sua Situação
       </h2>
 
       <div className="grid grid-cols-2 gap-4">
@@ -331,102 +353,104 @@ export default function UserStats() {
 
       <div className="mt-6">
 
-      <button
-  onClick={() =>
-    setExpandido(!expandido)
-  }
-  className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition rounded-2xl p-4 mb-3"
->
+        <button
+          onClick={() =>
+            setExpandido(!expandido)
+          }
+          className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition rounded-2xl p-4 mb-3"
+        >
 
-  <div className="text-left">
+          <div className="text-left">
 
-    <h3 className="text-lg font-black">
-      🎯 Seus Palpites
-    </h3>
-
-    <p className="text-zinc-400 text-sm">
-      {betHistory.length} apostas registradas
-    </p>
-
-  </div>
-
-  <div className="text-2xl">
-
-  {expandido
-  ? "🔮 Fechar previsões"
-  : "🔮 Ver minhas tragédias"}
-
-  </div>
-
-</button>
-
-{expandido && (
-
-<div className="space-y-3">
-
-          {betHistory.length === 0 && (
+            <h3 className="text-lg font-black">
+              🎯 Seus Palpites
+            </h3>
 
             <p className="text-zinc-400 text-sm">
-              Nenhum palpite registrado.
+              {betHistory.length} apostas registradas
             </p>
 
-          )}
+          </div>
 
-          {betHistory.map((bet, index) => (
+          <div className="text-2xl">
 
-            <div
-              key={index}
-              className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
-            >
+            {expandido
+              ? "🔮 Fechar previsões"
+              : "🔮 Ver minhas tragédias"}
 
-              <div className="flex justify-between items-start gap-4">
+          </div>
 
-                <div>
+        </button>
 
-                  <p className="font-bold text-sm mb-2">
-                    ⚽ {bet.jogo}
-                  </p>
+        {expandido && (
 
-                  <div className="text-xs text-zinc-400 space-y-1">
+          <div className="space-y-3">
 
-                    <p>
-                      🎯 Seu palpite:
-                      <span className="text-white font-bold ml-1">
-                        {bet.aposta}
-                      </span>
+            {betHistory.length === 0 && (
+
+              <p className="text-zinc-400 text-sm">
+                Nenhum palpite registrado.
+              </p>
+
+            )}
+
+            {betHistory.map((bet, index) => (
+
+              <div
+                key={index}
+                className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
+              >
+
+                <div className="flex justify-between items-start gap-4">
+
+                  <div>
+
+                    <p className="font-bold text-sm mb-2">
+                      ⚽ {bet.jogo}
                     </p>
 
-                    <p>
-                      🏁 Resultado oficial:
-                      <span className="text-white font-bold ml-1">
-                        {bet.resultado}
-                      </span>
+                    <div className="text-xs text-zinc-400 space-y-1">
+
+                      <p>
+                        🎯 Seu palpite:
+                        <span className="text-white font-bold ml-1">
+                          {bet.aposta}
+                        </span>
+                      </p>
+
+                      <p>
+                        🏁 Resultado oficial:
+                        <span className="text-white font-bold ml-1">
+                          {bet.resultado}
+                        </span>
+                      </p>
+
+                    </div>
+
+                  </div>
+
+                  <div className="text-right">
+
+                    <p className="text-yellow-400 font-black text-lg">
+                      ⭐ {bet.pontos}
+                    </p>
+
+                    <p className="text-zinc-500 text-xs">
+                      pontos
                     </p>
 
                   </div>
 
                 </div>
 
-                <div className="text-right">
-
-                  <p className="text-yellow-400 font-black text-lg">
-                    ⭐ {bet.pontos}
-                  </p>
-
-                  <p className="text-zinc-500 text-xs">
-                    pontos
-                  </p>
-
-                </div>
-
               </div>
 
-            </div>
+            ))}
 
-          ))}
+          </div>
 
-        </div>
-)}
+        )}
+
       </div>
 
     </div>
