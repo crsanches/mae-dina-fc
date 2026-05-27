@@ -650,55 +650,57 @@ export default function Home() {
         {/* link para auditoria */}
 
         <div
-            className="
-              relative
-              overflow-hidden
-              bg-gradient-to-br from-zinc-900 to-zinc-950
-              rounded-2xl
-              px-5 py-3
-              border border-red-800/40
-              shadow-xl shadow-red-950/30
-            "
-          >
+  className="
+    relative
+    overflow-hidden
+    bg-gradient-to-br from-zinc-900 to-zinc-950
+    rounded-2xl
+    px-5 py-3
+    pr-56
+    border border-red-800/40
+    shadow-xl shadow-red-950/30
+  "
+>
 
-            <h2
-              className="
-                text-2xl
-                font-black
-                text-yellow-300
-                tracking-wide
-              "
-            >
-              Relatório de Auditoria
-            </h2>
+  <h2
+    className="
+      text-2xl
+      font-black
+      text-yellow-300
+      tracking-wide
+      leading-none
+    "
+  >
+    Relatório de Auditoria
+  </h2>
 
-            <p className="text-zinc-400 text-sm">
-              Transparência total da rodada
-            </p>
+  <p className="text-zinc-400 text-sm mt-1">
+    Transparência total da rodada
+  </p>
 
-            <Link
-              href="/auditoria"
-              className="
-                absolute
-                top-1/2
-                right-4
-                -translate-y-1/2
-                hover:scale-105
-                transition-all duration-300
-              "
-            >
-              <img
-                src="/logos/casa_mae_joana.png"
-                alt="Auditoria"
-                className="
-                  w-48
-                  object-contain
-                  drop-shadow-2xl
-                "
-              />
-            </Link>
+  <Link
+    href="/auditoria"
+    className="
+      absolute
+      top-1/2
+      right-4
+      -translate-y-1/2
+      hover:scale-105
+      transition-all duration-300
+    "
+  >
+    <img
+      src="/logos/casa_mae_joana.png"
+      alt="Auditoria"
+      className="
+        w-44
+        object-contain
+        drop-shadow-2xl
+      "
+    />
+  </Link>
 
-          </div>
+</div>
 
 
 
