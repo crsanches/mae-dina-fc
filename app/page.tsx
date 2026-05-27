@@ -647,22 +647,70 @@ export default function Home() {
 
         )}
 
+        {/* link para auditoria */}
+
+        <div
+            className="
+              relative
+              overflow-hidden
+              bg-gradient-to-br from-zinc-900 to-zinc-950
+              rounded-2xl
+              px-5 py-3
+              border border-red-800/40
+              shadow-xl shadow-red-950/30
+            "
+          >
+
+            <h2
+              className="
+                text-2xl
+                font-black
+                text-yellow-300
+                tracking-wide
+              "
+            >
+              Relatório de Auditoria
+            </h2>
+
+            <p className="text-zinc-400 text-sm">
+              Transparência total da rodada
+            </p>
+
+            <Link
+              href="/auditoria"
+              className="
+                absolute
+                top-1/2
+                right-4
+                -translate-y-1/2
+                hover:scale-105
+                transition-all duration-300
+              "
+            >
+              <img
+                src="/logos/casa_mae_joana.png"
+                alt="Auditoria"
+                className="
+                  w-88
+                  object-contain
+                  drop-shadow-2xl
+                "
+              />
+            </Link>
+
+          </div>
+
+
+
         {/* RESULTADOS */}
 
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
-        <div className="flex items-center justify-between mb-4">
-
-      <h2 className="text-xl font-black">
-        📜 Resultados Oficiais
-      </h2>
-
-      <Link
-        href="/auditoria"
-        className="bg-zinc-800 hover:bg-zinc-700 transition px-3 py-2 rounded-xl text-sm font-bold"
-      >
-        📋 Auditoria By Casa da Mãe Joana
-      </Link>
+        <div className="flex items-start justify-between">
+  
+        <h2 className="text-xl font-bold">
+          Resultados Oficiais
+        </h2>
 
       </div>
 
