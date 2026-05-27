@@ -656,49 +656,52 @@ export default function Home() {
     bg-gradient-to-br from-zinc-900 to-zinc-950
     rounded-2xl
     px-5 py-3
-    pr-56
     border border-red-800/40
     shadow-xl shadow-red-950/30
   "
 >
 
-  <h2
-    className="
-      text-2xl
-      font-black
-      text-yellow-300
-      tracking-wide
-      leading-none
-    "
-  >
-    Relatório de Auditoria
-  </h2>
+  <div className="flex items-center justify-between">
 
-  <p className="text-zinc-400 text-sm mt-1">
-    Transparência total da rodada
-  </p>
+    <div>
+      <h2
+        className="
+          text-2xl
+          font-black
+          text-yellow-300
+          tracking-wide
+          leading-none
+        "
+      >
+        Relatório de Auditoria
+      </h2>
 
-  <Link
-    href="/auditoria"
-    className="
-      absolute
-      top-1/2
-      right-4
-      -translate-y-1/2
-      hover:scale-105
-      transition-all duration-300
-    "
-  >
-    <img
-      src="/logos/casa_mae_joana.png"
-      alt="Auditoria"
+      <p className="text-zinc-400 text-sm mt-1">
+        Transparência total da rodada
+      </p>
+    </div>
+
+  </div>
+
+  <div className="mt-2 flex justify-end">
+    <Link
+      href="/auditoria"
       className="
-        w-44
-        object-contain
-        drop-shadow-2xl
+        hover:scale-105
+        transition-all duration-300
       "
-    />
-  </Link>
+    >
+      <img
+        src="/logos/casa_mae_joana.png"
+        alt="Auditoria"
+        className="
+          w-44
+          object-contain
+          drop-shadow-2xl
+        "
+      />
+    </Link>
+  </div>
 
 </div>
 
