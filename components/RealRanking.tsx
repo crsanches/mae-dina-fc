@@ -10,12 +10,9 @@ import {
 } from "../lib/buildRanking";
 
 import {
-  query,
-  where,
+  collection,
   doc,
   getDoc,
-  collection,
-  getDocs,
   onSnapshot
 } from "firebase/firestore";
 
@@ -28,231 +25,84 @@ import {
   auth
 } from "../lib/firebase";
 
-import { calculatePoints }
-from "../lib/calculatePoints";
-
-type RankingUser = {
-
-  username: string;
-
-  nome: string;
-
-  points: number;
-
-  exatos: number;
-
-  aproximacaoVencedor: number;
-
-  aproximacaoEmpate: number;
-
-  acertosParciais: number;
-
-  ultimoHorarioAposta: number;
-
-};
-
-type Game = {
-
-  teamA: string;
-
-  teamB: string;
-
-  resultadoA: number;
-
-  resultadoB: number;
-
-};
-
-type BetData = {
-  userName: string;
-  match: string;
-  golsA: string;
-  golsB: string;
-  createdAt?: { seconds: number };
-  nome?: string;
-  username?: string;
-  uid?: string;
-};
+import type {
+  RankingUser
+} from "../lib/buildRanking";
 
 export default function RealRanking() {
 
   const [ranking, setRanking] =
     useState<RankingUser[]>([]);
 
+  const [faseSelecionada, setFaseSelecionada] =
+    useState<
+      | "geral"
+      | "grupos"
+      | "oitavas"
+      | "quartas"
+      | "semi"
+      | "final"
+    >("geral");
+
+  // =========================
+  // CARREGA RANKING
+  // =========================
+
   async function carregarRanking() {
-
-    const currentUser =
-      auth.currentUser;
-
-    if (!currentUser) {
-      return;
-    }
-
-    // =========================
-    // USUÁRIO ATUAL
-    // =========================
-
-    const userRef =
-      doc(
-        db,
-        "users",
-        currentUser.uid
-      );
-
-    const userSnap =
-      await getDoc(userRef);
-
-    if (!userSnap.exists()) {
-      return;
-    }
-
-    const currentGroupId =
-      userSnap.data().activeGroupId;
-
-    // =========================
-    // BUSCA APOSTAS
-    // =========================
-
-    const betsQuery =
-      query(
-        collection(db, "bets"),
-        where(
-          "groupId",
-          "==",
-          currentGroupId
-        )
-      );
-
-    const betsSnapshot =
-      await getDocs(betsQuery);
-
-    // =========================
-    // BUSCA JOGOS
-    // =========================
-
-    const gamesSnapshot =
-      await getDocs(
-        collection(db, "games")
-      );
-
-    // =========================
-    // MAPA RANKING
-    // =========================
-
-    const rankingMap:
-  Record<string, RankingUser> = {};
-
-// =========================
-// REMOVE APOSTAS DUPLICADAS
-// MANTÉM SOMENTE A MAIS RECENTE
-// =========================
-
-const latestBetsMap:
-Record<string, BetData> =  {};
-
-  betsSnapshot.forEach((betDoc) => {
-
-    const bet = betDoc.data() as BetData;
-
-  const key =
-    `${bet.userName}__${bet.match}`;
-
-  const current =
-    latestBetsMap[key];
-
-  const currentTime =
-    current?.createdAt?.seconds || 0;
-
-  const newTime =
-    bet.createdAt?.seconds || 0;
-
-  if (
-    !current ||
-    newTime > currentTime
-  ) {
-
-    latestBetsMap[key] = bet;
-
-  }
-
-});
-
-const uniqueBets =
-  Object.values(latestBetsMap);
-
-// =========================
-// LOOP DAS APOSTAS
-// =========================
-
-for (
-  const bet
-  of uniqueBets
-) {
-
-  const nome =
-
-    bet.nome ||
-
-    bet.userName ||
-
-    "Anônimo";
-
-  let username =
-
-    bet.username ||
-
-    nome;
-
-
-    const rankingArray =
-    await buildRanking(
-      currentGroupId
-    );
-  
-  setRanking(rankingArray);
-
-  // =========================
-  // FALLBACK USERNAME
-  // =========================
-
-  if (
-    !bet.username &&
-    bet.uid
-  ) {
 
     try {
 
-      const oldUserRef =
-        doc(
-          db,
-          "users",
-          bet.uid
-        );
+      const currentUser =
+        auth.currentUser;
 
-      const oldUserSnap =
-        await getDoc(
-          oldUserRef
-        );
+      if (!currentUser) {
 
-      if (
-        oldUserSnap.exists()
-      ) {
+        setRanking([]);
 
-        const userData =
-          oldUserSnap.data();
-
-        username =
-
-          userData.username ||
-
-          nome;
+        return;
 
       }
 
+      // =========================
+      // USUÁRIO ATUAL
+      // =========================
+
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+
+      const userSnap =
+        await getDoc(userRef);
+
+      if (!userSnap.exists()) {
+        return;
+      }
+
+      const currentGroupId =
+        userSnap.data().activeGroupId;
+
+      if (!currentGroupId) {
+        return;
+      }
+
+      // =========================
+      // BUILD RANKING OFICIAL
+      // =========================
+
+      const rankingArray =
+        await buildRanking(
+          currentGroupId
+        );
+
+      setRanking(rankingArray);
+
     } catch (error) {
 
-      console.log(
-        "Erro ao buscar usuário:",
+      console.error(
+        "Erro ao carregar ranking:",
         error
       );
 
@@ -261,341 +111,13 @@ for (
   }
 
   // =========================
-  // BUSCA JOGO
-  // =========================
-
-  let gameFound: Game | null = null;
-
-  gamesSnapshot.forEach((gameDoc) => {
-
-    const game =
-    gameDoc.data() as Game;
-
-    if (
-      `${game.teamA} x ${game.teamB}` ===
-bet.match &&
-      game.resultadoA != null &&
-      game.resultadoB != null
-    ) {
-
-      gameFound = game;
-
-    }
-
-  });
-
-  if (!gameFound) {
-    continue;
-  }
-  const game = gameFound as Game;
-
-  const resultadoA =
-  Number(game.resultadoA);
-
-const resultadoB =
-  Number(game.resultadoB);
-
-  // =========================
-  // PONTOS
-  // =========================
-
-  const calculatedPoints =
-    calculatePoints({
-
-      apostaA:
-        Number(bet.golsA),
-
-      apostaB:
-        Number(bet.golsB),
-
-      resultadoA:
-        resultadoA,
-
-      resultadoB:
-        resultadoB
-
-    });
-
-  // =========================
-  // EXATO
-  // =========================
-
-  const exato =
-
-    Number(bet.golsA) ===
-    resultadoA &&
-
-    Number(bet.golsB) ===
-    resultadoB;
-
-  // =========================
-  // DISTÂNCIA
-  // =========================
-
-  const distancia =
-
-    Math.abs(
-      Number(bet.golsA) -
-      resultadoA
-    ) +
-
-    Math.abs(
-      Number(bet.golsB) -
-      resultadoB
-    );
-
-  // =========================
-  // ACERTOS PARCIAIS
-  // =========================
-
-  let acertosParciais = 0;
-
-  if (
-    Number(bet.golsA) ===
-    resultadoA
-  ) {
-
-    acertosParciais += 1;
-
-  }
-
-  if (
-    Number(bet.golsB) ===
-    resultadoB
-  ) {
-
-    acertosParciais += 1;
-
-  }
-
-  if (exato) {
-
-    acertosParciais = 0;
-
-  }
-
-  // =========================
-  // CRIA USER
-  // =========================
-
-  if (!rankingMap[nome]) {
-
-    rankingMap[nome] = {
-
-      username,
-
-      nome,
-
-      points: 0,
-
-      exatos: 0,
-
-      aproximacaoVencedor: 0,
-
-      aproximacaoEmpate: 0,
-
-      acertosParciais: 0,
-
-      ultimoHorarioAposta: 0
-
-    };
-
-  }
-
-  // =========================
-  // SOMA PONTOS
-  // =========================
-
-  rankingMap[nome].points +=
-    calculatedPoints;
-
-  // =========================
-  // EXATOS
-  // =========================
-
-  if (exato) {
-
-    rankingMap[nome]
-      .exatos += 1;
-
-  }
-
-  // =========================
-  // ACERTOS PARCIAIS
-  // =========================
-
-  rankingMap[nome]
-    .acertosParciais +=
-      acertosParciais;
-
-  // =========================
-  // ACERTOU VENCEDOR
-  // =========================
-
-  const acertouVencedor =
-
-    (
-      Number(bet.golsA) >
-      Number(bet.golsB) &&
-
-      resultadoA >
-      resultadoB
-    ) ||
-
-    (
-      Number(bet.golsA) <
-      Number(bet.golsB) &&
-
-      resultadoA <
-      resultadoB
-    );
-
-  // =========================
-  // ACERTOU EMPATE
-  // =========================
-
-  const acertouEmpate =
-
-    Number(bet.golsA) ===
-    Number(bet.golsB) &&
-
-    resultadoA ===
-    resultadoB;
-
-  // =========================
-  // APROXIMAÇÃO VENCEDOR
-  // =========================
-
-  if (acertouVencedor) {
-
-    rankingMap[nome]
-      .aproximacaoVencedor +=
-        distancia;
-
-  }
-
-  // =========================
-  // APROXIMAÇÃO EMPATE
-  // =========================
-
-  if (acertouEmpate) {
-
-    rankingMap[nome]
-      .aproximacaoEmpate +=
-        distancia;
-
-  }
-
-  // =========================
-  // HORÁRIO
-  // =========================
-
-  const horario =
-    bet.createdAt?.seconds || 0;
-
-  if (
-    horario <
-      rankingMap[nome]
-        .ultimoHorarioAposta ||
-
-    rankingMap[nome]
-      .ultimoHorarioAposta === 0
-  ) {
-
-    rankingMap[nome]
-      .ultimoHorarioAposta =
-        horario;
-
-  }
-
-}
-
-// =========================
-// ORDENA
-// =========================
-
-const rankingArray =
-
-  Object.values(
-    rankingMap
-  )
-
-    .sort((a, b) => {
-
-      if (
-        b.points !== a.points
-      ) {
-
-        return (
-          b.points - a.points
-        );
-
-      }
-
-      if (
-        b.exatos !== a.exatos
-      ) {
-
-        return (
-          b.exatos - a.exatos
-        );
-
-      }
-
-      if (
-        a.aproximacaoVencedor !==
-        b.aproximacaoVencedor
-      ) {
-
-        return (
-          a.aproximacaoVencedor -
-          b.aproximacaoVencedor
-        );
-
-      }
-
-      if (
-        a.aproximacaoEmpate !==
-        b.aproximacaoEmpate
-      ) {
-
-        return (
-          a.aproximacaoEmpate -
-          b.aproximacaoEmpate
-        );
-
-      }
-
-      if (
-        b.acertosParciais !==
-        a.acertosParciais
-      ) {
-
-        return (
-          b.acertosParciais -
-          a.acertosParciais
-        );
-
-      }
-
-      return (
-        a.ultimoHorarioAposta -
-        b.ultimoHorarioAposta
-      );
-
-    });
-
-setRanking(
-  rankingArray
-);
-
-  }
-
-  // =========================
   // EFFECT
   // =========================
 
   useEffect(() => {
+
+    let unsubscribeBets:
+      (() => void) | undefined;
 
     const unsubscribeAuth =
       onAuthStateChanged(
@@ -612,7 +134,7 @@ setRanking(
 
           }
 
-          const unsubscribeBets =
+          unsubscribeBets =
             onSnapshot(
 
               collection(
@@ -628,20 +150,109 @@ setRanking(
 
             );
 
-          return () =>
-            unsubscribeBets();
-
         }
 
       );
 
-    return () =>
+    return () => {
+
       unsubscribeAuth();
+
+      if (
+        unsubscribeBets
+      ) {
+
+        unsubscribeBets();
+
+      }
+
+    };
 
   }, []);
 
   // =========================
-  // JSX
+  // TÍTULO
+  // =========================
+
+  function getTituloRanking() {
+
+    switch (faseSelecionada) {
+
+      case "grupos":
+        return "🌎 Ranking da Fase de Grupos";
+
+      case "oitavas":
+        return "⚔️ Ranking das Oitavas";
+
+      case "quartas":
+        return "🏟️ Ranking das Quartas";
+
+      case "semi":
+        return "🔥 Ranking da Semifinal";
+
+      case "final":
+        return "👑 Ranking da Final";
+
+      default:
+        return "🏆 Ranking Geral";
+
+    }
+
+  }
+
+  // =========================
+  // RANKING EXIBIDO
+  // =========================
+
+  const rankingExibido =
+
+    ranking
+
+      .map((user) => {
+
+        if (
+          faseSelecionada ===
+          "geral"
+        ) {
+
+          return user;
+
+        }
+
+        return {
+
+          ...user,
+
+          points:
+
+            user.porFase?.[
+              faseSelecionada
+            ] || 0
+
+        };
+
+      })
+
+      
+
+      .sort(
+        (a, b) =>
+          b.points - a.points
+      );
+
+ // =========================
+  // CRIANDO TOP 1 E TOP 3
+  // =========================
+
+      const campeaoAtual =
+      rankingExibido[0];
+
+      const top3 =
+      rankingExibido.slice(0, 3);
+
+
+  // =========================
+  // RENDER
   // =========================
 
   return (
@@ -659,12 +270,189 @@ setRanking(
         font-black
         mb-4
       ">
-        🏆 Ranking Mundial da Vergonha
+        {getTituloRanking()}
       </h2>
+
+      {/* FILTROS */}
+
+      <div className="
+        flex
+        flex-wrap
+        gap-2
+        mb-5
+      ">
+
+        {[
+          ["geral", "🏆 Geral"],
+          ["grupos", "🌎 Grupos"],
+          ["oitavas", "⚔️ Oitavas"],
+          ["quartas", "🏟️ Quartas"],
+          ["semi", "🔥 Semi"],
+          ["final", "👑 Final"],
+        ].map(([id, label]) => (
+
+          <button
+            key={id}
+
+            onClick={() =>
+              setFaseSelecionada(
+                id as typeof faseSelecionada
+              )
+            }
+
+            className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+              faseSelecionada === id
+
+                ? "bg-yellow-500 text-black"
+
+                : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+            }`}
+          >
+
+            {label}
+
+          </button>
+
+        ))}
+
+      </div>
+
+      {campeaoAtual && (
+
+<div className="
+  mb-5
+  bg-gradient-to-br
+  from-yellow-500
+  to-yellow-700
+  text-black
+  rounded-2xl
+  p-4
+  shadow-xl
+">
+
+  <div className="
+    flex
+    items-center
+    justify-between
+  ">
+
+    <div>
+
+      <p className="
+        text-xs
+        font-black
+        uppercase
+        opacity-70
+      ">
+
+        {faseSelecionada === "geral"
+
+          ? "🏆 Campeão Geral"
+
+          : "👑 Líder da Fase"}
+
+      </p>
+
+      <h3 className="
+        text-2xl
+        font-black
+        mt-1
+      ">
+
+        {campeaoAtual.username ===
+         campeaoAtual.nome
+
+          ? campeaoAtual.nome
+
+          : `${campeaoAtual.username} (${campeaoAtual.nome})`
+        }
+
+      </h3>
+
+    </div>
+
+    <div className="text-right">
+
+      <p className="
+        text-3xl
+        font-black
+      ">
+        ⭐ {campeaoAtual.points}
+      </p>
+
+      <p className="
+        text-xs
+        font-bold
+        opacity-70
+      ">
+        pontos
+      </p>
+
+    </div>
+
+  </div>
+
+  {/* TOP 3 */}
+
+  <div className="
+    mt-4
+    grid
+    grid-cols-3
+    gap-2
+  ">
+
+    {top3.map((user, index) => (
+
+      <div
+        key={index}
+        className="
+          bg-black/20
+          rounded-xl
+          p-2
+          text-center
+        "
+      >
+
+        <div className="text-xl mb-1">
+
+          {index === 0 && "🥇"}
+          {index === 1 && "🥈"}
+          {index === 2 && "🥉"}
+
+        </div>
+
+        <p className="
+          text-xs
+          font-black
+          truncate
+        ">
+
+          {user.username}
+
+        </p>
+
+        <p className="
+          text-sm
+          font-black
+        ">
+
+          ⭐ {user.points}
+
+        </p>
+
+      </div>
+
+    ))}
+
+  </div>
+
+</div>
+
+)}
 
       <div className="space-y-3">
 
-        {ranking.length === 0 && (
+        {rankingExibido.length === 0 && (
 
           <p className="
             text-zinc-400
@@ -675,7 +463,7 @@ setRanking(
 
         )}
 
-        {ranking.map(
+        {rankingExibido.map(
           (user, index) => (
 
             <div
@@ -733,13 +521,29 @@ setRanking(
 
               </div>
 
-              <p className="
-                text-yellow-400
-                font-black
-                text-sm
-              ">
-                ⭐ {user.points}
-              </p>
+              <div className="text-right">
+
+                <p className="
+                  text-yellow-400
+                  font-black
+                  text-sm
+                ">
+                  ⭐ {user.points}
+                </p>
+
+                {faseSelecionada !== "geral" && (
+
+                  <p className="
+                    text-zinc-500
+                    text-xs
+                    mt-1
+                  ">
+                    fase
+                  </p>
+
+                )}
+
+              </div>
 
             </div>
 

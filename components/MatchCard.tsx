@@ -35,6 +35,9 @@ type Props = {
 
   matchDate: string;
 
+  fase?: string;
+  pesoFase?: number;
+
 };
 
 export default function MatchCard({
@@ -48,7 +51,10 @@ export default function MatchCard({
   resultadoA,
   resultadoB,
 
-  matchDate
+  matchDate,
+
+  fase,
+  pesoFase
 
 }: Props) {
 
@@ -75,6 +81,29 @@ export default function MatchCard({
 
   const currentTime =
     new Date();
+
+    function getFaseLabel() {
+
+      switch (fase) {
+    
+        case "oitavas":
+          return "⚔️ Oitavas"
+    
+        case "quartas":
+          return "🏟️ Quartas"
+    
+        case "semi":
+          return "🔥 Semifinal"
+    
+        case "final":
+          return "🏆 Final"
+    
+        default:
+          return "🌎 Fase de Grupos"
+    
+      }
+    
+    }
 
   async function salvarPalpite() {
 
@@ -563,6 +592,25 @@ export default function MatchCard({
         </div>
 
       </div>
+      <div className="mt-3 flex items-center justify-between">
+
+        <div className="flex gap-2 items-center">
+
+          <span className="bg-zinc-800 text-zinc-300 text-xs px-2 py-1 rounded-lg font-bold">
+
+            {getFaseLabel()}
+
+          </span>
+
+          <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded-lg font-black">
+
+            Peso {pesoFase || 1}x
+
+          </span>
+
+        </div>
+
+        </div>
 
       <div className="mt-3 flex justify-between items-center">
 

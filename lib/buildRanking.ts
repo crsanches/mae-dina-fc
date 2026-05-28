@@ -13,6 +13,11 @@ import {
   import { calculatePoints }
   from "./calculatePoints";
 
+  import {
+    FaseCopa,
+    obterPesoDaFase
+  } from "./copas";
+
   
   /* =========================
      TYPES
@@ -39,6 +44,8 @@ import {
     exato: boolean;
   
     createdAt?: number;
+
+    fase?: string;
   
   };
   
@@ -51,6 +58,14 @@ import {
     nome: string;
   
     points: number;
+
+    porFase: {
+        grupos: number;
+        oitavas: number;
+        quartas: number;
+        semi: number;
+        final: number;
+      };
   
     exatos: number;
   
@@ -75,6 +90,8 @@ import {
     resultadoA: number;
   
     resultadoB: number;
+
+    fase?: FaseCopa;
   
   };
   
@@ -283,6 +300,15 @@ const total =
 
   });
 
+  const fase =
+  game.fase || "grupos";
+
+const peso =
+  obterPesoDaFase(fase);
+
+const totalPonderado =
+  total * peso;
+
 // =========================
 // EXATO
 // =========================
@@ -344,6 +370,20 @@ if (!rankingMap[username]) {
 
     points: 0,
 
+    porFase: {
+
+        grupos: 0,
+      
+        oitavas: 0,
+      
+        quartas: 0,
+      
+        semi: 0,
+      
+        final: 0,
+      
+      },
+
     exatos: 0,
 
     aproximacaoVencedor: 0,
@@ -365,7 +405,11 @@ if (!rankingMap[username]) {
 // =========================
 
 rankingMap[username].points +=
-  total;
+  totalPonderado;
+
+rankingMap[username]
+  .porFase[fase] +=
+    totalPonderado;
 
 // =========================
 // EXATOS
@@ -465,6 +509,10 @@ if (
 
 rankingMap[username]
   .jogos.push({
+
+
+    fase:
+     game.fase || "grupos",
 
     jogo:
       bet.match,

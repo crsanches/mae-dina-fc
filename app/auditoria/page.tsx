@@ -34,6 +34,16 @@ export default function AuditoriaPage() {
   const [ranking, setRanking] =
     useState<RankingUser[]>([]);
 
+  const [faseSelecionada, setFaseSelecionada] =
+  useState<
+    | "geral"
+    | "grupos"
+    | "oitavas"
+    | "quartas"
+    | "semi"
+    | "final"
+  >("geral");
+
   /* =========================
      LOAD DATA
   ========================= */
@@ -116,7 +126,131 @@ export default function AuditoriaPage() {
 
   /* =========================
      RENDER
-  ========================= */
+   ========================= */
+
+  function getTituloAuditoria() {
+
+    switch (faseSelecionada) {
+  
+      case "grupos":
+        return "🌎 Auditoria — Fase de Grupos";
+  
+      case "oitavas":
+        return "⚔️ Auditoria — Oitavas";
+  
+      case "quartas":
+        return "🏟️ Auditoria — Quartas";
+  
+      case "semi":
+        return "🔥 Auditoria — Semifinal";
+  
+      case "final":
+        return "👑 Auditoria — Final";
+  
+      default:
+        return "📋 Auditoria Oficial";
+  
+    }
+  
+  }
+
+  const rankingFiltrado =
+
+  ranking.map((user) => {
+
+    if (
+      faseSelecionada === "geral"
+    ) {
+
+      return user;
+
+    }
+
+    const jogosFiltrados =
+
+      user.jogos.filter((jogo) =>
+
+        jogo.fase ===
+        faseSelecionada
+      );
+
+    const pontosDaFase =
+
+      user.porFase?.[
+        faseSelecionada
+      ] || 0;
+
+    const exatosDaFase =
+
+      jogosFiltrados.filter(
+        (jogo) =>
+          jogo.pontosPlacar > 0
+      ).length;
+
+    const acertosParciaisDaFase =
+
+      jogosFiltrados.reduce(
+
+        (acc, jogo) =>
+
+          acc +
+
+          (
+            (
+              jogo.pontosVencedor > 0 ||
+
+              jogo.pontosEmpate > 0
+            )
+
+              ? 1
+
+              : 0
+          ),
+
+        0
+      );
+
+    const desempateDaFase =
+
+      jogosFiltrados.reduce(
+
+        (acc, jogo) =>
+
+          acc +
+          (jogo.desempate || 0),
+
+        0
+      );
+
+    return {
+
+      ...user,
+
+      points:
+        pontosDaFase,
+
+      jogos:
+        jogosFiltrados,
+
+      exatos:
+        exatosDaFase,
+
+      aproximacaoVencedor:
+        desempateDaFase,
+
+      aproximacaoEmpate: 0,
+
+      acertosParciais:
+        acertosParciaisDaFase
+
+    };
+
+  })
+
+  .sort(
+    (a, b) =>
+      b.points - a.points
+  );
 
   return (
 
@@ -130,9 +264,9 @@ export default function AuditoriaPage() {
 
           <div>
 
-            <h1 className="text-4xl font-black">
-              📋 Auditoria Oficial
-            </h1>
+          <h1 className="text-4xl font-black">
+            {getTituloAuditoria()}
+          </h1>
 
             <p className="text-zinc-400 mt-2">
               Relatório completo de pontuação
@@ -150,6 +284,48 @@ export default function AuditoriaPage() {
         </div>
 
         {/* RANKING */}
+
+        <div className="
+          flex
+          flex-wrap
+          gap-2
+          mb-6
+        ">
+
+          {[
+            ["geral", "🏆 Geral"],
+            ["grupos", "🌎 Grupos"],
+            ["oitavas", "⚔️ Oitavas"],
+            ["quartas", "🏟️ Quartas"],
+            ["semi", "🔥 Semi"],
+            ["final", "👑 Final"],
+          ].map(([id, label]) => (
+
+            <button
+              key={id}
+
+              onClick={() =>
+                setFaseSelecionada(
+                  id as typeof faseSelecionada
+                )
+              }
+
+              className={`px-3 py-2 rounded-xl text-sm font-black transition ${
+                faseSelecionada === id
+
+                  ? "bg-yellow-500 text-black"
+
+                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+
+              {label}
+
+            </button>
+
+          ))}
+
+        </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
 
@@ -269,7 +445,7 @@ export default function AuditoriaPage() {
 
           <div className="space-y-3">
 
-            {ranking.map(
+            {rankingFiltrado.map(
               (user, index) => (
 
                 <div
@@ -354,7 +530,7 @@ export default function AuditoriaPage() {
 
         <div className="space-y-5">
 
-          {ranking.map((user) => (
+          {rankingFiltrado.map((user) => (
 
             <details
               key={user.username}

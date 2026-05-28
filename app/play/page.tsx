@@ -5,6 +5,11 @@ import Link from "next/link";
 import MatchCard from "../../components/MatchCard";
 
 import {
+  FaseCopa,
+  obterPesoDaFase
+} from "../../lib/copas";
+
+import {
   useEffect,
   useState
 } from "react";
@@ -34,6 +39,10 @@ type Game = {
   resultadoB?: number;
 
   matchDate: string;
+
+  fase?: FaseCopa;
+
+  pesoFase?: number;
 
 };
 
@@ -89,7 +98,15 @@ export default function PlayPage() {
               data.resultadoB,
 
             matchDate:
-              data.matchDate
+              data.matchDate,
+
+              fase:
+              data.fase || "grupos",
+            
+              pesoFase:
+              obterPesoDaFase(
+                data.fase || "grupos"
+              ),
 
           });
 
@@ -145,18 +162,21 @@ export default function PlayPage() {
           {games.map((game) => (
 
             <MatchCard
-              key={game.id}
+            key={game.id}
 
-              teamA={game.teamA}
-              teamB={game.teamB}
+            teamA={game.teamA}
+            teamB={game.teamB}
 
-              emojiA={game.emojiA}
-              emojiB={game.emojiB}
+            emojiA={game.emojiA}
+            emojiB={game.emojiB}
 
-              resultadoA={game.resultadoA}
-              resultadoB={game.resultadoB}
+            resultadoA={game.resultadoA}
+            resultadoB={game.resultadoB}
 
-              matchDate={game.matchDate}
+            matchDate={game.matchDate}
+
+            fase={game.fase}
+            pesoFase={game.pesoFase}
             />
 
           ))}
