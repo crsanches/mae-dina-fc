@@ -60,14 +60,14 @@ import {
     points: number;
 
     porFase: {
-        grupos: number;
-        Fase32: number;
-        oitavas: number;
-        quartas: number;
-        semi: number;
-        terceiro: number;
-        final: number;
-      };
+      Grupos: number;
+      Fase32: number;
+      Oitavas: number;
+      Quartas: number;
+      Semi: number;
+      Terceiro: number;
+      Final: number;
+    };
   
     exatos: number;
   
@@ -376,19 +376,19 @@ if (!rankingMap[username]) {
 
     porFase: {
 
-        grupos: 0,
+        Grupos: 0,
 
-        segunda: 0,
+        Fase32: 0,
       
-        oitavas: 0,
+        Oitavas: 0,
       
-        quartas: 0,
+        Quartas: 0,
       
-        semi: 0,
+        Semi: 0,
 
-        terceiro: 0,
+        Terceiro: 0,
       
-        final: 0,
+        Final: 0,
       
       },
 
