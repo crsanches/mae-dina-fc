@@ -43,7 +43,7 @@ export default function AuditoriaPage() {
     | "Quartas"
     | "Semi"
     | "Final"
-  >("geral");
+  >("Geral");
 
   /* =========================
      LOAD DATA
