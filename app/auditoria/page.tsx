@@ -163,7 +163,7 @@ export default function AuditoriaPage() {
   ranking.map((user) => {
 
     if (
-      faseSelecionada === "geral"
+      faseSelecionada === "Geral"
     ) {
 
       return user;

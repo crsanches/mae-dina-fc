@@ -289,7 +289,7 @@ export default function RealRanking() {
         {[
           ["Geral", "🏆 Geral"],
           ["Grupos", "🌎 Grupos"],
-          ["Fase32", "⚔️ 🚪 segunda"],
+          ["Fase32", "⚔️ 🚪 Segunda"],
           ["Oitavas", "⚔️ Oitavas"],
           ["Quartas", "🏟️ Quartas"],
           ["Semi", "🔥 Semi"],
