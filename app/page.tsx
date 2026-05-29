@@ -91,7 +91,9 @@ type Game = {
   emojiA: string;
   emojiB: string;
 
-  phase: string;
+  fase: string;
+
+  grupo?: string;
 
   matchDate: string;
 
@@ -439,7 +441,9 @@ export default function Home() {
               emojiA: data.emojiA,
               emojiB: data.emojiB,
 
-              phase: data.phase,
+              fase: data.fase || data.phase,
+
+              grupo: data.grupo,
 
               matchDate: data.matchDate,
 
@@ -505,13 +509,13 @@ export default function Home() {
 
       (acc, jogo) => {
 
-        if (!acc[jogo.phase]) {
+        if (!acc[jogo.fase]) {
 
-          acc[jogo.phase] = [];
+          acc[jogo.fase] = [];
 
         }
 
-        acc[jogo.phase].push(jogo);
+        acc[jogo.fase].push(jogo);
 
         return acc;
 
@@ -747,29 +751,49 @@ export default function Home() {
 
                         <p className="font-bold text-sm flex items-center gap-2 flex-wrap">
 
-                          <span className="flex items-center gap-1">
+                        <span className="flex items-center gap-1">
 
-                            <img
-                              src={jogo.emojiA}
-                              alt={jogo.teamA}
-                              loading="lazy"
-                              className="w-5 h-5 object-contain inline-block"
-                            />
+                            {jogo.emojiA?.startsWith("/") ? (
+
+                              <img
+                                src={jogo.emojiA}
+                                alt={jogo.teamA}
+                                loading="lazy"
+                                className="w-5 h-5 object-contain inline-block"
+                              />
+
+                            ) : (
+
+                              <span className="text-lg leading-none">
+                                {jogo.emojiA}
+                              </span>
+
+                            )}
 
                             <span>{jogo.teamA}</span>
 
-                          </span>
+                            </span>
 
                           <span>x</span>
 
                           <span className="flex items-center gap-1">
 
-                            <img
-                              src={jogo.emojiB}
-                              alt={jogo.teamB}
-                              loading="lazy"
-                              className="w-5 h-5 object-contain inline-block"
-                            />
+                            {jogo.emojiB?.startsWith("/") ? (
+
+                              <img
+                                src={jogo.emojiB}
+                                alt={jogo.teamB}
+                                loading="lazy"
+                                className="w-5 h-5 object-contain inline-block"
+                              />
+
+                            ) : (
+
+                              <span className="text-lg leading-none">
+                                {jogo.emojiB}
+                              </span>
+
+                            )}
 
                             <span>{jogo.teamB}</span>
 

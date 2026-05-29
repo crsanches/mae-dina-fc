@@ -1,5 +1,5 @@
 export type Match = {
-  phase: string;
+  fase: string;
   teamA: string;
   teamB: string;
   emojiA: string;

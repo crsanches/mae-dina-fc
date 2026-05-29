@@ -25,7 +25,9 @@ type Game = {
   emojiA: string;
   emojiB: string;
 
-  phase: string;
+  fase: string;
+
+  grupo?: string;
 
   matchDate: string;
 };
@@ -93,7 +95,9 @@ export default function AdminPage() {
         emojiA: data.emojiA,
         emojiB: data.emojiB,
 
-        phase: data.phase,
+        fase: data.fase || data.phase,
+
+        grupo: data.grupo,
 
         matchDate: data.matchDate
 
@@ -429,7 +433,7 @@ export default function AdminPage() {
                     </h3>
 
                     <p className="text-zinc-400 text-sm">
-                      {game.phase}
+                      {game.fase}
                     </p>
 
                   </div>

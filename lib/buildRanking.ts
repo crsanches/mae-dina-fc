@@ -61,9 +61,11 @@ import {
 
     porFase: {
         grupos: number;
+        Fase32: number;
         oitavas: number;
         quartas: number;
         semi: number;
+        terceiro: number;
         final: number;
       };
   
@@ -92,6 +94,8 @@ import {
     resultadoB: number;
 
     fase?: FaseCopa;
+
+    grupo?: string;
   
   };
   
@@ -301,7 +305,7 @@ const total =
   });
 
   const fase =
-  game.fase || "grupos";
+  game.fase || "Grupos";
 
 const peso =
   obterPesoDaFase(fase);
@@ -373,12 +377,16 @@ if (!rankingMap[username]) {
     porFase: {
 
         grupos: 0,
+
+        segunda: 0,
       
         oitavas: 0,
       
         quartas: 0,
       
         semi: 0,
+
+        terceiro: 0,
       
         final: 0,
       
@@ -512,7 +520,7 @@ rankingMap[username]
 
 
     fase:
-     game.fase || "grupos",
+     game.fase || "Grupos",
 
     jogo:
       bet.match,

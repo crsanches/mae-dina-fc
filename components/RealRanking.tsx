@@ -36,13 +36,14 @@ export default function RealRanking() {
 
   const [faseSelecionada, setFaseSelecionada] =
     useState<
-      | "geral"
-      | "grupos"
-      | "oitavas"
-      | "quartas"
-      | "semi"
-      | "final"
-    >("geral");
+      | "Geral"
+      | "Grupos"
+      | "Fase32"
+      | "Oitavas"
+      | "Quartas"
+      | "Semi"
+      | "Final"
+    >("Geral");
 
   // =========================
   // CARREGA RANKING
@@ -178,19 +179,22 @@ export default function RealRanking() {
 
     switch (faseSelecionada) {
 
-      case "grupos":
+      case "Grupos":
         return "🌎 Ranking da Fase de Grupos";
 
-      case "oitavas":
+        case "Segunda":
+          return "⚔️ 🚪 Ranking da Segunda";
+
+      case "Oitavas":
         return "⚔️ Ranking das Oitavas";
 
-      case "quartas":
+      case "Quartas":
         return "🏟️ Ranking das Quartas";
 
-      case "semi":
+      case "Semi":
         return "🔥 Ranking da Semifinal";
 
-      case "final":
+      case "Final":
         return "👑 Ranking da Final";
 
       default:
@@ -283,12 +287,13 @@ export default function RealRanking() {
       ">
 
         {[
-          ["geral", "🏆 Geral"],
-          ["grupos", "🌎 Grupos"],
-          ["oitavas", "⚔️ Oitavas"],
-          ["quartas", "🏟️ Quartas"],
-          ["semi", "🔥 Semi"],
-          ["final", "👑 Final"],
+          ["Geral", "🏆 Geral"],
+          ["Grupos", "🌎 Grupos"],
+          ["Segunda", "⚔️ 🚪 segunda"],
+          ["Oitavas", "⚔️ Oitavas"],
+          ["Quartas", "🏟️ Quartas"],
+          ["Semi", "🔥 Semi"],
+          ["Final", "👑 Final"],
         ].map(([id, label]) => (
 
           <button

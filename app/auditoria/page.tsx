@@ -36,12 +36,13 @@ export default function AuditoriaPage() {
 
   const [faseSelecionada, setFaseSelecionada] =
   useState<
-    | "geral"
-    | "grupos"
-    | "oitavas"
-    | "quartas"
-    | "semi"
-    | "final"
+    | "Geral"
+    | "Grupos"
+    | "Fase32"
+    | "Oitavas"
+    | "Quartas"
+    | "Semi"
+    | "Final"
   >("geral");
 
   /* =========================
@@ -132,19 +133,22 @@ export default function AuditoriaPage() {
 
     switch (faseSelecionada) {
   
-      case "grupos":
+      case "Grupos":
         return "🌎 Auditoria — Fase de Grupos";
   
-      case "oitavas":
-        return "⚔️ Auditoria — Oitavas";
+      case "Oitavas":
+          return "⚔️ Auditoria — Oitavas";
+      
+      case "Fase32":
+        return "⚔️ 🚪 Auditoria — Fase32";
   
-      case "quartas":
+      case "Quartas":
         return "🏟️ Auditoria — Quartas";
   
-      case "semi":
+      case "Semi":
         return "🔥 Auditoria — Semifinal";
   
-      case "final":
+      case "Final":
         return "👑 Auditoria — Final";
   
       default:
@@ -293,12 +297,13 @@ export default function AuditoriaPage() {
         ">
 
           {[
-            ["geral", "🏆 Geral"],
-            ["grupos", "🌎 Grupos"],
-            ["oitavas", "⚔️ Oitavas"],
-            ["quartas", "🏟️ Quartas"],
-            ["semi", "🔥 Semi"],
-            ["final", "👑 Final"],
+            ["Geral", "🏆 Geral"],
+            ["Grupos", "🌎 Grupos"],
+            ["Segunda", "🚪 Segunda Fase"],
+            ["Oitavas", "⚔️ Oitavas"],
+            ["Quartas", "🏟️ Quartas"],
+            ["Semi", "🔥 Semi"],
+            ["Final", "👑 Final"],
           ].map(([id, label]) => (
 
             <button

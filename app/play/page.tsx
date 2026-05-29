@@ -1,192 +1,405 @@
 "use client";
 
 import Link from "next/link";
-
 import MatchCard from "../../components/MatchCard";
 
+import BetProgress from "../../components/BetProgress";
+
+
 import {
-  FaseCopa,
-  obterPesoDaFase
+FaseCopa,
+obterPesoDaFase
 } from "../../lib/copas";
 
 import {
-  useEffect,
-  useState
+useEffect,
+useState
 } from "react";
 
-import {
-  db
-} from "../../lib/firebase";
+import { db } from "../../lib/firebase";
 
 import {
-  collection,
-  onSnapshot,
-  orderBy,
-  query
+collection,
+onSnapshot,
+orderBy,
+query
 } from "firebase/firestore";
 
 type Game = {
+id: string;
 
-  id: string;
+teamA: string;
+teamB: string;
 
-  teamA: string;
-  teamB: string;
+emojiA: string;
+emojiB: string;
 
-  emojiA: string;
-  emojiB: string;
+resultadoA?: number;
+resultadoB?: number;
 
-  resultadoA?: number;
-  resultadoB?: number;
+matchDate: string;
 
-  matchDate: string;
+grupo?: string;
 
-  fase?: FaseCopa;
+fase?: FaseCopa;
 
-  pesoFase?: number;
-
+pesoFase?: number;
 };
 
 export default function PlayPage() {
 
-  const [games, setGames] =
-    useState<Game[]>([]);
+const [games, setGames] =
+useState<Game[]>([]);
 
-  useEffect(() => {
+const [tipoVisualizacao, setTipoVisualizacao] =
+useState<"grupos" | "matamata">(
+"grupos"
+);
 
-    const q = query(
+const [grupoSelecionado, setGrupoSelecionado] =
+useState("A");
 
-      collection(db, "games"),
+const [
+faseMataMataSelecionada,
+setFaseMataMataSelecionada
+] = useState<FaseCopa>("Fase32");
 
-      orderBy(
-        "matchDate",
-        "asc"
-      )
+useEffect(() => {
 
-    );
 
-    const unsubscribe =
-      onSnapshot(q, (snapshot) => {
+const q = query(
+  collection(db, "games"),
+  orderBy("matchDate", "asc")
+);
 
-        const loadedGames: Game[] = [];
+const unsubscribe =
+  onSnapshot(q, (snapshot) => {
 
-        snapshot.forEach((doc) => {
+    const loadedGames: Game[] = [];
 
-          const data =
-            doc.data();
+    snapshot.forEach((doc) => {
 
-          loadedGames.push({
+      const data =
+        doc.data();
 
-            id:
-              doc.id,
+      loadedGames.push({
 
-            teamA:
-              data.teamA,
+        id: doc.id,
 
-            teamB:
-              data.teamB,
+        teamA:
+          data.teamA,
 
-            emojiA:
-              data.emojiA,
+        teamB:
+          data.teamB,
 
-            emojiB:
-              data.emojiB,
+        emojiA:
+          data.emojiA,
 
-            resultadoA:
-              data.resultadoA,
+        emojiB:
+          data.emojiB,
 
-            resultadoB:
-              data.resultadoB,
+        resultadoA:
+          data.resultadoA,
 
-            matchDate:
-              data.matchDate,
+        resultadoB:
+          data.resultadoB,
 
-              fase:
-              data.fase || "grupos",
-            
-              pesoFase:
-              obterPesoDaFase(
-                data.fase || "grupos"
-              ),
+        matchDate:
+          data.matchDate,
 
-          });
+        grupo:
+          data.grupo,
 
-        });
+        fase:
+          data.fase || "Grupos",
 
-        setGames(
-          loadedGames
-        );
+        pesoFase:
+          obterPesoDaFase(
+            data.fase || "Grupos"
+          )
 
       });
 
-    return () => unsubscribe();
+    });
 
-  }, []);
+    setGames(
+      loadedGames
+    );
+
+  });
+
+return () => unsubscribe();
+
+
+}, []);
+
+const grupos = [
+"A","B","C","D","E","F",
+"G","H","I","J","K","L"
+];
+
+const jogosFiltrados =
+games.filter((game) => {
+
+
+  if (
+    tipoVisualizacao ===
+    "grupos"
+  ) {
+
+    return (
+      game.fase === "Grupos" &&
+      game.grupo === grupoSelecionado
+    );
+
+  }
 
   return (
+    game.fase ===
+    faseMataMataSelecionada
+  );
 
-    <main className="min-h-screen bg-zinc-950 text-white p-4">
+});
 
-      <div className="max-w-3xl mx-auto">
 
-        <div className="flex items-center justify-between mb-6">
 
-          <h1 className="text-3xl font-black">
+return (
 
-            🎯 Faça seus palpites
 
-          </h1>
+<main className="min-h-screen bg-zinc-950 text-white p-4">
 
-          <Link
-            href="/"
-            className="bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl font-bold text-sm"
+  <div className="max-w-3xl mx-auto">
+
+    <div className="flex items-center justify-between mb-6">
+
+      <h1 className="text-3xl font-black">
+        🎯 Faça seus palpites
+      </h1>
+
+      <Link
+        href="/"
+        className="
+          bg-zinc-800
+          hover:bg-zinc-700
+          transition
+          px-4
+          py-2
+          rounded-xl
+          font-bold
+          text-sm
+        "
+      >
+        ← Voltar ao menu
+      </Link>
+
+    </div>
+
+
+    {/* MENU PROGRESSOL */}
+
+      <BetProgress
+      totalJogos={games.length}
+     />
+
+
+
+    {/* MENU PRINCIPAL */}
+
+    <div className="flex gap-2 mb-6">
+
+      <button
+        onClick={() =>
+          setTipoVisualizacao(
+            "grupos"
+          )
+        }
+        className={
+          tipoVisualizacao === "grupos"
+
+            ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
+
+            : "bg-zinc-800 px-4 py-2 rounded-xl"
+        }
+      >
+        🌎 Grupos
+      </button>
+
+      <button
+        onClick={() =>
+          setTipoVisualizacao(
+            "matamata"
+          )
+        }
+        className={
+          tipoVisualizacao === "matamata"
+
+            ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
+
+            : "bg-zinc-800 px-4 py-2 rounded-xl"
+        }
+      >
+        ⚔️ Mata-mata
+      </button>
+
+    </div>
+
+    {/* SUBMENU GRUPOS */}
+
+    {tipoVisualizacao === "grupos" && (
+
+      <div className="flex flex-wrap gap-2 mb-6">
+
+        {grupos.map((grupo) => (
+
+          <button
+            key={grupo}
+            onClick={() =>
+              setGrupoSelecionado(
+                grupo
+              )
+            }
+            className={
+              grupoSelecionado === grupo
+
+                ? "bg-green-500 text-black px-3 py-2 rounded-xl font-black"
+
+                : "bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-xl"
+            }
           >
+            Grupo {grupo}
+          </button>
 
-            ← Voltar ao menu
-
-          </Link>
-
-        </div>
-
-        <div className="space-y-4">
-
-          {games.length === 0 && (
-
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 text-center text-zinc-400">
-
-              Nenhum jogo cadastrado 😥
-
-            </div>
-
-          )}
-
-          {games.map((game) => (
-
-            <MatchCard
-            key={game.id}
-
-            teamA={game.teamA}
-            teamB={game.teamB}
-
-            emojiA={game.emojiA}
-            emojiB={game.emojiB}
-
-            resultadoA={game.resultadoA}
-            resultadoB={game.resultadoB}
-
-            matchDate={game.matchDate}
-
-            fase={game.fase}
-            pesoFase={game.pesoFase}
-            />
-
-          ))}
-
-        </div>
+        ))}
 
       </div>
 
-    </main>
+    )}
 
-  );
+    {/* SUBMENU MATA-MATA */}
+
+    {tipoVisualizacao === "matamata" && (
+
+      <div className="flex flex-wrap gap-2 mb-6">
+
+        {[
+          {
+            id: "Fase32",
+            label: "🚪 Segunda Fase"
+          },
+          {
+            id: "Oitavas",
+            label: "⚔️ Oitavas"
+          },
+          {
+            id: "Quartas",
+            label: "🏟️ Quartas"
+          },
+          {
+            id: "Semi",
+            label: "🔥 Semi"
+          },
+          {
+            id: "Terceiro",
+            label: "🥉 3º Lugar"
+          },
+          {
+            id: "Final",
+            label: "🏆 Final"
+          }
+        ].map((fase) => (
+
+          <button
+            key={fase.id}
+            onClick={() =>
+              setFaseMataMataSelecionada(
+                fase.id as FaseCopa
+              )
+            }
+            className={
+              faseMataMataSelecionada === fase.id
+
+                ? "bg-red-500 text-black px-3 py-2 rounded-xl font-black"
+
+                : "bg-zinc-800 hover:bg-zinc-700 px-3 py-2 rounded-xl"
+            }
+          >
+            {fase.label}
+          </button>
+
+        ))}
+
+      </div>
+
+    )}
+
+    {/* JOGOS */}
+
+    <div className="space-y-4">
+
+      {games.length === 0 && (
+
+        <div
+          className="
+            bg-zinc-900
+            border
+            border-zinc-800
+            rounded-2xl
+            p-6
+            text-center
+            text-zinc-400
+          "
+        >
+          Nenhum jogo cadastrado 😥
+        </div>
+
+      )}
+
+      {jogosFiltrados.length === 0 && games.length > 0 && (
+
+        <div
+          className="
+            bg-zinc-900
+            border
+            border-zinc-800
+            rounded-2xl
+            p-6
+            text-center
+            text-zinc-400
+          "
+        >
+          Nenhum jogo encontrado nesta fase.
+        </div>
+
+      )}
+
+      {jogosFiltrados.map((game) => (
+
+        <MatchCard
+          key={game.id}
+
+          teamA={game.teamA}
+          teamB={game.teamB}
+
+          emojiA={game.emojiA}
+          emojiB={game.emojiB}
+
+          resultadoA={game.resultadoA}
+          resultadoB={game.resultadoB}
+
+          matchDate={game.matchDate}
+
+          fase={game.fase}
+          pesoFase={game.pesoFase}
+        />
+
+      ))}
+
+    </div>
+
+  </div>
+
+</main>
+
+);
 
 }

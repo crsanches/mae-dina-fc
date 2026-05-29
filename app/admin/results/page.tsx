@@ -26,7 +26,9 @@ type Game = {
   emojiA: string;
   emojiB: string;
 
-  phase: string;
+  fase: string;
+
+  grupo?: string;
 
   matchDate: string;
 
@@ -62,9 +64,11 @@ export default function AdminResultsPage() {
         emojiA: data.emojiA,
         emojiB: data.emojiB,
 
-        phase: data.phase,
+        fase: data.fase || data.phase,
 
         matchDate: data.matchDate,
+
+        grupo: data.grupo,
 
         resultadoA: data.resultadoA,
         resultadoB: data.resultadoB
@@ -267,7 +271,7 @@ function GameResultCard({
           </h2>
 
           <p className="text-zinc-400">
-            {game.phase}
+            {game.fase}
           </p>
 
         </div>

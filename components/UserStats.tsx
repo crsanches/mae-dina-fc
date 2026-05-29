@@ -9,6 +9,9 @@ import {
   collection,
   doc,
   getDoc,
+  getDocs,
+  query,
+  where,
   onSnapshot
 } from "firebase/firestore";
 
@@ -39,9 +42,19 @@ type BetHistory = {
 
   aposta: string;
 
-  resultado: string;
+  resultado?: string;
 
-  pontos: number;
+  pontos?: number;
+
+  fase?: string;
+
+  grupo?: string;
+
+  matchDate?: string;
+
+  emojiA?: string;
+
+  emojiB?: string;
 
 };
 
@@ -56,12 +69,194 @@ export default function UserStats() {
       points: 0
     });
 
-  const [betHistory, setBetHistory] =
+    const [betHistory, setBetHistory] =
     useState<BetHistory[]>([]);
+  
+  const [
+    tipoVisualizacao,
+    setTipoVisualizacao
+  ] = useState<
+    "grupos" | "matamata"
+  >("grupos");
+  
+  const [
+    grupoSelecionado,
+    setGrupoSelecionado
+  ] = useState("A");
+  
+  const [
+    faseSelecionada,
+    setFaseSelecionada
+  ] = useState("Fase32");
+    
+
 
   // =========================
   // LOAD STATS
   // =========================
+
+  async function carregarPalpites() {
+
+    const firebaseUser =
+      auth.currentUser;
+  
+    if (!firebaseUser) {
+      return;
+    }
+  
+    const userRef =
+      doc(
+        db,
+        "users",
+        firebaseUser.uid
+      );
+  
+    const userSnap =
+      await getDoc(userRef);
+  
+    if (!userSnap.exists()) {
+      return;
+    }
+  
+    const userData =
+      userSnap.data();
+  
+    const currentGroupId =
+      userData.activeGroupId;
+  
+    const possibleNames = [
+  
+      userData.nome,
+  
+      userData.username,
+  
+      userData.apelido,
+  
+      firebaseUser.displayName
+  
+    ].filter(Boolean);
+  
+    const betsSnapshot =
+      await getDocs(
+  
+        query(
+          collection(db, "bets"),
+          where(
+            "groupId",
+            "==",
+            currentGroupId
+          )
+        )
+  
+      );
+  
+    const gamesSnapshot =
+      await getDocs(
+        collection(db, "games")
+      );
+  
+    const gamesMap:
+      Record<string, any> = {};
+  
+    gamesSnapshot.forEach((gameDoc) => {
+  
+      const game =
+        gameDoc.data();
+  
+      gamesMap[
+        `${game.teamA} x ${game.teamB}`
+      ] = game;
+  
+    });
+  
+    const history: BetHistory[] = [];
+  
+    betsSnapshot.forEach((betDoc) => {
+  
+      const bet =
+        betDoc.data();
+  
+      const betName =
+  
+        bet.username ||
+  
+        bet.userName ||
+  
+        bet.nome;
+  
+      if (
+        !possibleNames.includes(
+          betName
+        )
+      ) {
+  
+        return;
+  
+      }
+  
+      const game =
+        gamesMap[bet.match];
+  
+      if (!game) {
+        return;
+      }
+  
+      history.push({
+  
+        jogo:
+          bet.match,
+  
+        aposta:
+          `${bet.golsA} x ${bet.golsB}`,
+  
+        resultado:
+  
+          game.resultadoA != null &&
+          game.resultadoB != null
+  
+            ? `${game.resultadoA} x ${game.resultadoB}`
+  
+            : undefined,
+  
+        pontos:
+          bet.points,
+  
+        fase:
+          game.fase,
+  
+        grupo:
+          game.grupo,
+  
+        matchDate:
+          game.matchDate,
+  
+        emojiA:
+          game.emojiA,
+  
+        emojiB:
+          game.emojiB
+  
+      });
+  
+    });
+  
+   
+  
+    history.sort((a, b) =>
+        (a.matchDate || "")
+          .localeCompare(
+            b.matchDate || ""
+          )
+      );
+      
+      setBetHistory(history);
+
+      
+    
+    }
+ 
+
+    /******** */
 
   async function carregarStats() {
 
@@ -195,31 +390,13 @@ export default function UserStats() {
       // HISTORY
       // =========================
 
-      const history =
-
-        currentUserData.jogos.map(
-          (jogo) => ({
-
-            jogo:
-              jogo.jogo,
-
-            aposta:
-              jogo.palpite,
-
-            resultado:
-              jogo.resultado,
-
-            pontos:
-              jogo.total
-
-          })
-        );
+      
 
       // =========================
       // SET STATE
       // =========================
 
-      setBetHistory(history);
+      
 
       setData({
 
@@ -229,6 +406,8 @@ export default function UserStats() {
           currentUserData.points
 
       });
+
+      await carregarPalpites();
 
     } catch (error) {
 
@@ -310,6 +489,104 @@ export default function UserStats() {
   }, []);
 
 
+  const grupos = [
+    "A","B","C","D","E","F",
+    "G","H","I","J","K","L"
+  ];
+  
+  const fasesMataMata = [
+    "Fase32",
+    "Oitavas",
+    "Quartas",
+    "Semi",
+    "Final"
+  ];
+
+  const resumoGrupos = grupos.reduce(
+    (acc, grupo) => {
+  
+      const feitos =
+        betHistory.filter(
+          (bet) => bet.grupo === grupo
+        ).length;
+  
+      acc[grupo] = {
+        feitos,
+        total: 6
+      };
+  
+      return acc;
+  
+    },
+    {} as Record<
+      string,
+      {
+        feitos: number;
+        total: number;
+      }
+    >
+  );
+  
+  const apostasFiltradas =
+  betHistory.filter((bet) => {
+
+    if (tipoVisualizacao === "grupos") {
+
+      return (
+        String(bet.grupo || "")
+          .toUpperCase() ===
+        grupoSelecionado.toUpperCase()
+      );
+
+    }
+
+    return (
+      [
+        "Fase32",
+        "Oitavas",
+        "Quartas",
+        "Semi",
+        "Final"
+      ].includes(
+        bet.fase || ""
+      ) &&
+      bet.fase === faseSelecionada
+    );
+
+  });
+
+ 
+  const groupedBets =
+  apostasFiltradas.reduce(
+
+    (acc, bet) => {
+
+      const key =
+        bet.grupo
+          ? `Grupo ${bet.grupo}`
+          : (
+              bet.fase ||
+              "Outros"
+            );
+
+      if (!acc[key]) {
+
+        acc[key] = [];
+
+      }
+
+      acc[key].push(bet);
+
+      return acc;
+
+    },
+
+    {} as Record<
+      string,
+      BetHistory[]
+    >
+
+  );
   
   // =========================
   // RENDER
@@ -350,43 +627,165 @@ export default function UserStats() {
         </div>
 
       </div>
+    
 
       <div className="mt-6">
 
-        <button
-          onClick={() =>
-            setExpandido(!expandido)
-          }
-          className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition rounded-2xl p-4 mb-3"
-        >
+      <button
+        onClick={() => setExpandido(!expandido)}
+        className="w-full flex items-center justify-between bg-zinc-800 hover:bg-zinc-700 transition rounded-2xl p-4 mb-3"
+      >
+        <div className="text-left">
 
-          <div className="text-left">
+          <h3 className="text-lg font-black">
+            🎯 Seus Palpites
+          </h3>
 
-            <h3 className="text-lg font-black">
-              🎯 Seus Palpites
-            </h3>
+          <p className="text-zinc-400 text-sm">
+            {betHistory.length} apostas registradas
+          </p>
 
-            <p className="text-zinc-400 text-sm">
-              {betHistory.length} apostas registradas
-            </p>
+        </div>
 
-          </div>
+        <div className="text-2xl">
 
-          <div className="text-2xl">
+          {expandido
+            ? "🔮 Fechar previsões"
+            : "🔮 Ver minhas tragédias"}
 
-            {expandido
-              ? "🔮 Fechar previsões"
-              : "🔮 Ver minhas tragédias"}
+        </div>
 
-          </div>
-
-        </button>
+       </button>
 
         {expandido && (
 
-          <div className="space-y-3">
+        <div className="mt-4">
 
-            {betHistory.length === 0 && (
+          {/* TIPO DE VISUALIZAÇÃO */}
+
+          <div className="flex gap-2 mb-4">
+
+            <button
+              onClick={() =>
+                setTipoVisualizacao("grupos")
+              }
+              className={
+                tipoVisualizacao === "grupos"
+                  ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
+                  : "bg-zinc-700 px-3 py-2 rounded-xl"
+              }
+            >
+              🌎 Grupos
+            </button>
+
+            <button
+              onClick={() =>
+                setTipoVisualizacao("matamata")
+              }
+              className={
+                tipoVisualizacao === "matamata"
+                  ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
+                  : "bg-zinc-700 px-3 py-2 rounded-xl"
+              }
+            >
+              ⚔️ Mata-mata
+            </button>
+
+          </div>
+
+          {/* BOTÕES DOS GRUPOS */}
+
+          {tipoVisualizacao === "grupos" && (
+
+            <div className="flex flex-wrap gap-2 mb-4">
+
+                {grupos.map((grupo) => {
+
+                const info =
+                  resumoGrupos[grupo];
+
+                const faltam =
+                  info.total - info.feitos;
+
+                return (
+
+                  <button
+                    key={grupo}
+                    onClick={() =>
+                      setGrupoSelecionado(grupo)
+                    }
+                    className={
+                      grupoSelecionado === grupo
+                        ? "bg-green-500 text-black px-3 py-2 rounded-xl font-black"
+                        : "bg-zinc-700 px-3 py-2 rounded-xl"
+                    }
+                  >
+
+                    <div className="flex items-center gap-1">
+
+                      <span>
+                        {grupo}
+                      </span>
+
+                      {faltam === 0 ? (
+
+                        <span className="text-xs">
+                          ✅
+                        </span>
+
+                      ) : (
+
+                        <span className="text-xs text-red-300">
+                          ({faltam})
+                        </span>
+
+                      )}
+
+                    </div>
+
+                  </button>
+
+                );
+
+                })}
+
+            </div>
+
+          )}
+
+          {/* BOTÕES DAS FASES */}
+
+          {tipoVisualizacao === "matamata" && (
+
+            <div className="flex flex-wrap gap-2 mb-4">
+
+              {fasesMataMata.map((fase) => (
+
+                <button
+                  key={fase}
+                  onClick={() =>
+                    setFaseSelecionada(fase)
+                  }
+                  className={
+                    faseSelecionada === fase
+                      ? "bg-red-500 text-black px-3 py-2 rounded-xl font-black"
+                      : "bg-zinc-700 px-3 py-2 rounded-xl"
+                  }
+                >
+                  {fase}
+                </button>
+
+              ))}
+
+            </div>
+
+            )}
+
+           {/* LISTA DE PALPITES */}
+
+           <div className="space-y-3">
+
+            {apostasFiltradas.length === 0 && (
 
               <p className="text-zinc-400 text-sm">
                 Nenhum palpite registrado.
@@ -394,66 +793,82 @@ export default function UserStats() {
 
             )}
 
-            {betHistory.map((bet, index) => (
+{Object.entries(groupedBets).map(
+  ([grupo, bets]) => (
 
-              <div
-                key={index}
-                className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
-              >
+    <div
+      key={grupo}
+      className="mb-5"
+    >
 
-                <div className="flex justify-between items-start gap-4">
+      <h3 className="font-black text-yellow-400 mb-3">
 
-                  <div>
+        {grupo.startsWith("Grupo")
+          ? `🌎 ${grupo}`
+          : `⚔️ ${grupo}`}
 
-                    <p className="font-bold text-sm mb-2">
-                      ⚽ {bet.jogo}
-                    </p>
+      </h3>
 
-                    <div className="text-xs text-zinc-400 space-y-1">
+      <div className="space-y-3">
 
-                      <p>
-                        🎯 Seu palpite:
-                        <span className="text-white font-bold ml-1">
-                          {bet.aposta}
-                        </span>
-                      </p>
+        {bets.map((bet, index) => (
 
-                      <p>
-                        🏁 Resultado oficial:
-                        <span className="text-white font-bold ml-1">
-                          {bet.resultado}
-                        </span>
-                      </p>
+          <div
+            key={index}
+            className="bg-zinc-800 rounded-2xl p-4 border border-zinc-700"
+          >
 
-                    </div>
+            <p className="font-bold text-sm mb-2">
+              ⚽ {bet.jogo}
+            </p>
 
-                  </div>
+            <p className="text-zinc-300 text-sm">
+              🎯 Palpite: {bet.aposta}
+            </p>
 
-                  <div className="text-right">
+            {bet.resultado ? (
 
-                    <p className="text-yellow-400 font-black text-lg">
-                      ⭐ {bet.pontos}
-                    </p>
+              <>
 
-                    <p className="text-zinc-500 text-xs">
-                      pontos
-                    </p>
+                <p className="text-zinc-300 text-sm">
+                  🏁 Resultado: {bet.resultado}
+                </p>
 
-                  </div>
+                <p className="text-yellow-400 text-sm font-bold">
+                  ⭐ {bet.pontos || 0} pontos
+                </p>
 
-                </div>
+              </>
 
-              </div>
+            ) : (
 
-            ))}
+              <p className="text-blue-400 text-sm">
+                ⏳ Aguardando jogo
+              </p>
+
+            )}
 
           </div>
 
-        )}
+        ))}
 
       </div>
 
     </div>
+
+  )
+
+)}
+
+          </div>
+
+        </div>
+
+      )}
+
+    </div>
+
+  </div>
 
   );
 

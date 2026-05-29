@@ -86,16 +86,16 @@ export default function MatchCard({
 
       switch (fase) {
     
-        case "oitavas":
+        case "Oitavas":
           return "⚔️ Oitavas"
     
-        case "quartas":
+        case "Quartas":
           return "🏟️ Quartas"
     
-        case "semi":
+        case "Semi":
           return "🔥 Semifinal"
     
-        case "final":
+        case "Final":
           return "🏆 Final"
     
         default:
@@ -435,14 +435,17 @@ export default function MatchCard({
 
         <div className="text-center w-20">
 
-        <div className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
+        <div
+            className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
             style={{
               width: "52px",
               height: "52px"
             }}
-            >
+          >
 
-                <img
+            {emojiA?.startsWith("/") ? (
+
+              <img
                 src={emojiA}
                 alt={teamA}
                 style={{
@@ -452,7 +455,20 @@ export default function MatchCard({
                 }}
               />
 
-</div>
+            ) : (
+
+              <span
+                style={{
+                  fontSize: "32px",
+                  lineHeight: 1
+                }}
+              >
+                {emojiA}
+              </span>
+
+            )}
+
+          </div>
 
         
 
@@ -566,22 +582,38 @@ export default function MatchCard({
 
         <div className="text-center w-20">
 
-        <div className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
+        <div
+            className="bg-white rounded-full p-1 mx-auto mb-1 flex items-center justify-center"
             style={{
               width: "52px",
               height: "52px"
             }}
-            >
+          >
 
-          <img
-            src={emojiB}
-            alt={teamB}
-            style={{
-              width: "42px",
-              height: "42px",
-              objectFit: "contain"
-            }}
-          />
+            {emojiB?.startsWith("/") ? (
+
+              <img
+                src={emojiB}
+                alt={teamB}
+                style={{
+                  width: "42px",
+                  height: "42px",
+                  objectFit: "contain"
+                }}
+              />
+
+            ) : (
+
+              <span
+                style={{
+                  fontSize: "32px",
+                  lineHeight: 1
+                }}
+              >
+                {emojiB}
+              </span>
+
+            )}
 
           </div>
 
