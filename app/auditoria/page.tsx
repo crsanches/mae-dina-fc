@@ -299,7 +299,7 @@ export default function AuditoriaPage() {
           {[
             ["Geral", "🏆 Geral"],
             ["Grupos", "🌎 Grupos"],
-            ["Segunda", "🚪 Segunda Fase"],
+            ["Fase32", "🚪 Segunda"],
             ["Oitavas", "⚔️ Oitavas"],
             ["Quartas", "🏟️ Quartas"],
             ["Semi", "🔥 Semi"],

@@ -182,7 +182,7 @@ export default function RealRanking() {
       case "Grupos":
         return "🌎 Ranking da Fase de Grupos";
 
-        case "Segunda":
+        case "Fase32":
           return "⚔️ 🚪 Ranking da Segunda";
 
       case "Oitavas":
@@ -216,7 +216,7 @@ export default function RealRanking() {
 
         if (
           faseSelecionada ===
-          "geral"
+          "Geral"
         ) {
 
           return user;
@@ -289,7 +289,7 @@ export default function RealRanking() {
         {[
           ["Geral", "🏆 Geral"],
           ["Grupos", "🌎 Grupos"],
-          ["Segunda", "⚔️ 🚪 segunda"],
+          ["Fase32", "⚔️ 🚪 segunda"],
           ["Oitavas", "⚔️ Oitavas"],
           ["Quartas", "🏟️ Quartas"],
           ["Semi", "🔥 Semi"],
@@ -350,7 +350,7 @@ export default function RealRanking() {
         opacity-70
       ">
 
-        {faseSelecionada === "geral"
+        {faseSelecionada === "Geral"
 
           ? "🏆 Campeão Geral"
 
@@ -536,7 +536,7 @@ export default function RealRanking() {
                   ⭐ {user.points}
                 </p>
 
-                {faseSelecionada !== "geral" && (
+                {faseSelecionada !== "Geral" && (
 
                   <p className="
                     text-zinc-500
