@@ -155,13 +155,35 @@ export default function UserStats() {
         collection(db, "games")
       );
   
-    const gamesMap:
-      Record<string, any> = {};
+      type GameData = {
+
+        teamA: string;
+      
+        teamB: string;
+      
+        resultadoA?: number;
+      
+        resultadoB?: number;
+      
+        fase?: string;
+      
+        grupo?: string;
+      
+        matchDate?: string;
+      
+        emojiA?: string;
+      
+        emojiB?: string;
+      
+      };
+
+   const gamesMap:
+  Record<string, GameData> = {};
   
     gamesSnapshot.forEach((gameDoc) => {
   
       const game =
-        gameDoc.data();
+        gameDoc.data() as GameData;
   
       gamesMap[
         `${game.teamA} x ${game.teamB}`
