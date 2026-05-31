@@ -329,6 +329,7 @@ export default function GroupCard() {
 
         }
       );
+      window.location.reload();
 
       setActiveGroupId(
         groupId

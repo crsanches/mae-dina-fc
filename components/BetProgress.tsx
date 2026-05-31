@@ -6,6 +6,11 @@ import {
 } from "react";
 
 import {
+  query,
+  where
+} from "firebase/firestore";
+
+import {
   auth,
   db
 } from "../lib/firebase";
@@ -51,151 +56,154 @@ export default function BetProgress({
     setGames
   ] = useState<Game[]>([]);
 
-  useEffect(() => {
+  async function carregar() {
 
-    async function carregar() {
-
-      const user =
-        auth.currentUser;
-
-      if (!user) {
-        return;
-      }
-
-      const userRef =
-        doc(
-          db,
-          "users",
-          user.uid
-        );
-
-      const userSnap =
-        await getDoc(userRef);
-
-      if (!userSnap.exists()) {
-        return;
-      }
-
-      const userData =
-        userSnap.data();
-
-      const possibleNames = [
-
-        userData.nome,
-
-        userData.username,
-
-        userData.apelido,
-
-        user.displayName
-
-      ].filter(Boolean);
-
-      // =========================
-      // BETS
-      // =========================
-
-      const betsSnapshot =
-        await getDocs(
+    const user =
+      auth.currentUser;
+  
+    if (!user) {
+      return;
+    }
+  
+    const userRef =
+      doc(
+        db,
+        "users",
+        user.uid
+      );
+  
+    const userSnap =
+      await getDoc(userRef);
+  
+    if (!userSnap.exists()) {
+      return;
+    }
+  
+    const userData =
+      userSnap.data();
+  
+    const currentGroupId =
+      userData.activeGroupId;
+  
+    const possibleNames = [
+  
+      userData.nome,
+  
+      userData.username,
+  
+      userData.apelido,
+  
+      user.displayName
+  
+    ].filter(Boolean);
+  
+    const betsSnapshot =
+      await getDocs(
+  
+        query(
+  
           collection(
             db,
             "bets"
+          ),
+  
+          where(
+            "groupId",
+            "==",
+            currentGroupId
           )
-        );
-
-      let total = 0;
-
-      const apostas: Bet[] = [];
-
-      betsSnapshot.forEach(
-        (betDoc) => {
-
-          const bet =
-            betDoc.data();
-
-          const nome =
-
-            bet.username ||
-
-            bet.userName ||
-
-            bet.nome;
-
-          if (
-            possibleNames.includes(
-              nome
-            )
-          ) {
-
-            total++;
-
-            apostas.push({
-              match:
-                bet.match
-            });
-
-          }
-
-        }
+  
+        )
+  
       );
-
-      setTotalApostados(
-        total
-      );
-
-      setApostasUsuario(
-        apostas
-      );
-
-      // =========================
-      // GAMES
-      // =========================
-
-      const gamesSnapshot =
-        await getDocs(
-          collection(
-            db,
-            "games"
+  
+    let total = 0;
+  
+    const apostas: Bet[] = [];
+  
+    betsSnapshot.forEach(
+      (betDoc) => {
+  
+        const bet =
+          betDoc.data();
+  
+        const nome =
+  
+          bet.username ||
+  
+          bet.userName ||
+  
+          bet.nome;
+  
+        if (
+          possibleNames.includes(
+            nome
           )
-        );
-
-      const loadedGames:
-        Game[] = [];
-
-      gamesSnapshot.forEach(
-        (gameDoc) => {
-
-          const game =
-            gameDoc.data();
-
-          loadedGames.push({
-
-            teamA:
-              game.teamA,
-
-            teamB:
-              game.teamB,
-
-            grupo:
-              game.grupo,
-
-            fase:
-              game.fase
-
+        ) {
+  
+          total++;
+  
+          apostas.push({
+            match:
+              bet.match
           });
-
+  
         }
+  
+      }
+    );
+  
+    setTotalApostados(
+      total
+    );
+  
+    setApostasUsuario(
+      apostas
+    );
+  
+    const gamesSnapshot =
+      await getDocs(
+        collection(
+          db,
+          "games"
+        )
       );
+  
+    const loadedGames:
+      Game[] = [];
+  
+    gamesSnapshot.forEach(
+      (gameDoc) => {
+  
+        const game =
+          gameDoc.data();
+  
+        loadedGames.push({
+  
+          teamA:
+            game.teamA,
+  
+          teamB:
+            game.teamB,
+  
+          grupo:
+            game.grupo,
+  
+          fase:
+            game.fase
+  
+        });
+  
+      }
+    );
+  
+    setGames(
+      loadedGames
+    );
+  
+  }
 
-      setGames(
-        loadedGames
-      );
 
-    }
-
-    carregar();
-
-  }, []);
 
   const faltam =
     Math.max(
@@ -276,6 +284,32 @@ export default function BetProgress({
       };
 
     });
+
+    useEffect(() => {
+
+      carregar();
+    
+      const atualizar = () => {
+    
+        carregar();
+    
+      };
+    
+      window.addEventListener(
+        "betSaved",
+        atualizar
+      );
+    
+      return () => {
+    
+        window.removeEventListener(
+          "betSaved",
+          atualizar
+        );
+    
+      };
+    
+    }, []);
 
   return (
 

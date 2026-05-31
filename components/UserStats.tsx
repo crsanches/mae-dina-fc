@@ -149,6 +149,11 @@ export default function UserStats() {
         )
   
       );
+
+
+betsSnapshot.forEach((betDoc) => {
+
+});
   
     const gamesSnapshot =
       await getDocs(
@@ -194,35 +199,33 @@ export default function UserStats() {
     const history: BetHistory[] = [];
   
     betsSnapshot.forEach((betDoc) => {
-  
+
       const bet =
         betDoc.data();
-  
-      const betName =
-  
-        bet.username ||
-  
-        bet.userName ||
-  
-        bet.nome;
-  
+    
       if (
-        !possibleNames.includes(
-          betName
-        )
+        bet.uid !==
+        firebaseUser.uid
       ) {
-  
+    
+        console.log(
+          "UID DIFERENTE"
+        );
+    
         return;
-  
+    
       }
-  
+    
       const game =
         gamesMap[bet.match];
-  
+   
       if (!game) {
+    
         return;
+    
       }
-  
+    
+
       history.push({
   
         jogo:
@@ -270,6 +273,9 @@ export default function UserStats() {
             b.matchDate || ""
           )
       );
+
+
+      console.table(history);
       
       setBetHistory(history);
 
@@ -314,6 +320,7 @@ export default function UserStats() {
 
       const currentGroupId =
         userData.activeGroupId;
+
 
         const currentUsername =
 
@@ -371,21 +378,21 @@ export default function UserStats() {
       // =========================
       // NÃO ENCONTROU
       // =========================
-
+     
       if (!currentUserData) {
 
         setData({
-
+      
           position: 0,
-
+      
           points: 0
-
+      
         });
-
-        setBetHistory([]);
-
+      
+        await carregarPalpites();
+      
         return;
-
+      
       }
 
       // =========================
@@ -548,7 +555,7 @@ export default function UserStats() {
       }
     >
   );
-  
+
   const apostasFiltradas =
   betHistory.filter((bet) => {
 
