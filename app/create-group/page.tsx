@@ -21,7 +21,10 @@ import {
   collection,
   doc,
   serverTimestamp,
-  setDoc
+  setDoc,
+  query,
+  where,
+  getDocs
 } from "firebase/firestore";
 
 export default function CreateGroupPage() {
@@ -37,7 +40,10 @@ export default function CreateGroupPage() {
 
   async function criarGrupo() {
 
-    if (!groupName.trim()) {
+    const nomeLimpo =
+      groupName.trim();
+
+    if (!nomeLimpo) {
 
       alert(
         "Digite um nome para o grupo 😄"
@@ -64,14 +70,45 @@ export default function CreateGroupPage() {
 
       setLoading(true);
 
+      // 🚀 verifica se já existe liga com este nome
+
+      const q =
+        query(
+          collection(db, "groups"),
+          where(
+            "nameNormalized",
+            "==",
+            nomeLimpo.toLowerCase()
+          )
+        );
+
+      const existingGroups =
+        await getDocs(q);
+
+      if (!existingGroups.empty) {
+
+        alert(
+          "Já existe uma liga com esse nome 😄"
+        );
+
+        setLoading(false);
+
+        return;
+
+      }
+
       // 🚀 cria grupo
+
       const groupRef =
         await addDoc(
           collection(db, "groups"),
           {
 
             name:
-              groupName,
+              nomeLimpo,
+
+            nameNormalized:
+              nomeLimpo.toLowerCase(),
 
             ownerId:
               user.uid,
@@ -82,7 +119,8 @@ export default function CreateGroupPage() {
           }
         );
 
-      // 🚀 cria usuário
+      // 🚀 atualiza usuário
+
       await setDoc(
         doc(
           db,
@@ -90,33 +128,31 @@ export default function CreateGroupPage() {
           user.uid
         ),
         {
-      
+
           uid:
             user.uid,
-      
+
           displayName:
             user.displayName || "Anônimo",
-      
-            //groupId:
-            //groupRef.id,
-          
+
           activeGroupId:
             groupRef.id,
-          
+
           groups:
             arrayUnion(
               groupRef.id
             )
-      
+
         },
         {
-      
+
           merge: true
-      
+
         }
       );
 
       // 🚀 redirect
+
       router.push("/");
 
     } catch (error) {
@@ -140,20 +176,19 @@ export default function CreateGroupPage() {
     <main className="min-h-screen bg-zinc-950 text-white flex items-center justify-center p-4">
 
       <div className="w-full max-w-md bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
-        
+
         <div className="mb-6">
 
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
-        >
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+          >
 
-          ← Voltar
+            ← Voltar
 
-        </Link>
+          </Link>
 
         </div>
-
 
         <h1 className="text-3xl font-black mb-2">
 
