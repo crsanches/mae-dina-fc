@@ -2,7 +2,8 @@
 
 import {
   useEffect,
-  useState
+  useState,
+  useCallback
 } from "react";
 
 import {
@@ -56,7 +57,8 @@ export default function BetProgress({
     setGames
   ] = useState<Game[]>([]);
 
-  async function carregar() {
+  const carregar = useCallback(
+    async () => {
 
     const user =
       auth.currentUser;
@@ -201,7 +203,10 @@ export default function BetProgress({
       loadedGames
     );
   
-  }
+  },
+  []
+  );
+  
 
 
 
@@ -287,13 +292,16 @@ export default function BetProgress({
 
     useEffect(() => {
 
-      carregar();
-    
       const atualizar = () => {
     
         carregar();
     
       };
+    
+      const timer = setTimeout(
+        atualizar,
+        0
+      );
     
       window.addEventListener(
         "betSaved",
@@ -302,6 +310,8 @@ export default function BetProgress({
     
       return () => {
     
+        clearTimeout(timer);
+    
         window.removeEventListener(
           "betSaved",
           atualizar
@@ -309,7 +319,7 @@ export default function BetProgress({
     
       };
     
-    }, []);
+    }, [carregar]);
 
   return (
 
