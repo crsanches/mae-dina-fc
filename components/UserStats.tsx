@@ -71,6 +71,9 @@ export default function UserStats() {
 
     const [betHistory, setBetHistory] =
     useState<BetHistory[]>([]);
+
+    const [loading, setLoading] =
+  useState(true);
   
   const [
     tipoVisualizacao,
@@ -288,6 +291,8 @@ betsSnapshot.forEach((betDoc) => {
 
   async function carregarStats() {
 
+    setLoading(true);
+
     try {
 
       const firebaseUser =
@@ -381,14 +386,6 @@ betsSnapshot.forEach((betDoc) => {
      
       if (!currentUserData) {
 
-        setData({
-      
-          position: 0,
-      
-          points: 0
-      
-        });
-      
         await carregarPalpites();
       
         return;
@@ -436,6 +433,8 @@ betsSnapshot.forEach((betDoc) => {
 
       });
 
+      setLoading(false);
+
       await carregarPalpites();
 
     } catch (error) {
@@ -444,6 +443,7 @@ betsSnapshot.forEach((betDoc) => {
         "Erro ao carregar stats:",
         error
       );
+      setLoading(false);
 
     }
 
@@ -481,21 +481,49 @@ betsSnapshot.forEach((betDoc) => {
 
           }
 
-          unsubscribeBets =
-            onSnapshot(
-
-              collection(
-                db,
-                "bets"
-              ),
-
-              () => {
-
-                carregarStats();
-
-              }
-
-            );
+          const userRef =
+          doc(
+            db,
+            "users",
+            user.uid
+          );
+        
+        getDoc(userRef)
+          .then((userSnap) => {
+        
+            if (!userSnap.exists()) {
+              return;
+            }
+        
+            const currentGroupId =
+              userSnap.data().activeGroupId;
+        
+            unsubscribeBets =
+              onSnapshot(
+        
+                query(
+                  collection(
+                    db,
+                    "bets"
+                  ),
+        
+                  where(
+                    "groupId",
+                    "==",
+                    currentGroupId
+                  )
+        
+                ),
+        
+                () => {
+        
+                  carregarStats();
+        
+                }
+        
+              );
+        
+          });
 
         }
 
