@@ -1674,10 +1674,16 @@ if (
     left-0
     right-0
     z-50
-    px-3
     drop-shadow-md
   "
 >
+<div
+    className="
+      max-w-2xl
+      mx-auto
+      px-2
+    "
+  >
 
     <div className="
       bg-zinc-950
