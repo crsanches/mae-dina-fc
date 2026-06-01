@@ -721,7 +721,7 @@ betsSnapshot.forEach((betDoc) => {
 
           {expandido
             ? "🔮 Fechar previsões"
-            : "🔮 Ver minhas tragédias"}
+            : "🔮 Abrir meus palpites"}
 
         </div>
 
