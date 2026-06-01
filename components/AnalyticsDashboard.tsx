@@ -1677,6 +1677,7 @@ if (
     drop-shadow-md
   "
 >
+</div>
 <div
     className="
       max-w-2xl
