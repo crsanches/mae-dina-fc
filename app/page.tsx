@@ -570,9 +570,9 @@ export default function Home() {
 
     <main className="min-h-screen bg-zinc-950 text-white pb-20">
 
-      <Header />
+     {/* <Header />*/}
 
-      <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3 pt-56">
+     <section className="max-w-2xl mx-auto px-2 md:px-4 grid gap-3 pt-[350px]">
 
         <LoginCard />
 

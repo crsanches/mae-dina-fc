@@ -129,6 +129,8 @@ import {
     groupId: string
   ) {
   
+   
+
     const betsQuery =
       query(
         collection(db, "bets"),

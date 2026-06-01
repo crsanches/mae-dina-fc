@@ -375,6 +375,8 @@ export default function GroupCard() {
 
     <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6">
 
+    
+
       <div className="flex items-center justify-between mb-4">
 
         <div>

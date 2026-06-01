@@ -19,6 +19,12 @@ export default function Footer() {
       <span className="text-[12px] text-zinc-500">
         Chegamos onde a IA não alcança.
       </span>
+      <a
+        href="mailto:crsanches@kinesis.com.br"
+        className="mt-2 text-[12px] text-zinc-400 hover:text-white transition"
+      >
+        ✉️ Suporte: crsanches@kinesis.com.br
+      </a>
 
     </footer>
   )

@@ -458,75 +458,88 @@ betsSnapshot.forEach((betDoc) => {
     let unsubscribeBets:
       (() => void) | undefined;
 
-    const unsubscribeAuth =
+      const unsubscribeAuth =
       onAuthStateChanged(
-
+    
         auth,
-
-        (user) => {
-
+    
+        async (user) => {
+    
           if (!user) {
-
+    
             setData({
-
+    
               position: 0,
-
+    
               points: 0
-
+    
             });
-
+    
             setBetHistory([]);
-
+    
             return;
-
+    
           }
-
+    
           const userRef =
-          doc(
-            db,
-            "users",
-            user.uid
-          );
-        
-        getDoc(userRef)
-          .then((userSnap) => {
-        
-            if (!userSnap.exists()) {
-              return;
-            }
-        
-            const currentGroupId =
-              userSnap.data().activeGroupId;
-        
-            unsubscribeBets =
-              onSnapshot(
-        
-                query(
-                  collection(
-                    db,
-                    "bets"
-                  ),
-        
-                  where(
-                    "groupId",
-                    "==",
-                    currentGroupId
-                  )
-        
+            doc(
+              db,
+              "users",
+              user.uid
+            );
+    
+          const userSnap =
+            await getDoc(userRef);
+    
+          if (!userSnap.exists()) {
+            return;
+          }
+    
+          const currentGroupId =
+            userSnap.data().activeGroupId;
+    
+          if (!currentGroupId) {
+            return;
+          }
+    
+          // carrega imediatamente
+    
+          carregarStats();
+    
+          // escuta somente apostas da liga atual
+    
+          unsubscribeBets =
+            onSnapshot(
+    
+              query(
+    
+                collection(
+                  db,
+                  "bets"
                 ),
-        
-                () => {
-        
-                  carregarStats();
-        
-                }
-        
-              );
-        
-          });
-
+    
+                where(
+                  "groupId",
+                  "==",
+                  currentGroupId
+                )
+    
+              ),
+    
+              () => {
+    
+                console.log(
+                  "USERSTATS SNAPSHOT RECEBIDO"
+                );
+    
+                carregarStats();
+    
+              }
+    
+            );
+    
         }
-
+    
       );
 
     return () => {

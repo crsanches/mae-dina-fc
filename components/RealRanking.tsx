@@ -13,7 +13,9 @@ import {
   collection,
   doc,
   getDoc,
-  onSnapshot
+  onSnapshot,
+  query,
+  where
 } from "firebase/firestore";
 
 import {
@@ -119,56 +121,97 @@ export default function RealRanking() {
 
     let unsubscribeBets:
       (() => void) | undefined;
-
+  
     const unsubscribeAuth =
       onAuthStateChanged(
-
+  
         auth,
-
-        (user) => {
-
+  
+        async (user) => {
+  
           if (!user) {
-
+  
             setRanking([]);
-
+  
             return;
-
+  
           }
-
+  
+          const userRef =
+            doc(
+              db,
+              "users",
+              user.uid
+            );
+  
+          const userSnap =
+            await getDoc(userRef);
+  
+          if (!userSnap.exists()) {
+            return;
+          }
+  
+          const currentGroupId =
+            userSnap.data().activeGroupId;
+  
+          if (!currentGroupId) {
+            return;
+          }
+  
+          // carrega imediatamente
+  
+          carregarRanking();
+  
+          // escuta apenas apostas da liga atual
+  
           unsubscribeBets =
             onSnapshot(
-
-              collection(
-                db,
-                "bets"
+  
+              query(
+  
+                collection(
+                  db,
+                  "bets"
+                ),
+  
+                where(
+                  "groupId",
+                  "==",
+                  currentGroupId
+                )
+  
               ),
-
+  
               () => {
-
+  
+                console.log(
+                  "REALRANKING SNAPSHOT"
+                );
+  
                 carregarRanking();
-
+  
               }
-
+  
             );
-
+  
         }
-
+  
       );
-
+  
     return () => {
-
+  
       unsubscribeAuth();
-
+  
       if (
         unsubscribeBets
       ) {
-
+  
         unsubscribeBets();
-
+  
       }
-
+  
     };
-
+  
   }, []);
 
   // =========================

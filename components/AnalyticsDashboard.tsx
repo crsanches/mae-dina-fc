@@ -1670,7 +1670,7 @@ if (
         <div
   className="
     fixed
-    top-[72px]
+    top-0
     left-0
     right-0
     z-50
@@ -1679,15 +1679,14 @@ if (
   "
 >
 
-  <div className="
-    bg-zinc-950/95
-    border
-    border-zinc-800
-    rounded-3xl
-    overflow-hidden
-    shadow-md
-    bg-black/70
-  ">
+    <div className="
+      bg-zinc-950
+      border
+      border-zinc-800
+      rounded-3xl
+      overflow-hidden
+      shadow-2xl
+    ">
 
     <div className="
       px-5
@@ -1695,16 +1694,44 @@ if (
       pb-2
       border-b
       border-zinc-800
-      bg-gradient-to-r
-      from-yellow-900/40
-      to-purple-900/40
+      bg-zinc-900
     ">
 
-      <h2 className="text-2xl font-black">
+<div className="text-center mb-4">
 
-        🏅 Conquistas da Vergonha
+<div className="flex items-center justify-center gap-3">
 
-      </h2>
+  <img
+    src="/icon.png"
+    alt="Mãe Diná FC"
+    className="w-10 h-10 rounded-xl"
+  />
+
+  <h1 className="text-3xl font-black">
+
+    ⚽ Mãe Diná FC ⚽
+
+  </h1>
+
+</div>
+
+<p className="text-zinc-400 text-sm mt-2">
+
+  O único bolão onde errar feio também vira troféu.
+
+</p>
+
+</div>
+
+<div className="border-t border-zinc-800 pt-4">
+
+<h2 className="text-2xl font-black">
+
+  🏅 Conquistas da Vergonha
+
+</h2>
+
+</div>
 
     </div>
 
