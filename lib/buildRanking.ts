@@ -119,6 +119,11 @@ import {
   
   };
   
+  interface UserData {
+    username?: string;
+    displayName?: string;
+  }
+  
   /* =========================
      BUILD RANKING
   ========================= */
@@ -167,7 +172,7 @@ import {
       );
 
     const usersMap:
-      Record<string, any> = {};
+      Record<string, UserData> = {};
 
     usersSnapshot.forEach((userDoc) => {
 
