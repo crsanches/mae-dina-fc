@@ -47,7 +47,7 @@ function normalize(text?: string) {
 }
 
 export async function GET() {
-  console.log("🔥 NOVA VERSAO DA API 🔥");
+ 
   try {
 
     const response = await fetch(
@@ -57,7 +57,7 @@ export async function GET() {
     
 
     const data = await response.json();
-    console.log(data);
+   
 
     const hoje = new Date();
 
@@ -78,24 +78,18 @@ export async function GET() {
       }
     );
 
-console.log(
-  "JOGOS RECENTES:",
-  recentGames.length
-);
+
 
     const gamesSnapshot =
     await adminDb
       .collection("games")
       .get();
 
-    console.log(
-        "TOTAL JOGOS FIREBASE:",
-        gamesSnapshot.docs.length
-      );
+  
       
       gamesSnapshot.docs.forEach((doc) => {
       
-        console.log("DOC:", doc.data());
+      
       
       });
 
@@ -108,11 +102,7 @@ console.log(
         "Brazilian Serie A"
       ) continue;
     
-        console.log(
-            apiGame.strHomeTeam,
-            "x",
-            apiGame.strAwayTeam
-          );
+      
 
 
           
@@ -132,16 +122,6 @@ console.log(
             const apiAway =
               normalize(apiGame.strAwayTeam);
           
-            console.log(
-              "COMPARE:",
-              firebaseA,
-              "vs",
-              apiHome,
-              "|",
-              firebaseB,
-              "vs",
-              apiAway
-            );
           
             const directMatch =
               firebaseA === apiHome &&
@@ -157,38 +137,16 @@ console.log(
 
           if (localGame !== undefined) {
 
-            console.log(
-              "✅ MATCH:",
-              apiGame.strHomeTeam,
-              "x",
-              apiGame.strAwayTeam
-            );
+          
           
           } else {
           
-            console.log(
-              "❌ SEM MATCH:",
-              apiGame.strHomeTeam,
-              "x",
-              apiGame.strAwayTeam
-            );
+          
           
           }
 
           if (localGame === undefined) continue;
-      console.log(
-
-        apiGame.strHomeTeam,
-      
-        apiGame.intHomeScore,
-      
-        "x",
-      
-        apiGame.intAwayScore,
-      
-        apiGame.strAwayTeam
-      
-      );
+   
       if (apiGame.strStatus === "FT") {
 
         await adminDb

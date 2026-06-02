@@ -144,15 +144,15 @@ export default function UserStats() {
   
         query(
           collection(db, "bets"),
-          where(
-            "groupId",
-            "==",
-            currentGroupId
-          )
+          where("groupId","==",currentGroupId),
+          where("uid","==",firebaseUser.uid)
         )
   
       );
-
+      console.log(
+        "BETS:",
+        betsSnapshot.size
+      );
 
 betsSnapshot.forEach((betDoc) => {
 
@@ -161,6 +161,10 @@ betsSnapshot.forEach((betDoc) => {
     const gamesSnapshot =
       await getDocs(
         collection(db, "games")
+      );
+      console.log(
+        "GAMES:",
+        gamesSnapshot.size
       );
   
       type GameData = {
@@ -211,10 +215,7 @@ betsSnapshot.forEach((betDoc) => {
         firebaseUser.uid
       ) {
     
-        console.log(
-          "UID DIFERENTE"
-        );
-    
+       
         return;
     
       }
@@ -278,8 +279,8 @@ betsSnapshot.forEach((betDoc) => {
       );
 
 
-      console.table(history);
-      
+      //console.table(history);
+      console.timeEnd("carregarPalpites");
       setBetHistory(history);
 
       
@@ -387,7 +388,7 @@ betsSnapshot.forEach((betDoc) => {
       if (!currentUserData) {
 
         await carregarPalpites();
-      
+        setLoading(false);
         return;
       
       }
@@ -433,10 +434,10 @@ betsSnapshot.forEach((betDoc) => {
 
       });
 
-      setLoading(false);
+      
 
       await carregarPalpites();
-
+      setLoading(false);
     } catch (error) {
 
       console.error(
@@ -525,11 +526,11 @@ betsSnapshot.forEach((betDoc) => {
                 )
     
               ),
-    
-              () => {
-    
+              (snapshot) => {
+
                 console.log(
-                  "USERSTATS SNAPSHOT RECEBIDO"
+                  "USERSTATS SNAPSHOT RECEBIDO",
+                  snapshot.docs.length
                 );
     
                 carregarStats();

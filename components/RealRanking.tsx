@@ -159,8 +159,11 @@ export default function RealRanking() {
           }
   
           // carrega imediatamente
+          console.log(
+            "REALRANKING DESABILITADO"
+          );
   
-          carregarRanking();
+          //carregarRanking();
   
           // escuta apenas apostas da liga atual
   
@@ -188,7 +191,7 @@ export default function RealRanking() {
                   "REALRANKING SNAPSHOT"
                 );
   
-                carregarRanking();
+                //carregarRanking();
   
               }
   

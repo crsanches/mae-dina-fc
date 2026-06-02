@@ -1,7 +1,5 @@
 import {
     collection,
-    doc,
-    getDoc,
     getDocs,
     query,
     where
@@ -129,7 +127,7 @@ import {
     groupId: string
   ) {
   
-   
+    console.time("buildRanking");
 
     const betsQuery =
       query(
@@ -148,6 +146,35 @@ import {
       await getDocs(
         collection(db, "games")
       );
+    
+      const gamesMap:
+      Record<string, Game> = {};
+    
+      gamesSnapshot.forEach((gameDoc) => {
+      
+        const game =
+          gameDoc.data() as Game;
+      
+        gamesMap[
+          `${game.teamA} x ${game.teamB}`
+        ] = game;
+      
+      });
+
+      const usersSnapshot =
+      await getDocs(
+        collection(db, "users")
+      );
+
+    const usersMap:
+      Record<string, any> = {};
+
+    usersSnapshot.forEach((userDoc) => {
+
+      usersMap[userDoc.id] =
+        userDoc.data();
+
+    });
   
     const rankingMap:
       Record<string, RankingUser> = {};
@@ -218,66 +245,29 @@ if (
   bet.uid
 ) {
 
-  try {
+  username =
 
-    const userRef =
-      doc(
-        db,
-        "users",
-        bet.uid
-      );
+    usersMap[bet.uid]
+      ?.username ||
 
-    const userSnap =
-      await getDoc(userRef);
-
-    if (
-      userSnap.exists()
-    ) {
-
-      username =
-        userSnap.data()
-          .username || nome;
-
-    }
-
-  } catch {}
+    nome;
 
 }
 
 // =========================
 // BUSCA JOGO
 // =========================
+const game =
+  gamesMap[bet.match];
 
-let gameFound:
-  Game | null = null;
-
-gamesSnapshot.forEach((gameDoc) => {
-
-  const game =
-    gameDoc.data() as Game;
-
-  if (
-
-    `${game.teamA} x ${game.teamB}` ===
-      bet.match &&
-
-    game.resultadoA != null &&
-    game.resultadoB != null
-
-  ) {
-
-    gameFound = game;
-
-  }
-
-});
-
-if (!gameFound) {
+if (
+  !game ||
+  game.resultadoA == null ||
+  game.resultadoB == null
+) {
   continue;
 }
 
-const game =
-  gameFound as Game;
 
 const resultadoA =
   Number(game.resultadoA);
@@ -563,7 +553,7 @@ rankingMap[username]
 
 }
 
-
+console.timeEnd("buildRanking");
 
 return Object
   .values(rankingMap)
@@ -632,4 +622,6 @@ return Object
     );
 
   });
+
+  
   }
