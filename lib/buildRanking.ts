@@ -76,6 +76,10 @@ import {
     acertosParciais: number;
   
     ultimoHorarioAposta: number;
+
+    acertosVencedor: number;
+
+    acertosEmpate: number;
   
     jogos: AuditGame[];
   
@@ -359,7 +363,10 @@ if (!rankingMap[username]) {
 
   rankingMap[username] = {
 
-   
+    acertosVencedor: 0,
+
+    acertosEmpate: 0,
+
   uid:
   bet.uid ||
 
@@ -450,7 +457,12 @@ const acertouVencedor =
     apostaA < apostaB &&
     resultadoA < resultadoB
   );
+if (acertouVencedor) {
 
+  rankingMap[username]
+    .acertosVencedor += 1;
+
+}
 // =========================
 // ACERTOU EMPATE
 // =========================
@@ -459,7 +471,12 @@ const acertouEmpate =
 
   apostaA === apostaB &&
   resultadoA === resultadoB;
+  if (acertouEmpate) {
 
+    rankingMap[username]
+      .acertosEmpate += 1;
+  
+  }
 // =========================
 // APROXIMAÇÃO VENCEDOR
 // =========================

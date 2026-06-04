@@ -1,5 +1,5 @@
 "use client";
-
+// arquivo com palpites dos usuarios
 import Link from "next/link";
 import MatchCard from "../../components/MatchCard";
 

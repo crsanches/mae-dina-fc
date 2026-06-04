@@ -137,6 +137,27 @@ export default function AdminMemesPage() {
     <main className="min-h-screen bg-zinc-950 text-white p-4">
 
       <div className="max-w-4xl mx-auto">
+      <div className="mb-6">
+
+            <Link
+              href="/admin/dashboard"
+              className="
+                inline-flex
+                items-center
+                gap-2
+                bg-zinc-800
+                hover:bg-zinc-700
+                transition
+                px-5
+                py-3
+                rounded-2xl
+                font-bold
+              "
+            >
+              ← Dashboard
+            </Link>
+
+            </div>
 
         <div className="flex items-center justify-between mb-6">
 
@@ -144,12 +165,6 @@ export default function AdminMemesPage() {
             🤣 Central de Memes
           </h1>
 
-          <Link
-            href="/admin"
-            className="bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl text-sm font-bold"
-          >
-            ← Dashboard
-          </Link>
 
         </div>
 

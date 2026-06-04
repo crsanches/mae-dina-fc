@@ -1,5 +1,7 @@
 "use client";
 
+// esse é o que administra e reguatra os jogos.
+
 import Link from "next/link";
 
 import { useEffect, useState } from "react";
@@ -71,6 +73,33 @@ export default function AdminPage() {
   
   const [savedGameId, setSavedGameId] =
     useState<string | null>(null);
+
+    const [showCreateForm, setShowCreateForm] =
+    useState(false);
+  
+  const groupedGames =
+    games.reduce(
+  
+      (acc, game) => {
+  
+        const grupo =
+          game.grupo || "Mata-Mata";
+  
+        if (!acc[grupo]) {
+  
+          acc[grupo] = [];
+  
+        }
+  
+        acc[grupo].push(game);
+  
+        return acc;
+  
+      },
+  
+      {} as Record<string, Game[]>
+  
+    );
 
   async function carregarJogos() {
 
@@ -220,50 +249,65 @@ export default function AdminPage() {
     <main className="min-h-screen bg-zinc-950 text-white p-6">
 
       <div className="max-w-4xl mx-auto">
-
-        {/* NAVEGAÇÃO */}
-
-        <div className="mb-6 flex gap-3">
+      <div className="mb-6">
 
           <Link
             href="/admin/dashboard"
-            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl font-semibold text-sm"
+            className="
+              inline-flex
+              items-center
+              gap-2
+              bg-zinc-800
+              hover:bg-zinc-700
+              transition
+              px-5
+              py-3
+              rounded-2xl
+              font-bold
+            "
           >
             ← Dashboard
           </Link>
 
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-4 py-2 rounded-xl font-semibold text-sm"
-          >
-            ⚽ Bolão
-          </Link>
-          
-          <Link
-            href="/admin/bets"
-            className="inline-flex items-center gap-2 bg-purple-700 hover:bg-purple-600 transition px-4 py-2 rounded-xl font-semibold text-sm"
-          >
-          
-            🎯 Ver Palpites
-          </Link>
-          <Link
-            href="/admin/memes"
-            className="inline-flex items-center gap-2 bg-pink-700 hover:bg-pink-600 transition px-4 py-2 rounded-xl font-semibold text-sm"
-          >
-            🤣 Memes
-          </Link>
-
-        </div>
+          </div>
+        
 
         {/* TÍTULO */}
 
-        <h1 className="text-3xl font-black mb-6">
-          👑 Administrador — Mãe Diná FC
-          👑  Registro de jogos
+        <h1 className="text-4xl font-black mb-6">
+          ⚽ Gerenciamento de Jogos
         </h1>
 
-        {/* FORMULÁRIO */}
+        <button
+          onClick={() =>
+            setShowCreateForm(
+              !showCreateForm
+            )
+          }
+          className="
+            w-full
+            bg-green-600
+            hover:bg-green-700
+            transition
+            rounded-2xl
+            p-4
+            font-black
+            mb-6
+          "
+        >
+          {showCreateForm
 
+            ? "➖ Fechar cadastro"
+
+            : "➕ Novo Jogo"
+
+          }
+        </button>
+
+
+
+        {/* FORMULÁRIO */}
+        {showCreateForm && (
         <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 space-y-4">
 
           <div>
@@ -395,6 +439,7 @@ export default function AdminPage() {
           )}
 
         </div>
+        )}
 
         {/* LISTA DE JOGOS */}
 
@@ -407,7 +452,42 @@ export default function AdminPage() {
           
           <div className="space-y-3">
 
-            {games.map((game) => (
+          {Object
+            .entries(groupedGames)
+            .sort(
+              ([grupoA], [grupoB]) =>
+                grupoA.localeCompare(grupoB)
+            ).map(
+
+          ([grupo, jogos]) => (
+
+            <div
+              key={grupo}
+              className="mb-10"
+            >
+
+              <h2
+                className="
+                  text-3xl
+                  font-black
+                  text-yellow-400
+                  mb-4
+                "
+              >
+
+                {grupo === "Mata-Mata"
+
+                  ? "🏆 Mata-Mata"
+
+                  : `Grupo ${grupo}`
+
+                }
+
+              </h2>
+
+              <div className="space-y-3">
+
+        {jogos.map((game) => (
 
               <div
                 key={game.id}
@@ -433,7 +513,15 @@ export default function AdminPage() {
                     </h3>
 
                     <p className="text-zinc-400 text-sm">
-                      {game.fase}
+
+                      {game.grupo
+
+                        ? `Grupo ${game.grupo}`
+
+                        : game.fase
+
+                      }
+
                     </p>
 
                   </div>
@@ -451,71 +539,71 @@ export default function AdminPage() {
 
                 <div className="mt-4 pb-4 space-y-4">
 
-  <label className="block font-semibold text-sm">
-    Alterar data/hora
-  </label>
+                  <label className="block font-semibold text-sm">
+                    Alterar data/hora
+                  </label>
 
-  <input
-  type="text"
-  value={
-    editedDates[game.id] ??
-    game.matchDate
-  }
-  onChange={(e) =>
-    setEditedDates({
-      ...editedDates,
-      [game.id]: e.target.value
-    })
-  }
-  placeholder="2026-07-15T21:30"
-  className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
-/>
-<p className="text-zinc-500 text-xs">
-  Formato: AAAA-MM-DDTHH:MM
-</p>
+                  <input
+                  type="text"
+                  value={
+                    editedDates[game.id] ??
+                    game.matchDate
+                  }
+                  onChange={(e) =>
+                    setEditedDates({
+                      ...editedDates,
+                      [game.id]: e.target.value
+                    })
+                  }
+                  placeholder="2026-07-15T21:30"
+                  className="w-full bg-zinc-800 rounded-xl p-3 text-sm"
+                />
+                <p className="text-zinc-500 text-xs">
+                  Formato: AAAA-MM-DDTHH:MM
+                </p>
 
-  <button
-    onClick={async () => {
+                  <button
+                    onClick={async () => {
 
-      setSavingGameId(game.id);
+                      setSavingGameId(game.id);
 
-      await atualizarData(
-        game.id,
-        editedDates[game.id] ||
-        game.matchDate
-      );
+                      await atualizarData(
+                        game.id,
+                        editedDates[game.id] ||
+                        game.matchDate
+                      );
 
-      setSavingGameId(null);
+                      setSavingGameId(null);
 
-      setSavedGameId(game.id);
+                      setSavedGameId(game.id);
 
-      setTimeout(() => {
+                      setTimeout(() => {
 
-        setSavedGameId(null);
+                        setSavedGameId(null);
 
-      }, 2000);
+                      }, 2000);
 
-    }}
-    className="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-xl text-black font-bold text-sm"
-  >
+                    }}
+                    className="bg-blue-500 hover:bg-blue-600 transition px-4 py-2 rounded-xl text-black font-bold text-sm"
+                  >
 
-    {savingGameId === game.id
-      ? "Salvando..."
-      : "💾 Confirmar alteração"}
+                    {savingGameId === game.id
+                      ? "Salvando..."
+                      : "💾 Confirmar alteração"}
 
-  </button>
+                  </button>
 
-  {savedGameId === game.id && (
+                  {savedGameId === game.id && (
 
-    <div className="text-green-400 text-sm font-bold">
+                    <div className="text-green-400 text-sm font-bold">
 
-      ✅ Alteração salva com sucesso!
+                      ✅ Alteração salva com sucesso!
 
-    </div>
+                    </div>
 
-  )}
+                  )}
 
-</div>
+                </div>
 
               </div>
 
@@ -524,9 +612,12 @@ export default function AdminPage() {
           </div>
 
         </div>
+)
 
+)}
       </div>
-
+      </div>
+      </div>
     </main>
 
   );

@@ -40,7 +40,32 @@ export default function AdminResultsPage() {
 
   const [games, setGames] =
     useState<Game[]>([]);
-
+    const groupedGames =
+    games.reduce(
+  
+      (acc, game) => {
+  
+        const grupo =
+          game.grupo || "Sem Grupo";
+  
+        if (!acc[grupo]) {
+  
+          acc[grupo] = [];
+  
+        }
+  
+        acc[grupo].push(game);
+  
+        return acc;
+  
+      },
+  
+      {} as Record<
+        string,
+        Game[]
+      >
+  
+    );
   async function carregarJogos() {
 
     const snapshot =
@@ -201,9 +226,33 @@ export default function AdminResultsPage() {
           🏆 Resultados Oficiais
         </h1>
 
-        <div className="space-y-5">
+        <div className="space-y-10">
 
-          {games.map((game) => (
+      {Object
+      .entries(groupedGames)
+      .sort(
+        ([grupoA], [grupoB]) =>
+          grupoA.localeCompare(grupoB)
+      ).map(
+
+        ([grupo, jogos]) => (
+
+         <div key={grupo}>
+
+        <h2
+          className="
+            text-3xl
+            font-black
+            mb-4
+            text-yellow-400
+          "
+        >
+          Grupo {grupo}
+        </h2>
+
+        <div className="space-y-4">
+
+          {jogos.map((game) => (
 
             <GameResultCard
               key={game.id}
@@ -214,6 +263,14 @@ export default function AdminResultsPage() {
           ))}
 
         </div>
+
+      </div>
+
+    )
+
+  )}
+
+</div>
 
       </div>
 
