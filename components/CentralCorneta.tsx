@@ -133,8 +133,8 @@ export default function CentralCorneta({
   const [menuUsuariosAberto, setMenuUsuariosAberto] =
     useState(false);
 
-  const menuUsuariosRef =
-    useRef<HTMLDivElement | null>(null);
+ // const menuUsuariosRef =
+ //   useRef<HTMLDivElement | null>(null);
 
   /*
   ========================================
@@ -500,7 +500,7 @@ export default function CentralCorneta({
   ========================================
   */
 
-  useEffect(() => {
+/*  useEffect(() => {
 
     function handleClickOutside(
       event: MouseEvent
@@ -536,7 +536,7 @@ export default function CentralCorneta({
 
     };
 
-  }, []);
+  }, []); */
 
   /*
   ========================================
@@ -613,10 +613,7 @@ export default function CentralCorneta({
 
       <div className="flex flex-col gap-3 mb-6">
 
-        <div
-          className="relative"
-          ref={menuUsuariosRef}
-        >
+        <div className="relative" >
 
           <div
             className="
@@ -705,12 +702,26 @@ export default function CentralCorneta({
             </button>
 
           </div>
+          {menuUsuariosAberto && (
+
+            <div
+              className="
+                fixed
+                inset-0
+                z-40
+              "
+              onClick={() =>
+                setMenuUsuariosAberto(false)
+              }
+            />
+
+          )}
 
           {menuUsuariosAberto && (
 
             <div
               className="
-                absolute z-50 mt-2
+                absolute z-60 mt-2
                 w-full
                 max-h-64
                 overflow-y-auto
@@ -722,7 +733,29 @@ export default function CentralCorneta({
                 flex flex-col gap-1
               "
             >
+              <button
+                  onClick={() => {
 
+                    setDestinoId("");
+                    setMenuUsuariosAberto(false);
+
+                  }}
+                  className="
+                    w-full
+                    text-left
+                    px-4 py-3
+                    rounded-xl
+                    bg-red-900/30
+                    hover:bg-red-900/50
+                    text-red-300
+                    mb-2
+                  "
+                >
+
+                  ❌ Cancelar
+
+                </button>
+                
               {usuariosFiltrados.map(
                 (usuario) => {
 
