@@ -169,9 +169,9 @@ export default function CentralCorneta({
 
         const agora =
           Date.now();
-
-        const vinteQuatroHoras =
-          1000 * 60 * 60 * 24;
+        //aqui eu alterei de 24 para 48 horas
+        const tempoMensagem =
+          1000 * 60 * 60 * 48;
 
         const lista: Mensagem[] =
 
@@ -208,7 +208,7 @@ export default function CentralCorneta({
 
                 agora - dataMensagem <
 
-                vinteQuatroHoras
+                tempoMensagem 
 
               );
 
@@ -755,7 +755,7 @@ export default function CentralCorneta({
                   ❌ Cancelar
 
                 </button>
-                
+
               {usuariosFiltrados.map(
                 (usuario) => {
 
