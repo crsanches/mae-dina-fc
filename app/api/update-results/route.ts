@@ -110,15 +110,17 @@ export async function GET() {
     
 
     const data = await response.json();
+    type ApiGame = {
+      strStatus: string;
+      strHomeTeam: string;
+      strAwayTeam: string;
+      intHomeScore: number | string | null;
+      intAwayScore: number | string | null;
+    };
+
     const recentGames = (data.events || []).filter(
-      (game: any) =>
+      (game: ApiGame) =>
         game.strStatus === "FT"
-    );
-    console.log(
-      recentGames.map(
-        (g: any) =>
-          `${g.strHomeTeam} x ${g.strAwayTeam} (${g.strStatus})`
-      )
     );
   
 
@@ -128,9 +130,6 @@ export async function GET() {
       .collection("games")
       .get();
 
-      gamesSnapshot.docs.forEach((doc) => {
- 
-      });
 
       for (const apiGame of recentGames) {
     
