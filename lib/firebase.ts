@@ -23,7 +23,8 @@ import {
 
   getApps,
 
-  getApp
+  getApp  
+  
 
 } from "firebase/app";
 
@@ -35,7 +36,8 @@ import {
 
 import {
 
-  getAuth
+  getAuth,
+  GoogleAuthProvider
 
 } from "firebase/auth";
 
@@ -74,3 +76,6 @@ export const db =
 
 export const auth =
   getAuth(app);
+
+export const googleProvider =
+  new GoogleAuthProvider();

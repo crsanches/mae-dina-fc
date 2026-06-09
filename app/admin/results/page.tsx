@@ -4,6 +4,11 @@ import { useEffect, useState } from "react";
 
 import { db } from "../../../lib/firebase";
 import Link from "next/link";
+import { auth } from "../../../lib/firebase";
+
+import {
+  onAuthStateChanged
+} from "firebase/auth";
 
 import {
   collection,
@@ -16,6 +21,8 @@ import {
 
 import { calculatePoints }
 from "../../../lib/calculatePoints";
+
+console.log("AUTH OBJ:", auth);
 
 type Game = {
   id: string;
@@ -68,6 +75,12 @@ export default function AdminResultsPage() {
     );
   async function carregarJogos() {
 
+    console.log(
+      "AUTH:",
+      auth.currentUser
+    );
+  
+
     const snapshot =
       await getDocs(
         collection(db, "games")
@@ -108,14 +121,31 @@ export default function AdminResultsPage() {
 
   useEffect(() => {
 
-    const timeout = setTimeout(() => {
-
-      carregarJogos();
-
-    }, 0);
-
-    return () => clearTimeout(timeout);
-
+    const unsubscribe =
+  
+      onAuthStateChanged(
+  
+        auth,
+  
+        (user) => {
+  
+          console.log(
+            "USUARIO:",
+            user?.uid
+          );
+  
+          if (user) {
+  
+            carregarJogos();
+  
+          }
+  
+        }
+  
+      );
+  
+    return () => unsubscribe();
+  
   }, []);
 
   async function salvarResultado(

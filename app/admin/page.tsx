@@ -1,6 +1,6 @@
 "use client";
 
-// esse é o que administra e reguatra os jogos.
+// esse é o que administra e registra os jogos.
 
 import Link from "next/link";
 
@@ -17,6 +17,9 @@ import {
   serverTimestamp,
   updateDoc
 } from "firebase/firestore";
+
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../lib/firebase";
 
 type Game = {
   id: string;
@@ -36,7 +39,15 @@ type Game = {
 
 export default function AdminPage() {
 
-  
+  const ADMIN_EMAILS = [
+    "crsanches4@gmail.com"
+  ];
+
+  const [authorized, setAuthorized] =
+  useState(false);
+
+const [checkingAuth, setCheckingAuth] =
+  useState(true);
 
   const [teamA, setTeamA] =
     useState("");
@@ -101,6 +112,49 @@ export default function AdminPage() {
   
     );
 
+    useEffect(() => {
+
+      const unsubscribe =
+        onAuthStateChanged(
+          auth,
+          (user) => {
+    
+            if (!user) {
+
+              setCheckingAuth(false);
+    
+              window.location.href =
+                "/admin-login";
+    
+              return;
+    
+            }
+    
+            if (
+              !ADMIN_EMAILS.includes(
+                user.email || ""
+              )
+            ) {
+              setCheckingAuth(false);
+              alert("Acesso negado");
+    
+              window.location.href = "/";
+    
+              return;
+    
+            }
+    
+            setAuthorized(true);
+            setCheckingAuth(false);
+    
+          }
+        );
+    
+      return () => unsubscribe();
+    
+    }, []);
+
+
   async function carregarJogos() {
 
     const snapshot =
@@ -140,15 +194,13 @@ export default function AdminPage() {
 
   useEffect(() => {
 
-    const timeout = setTimeout(() => {
+    if (!authorized) return;
+  
+    carregarJogos();
+  
+  }, [authorized]);
 
-      carregarJogos();
 
-    }, 0);
-
-    return () => clearTimeout(timeout);
-
-  }, []);
 
   async function criarJogo() {
 
@@ -242,6 +294,22 @@ export default function AdminPage() {
 
     carregarJogos();
 
+  }
+
+  if (checkingAuth) {
+
+    return (
+      <div className="p-10">
+        Verificando acesso...
+      </div>
+    );
+  
+  }
+  
+  if (!authorized) {
+  
+    return null;
+  
   }
 
   return (

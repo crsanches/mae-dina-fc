@@ -10,6 +10,9 @@ import {
 
 import { db } from "../../../lib/firebase";
 
+import { onAuthStateChanged } from "firebase/auth";
+import { auth } from "../../../lib/firebase";
+
 
 type GroupStats = {
 
@@ -42,6 +45,10 @@ type DashboardStats = {
 
 
 export default function AdminDashboard() {
+
+  const ADMIN_EMAILS = [
+    "crsanches4@gmail.com"
+  ];
 
 const [stats, setStats] =
   useState<DashboardStats>({
@@ -200,7 +207,56 @@ useEffect(() => {
 
   }
 
-  loadStats();
+  const unsubscribe = onAuthStateChanged(
+
+    auth,
+
+    (user) => {
+
+      console.log(
+        "USUARIO LOGADO:",
+        user?.uid
+      );
+
+      console.log(
+        "EMAIL:",
+        user?.email
+      );
+      
+      console.log(
+        "UID:",
+        user?.uid
+      );
+
+      if (!user) {
+
+        window.location.href = "/";
+      
+        return;
+      
+      }
+      
+      if (
+        !ADMIN_EMAILS.includes(
+          user.email || ""
+        )
+      ) {
+      
+        alert("Acesso negado");
+      
+        window.location.href = "/";
+      
+        return;
+      
+      }
+      
+      loadStats();
+
+    }
+
+  );
+
+  return () => unsubscribe();
 
 }, []);
 
