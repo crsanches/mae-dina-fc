@@ -18,9 +18,6 @@ import {
   updateDoc
 } from "firebase/firestore";
 
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../../lib/firebase";
-
 type Game = {
   id: string;
 
@@ -40,14 +37,8 @@ type Game = {
 export default function AdminPage() {
 
   const ADMIN_EMAILS = [
-    "crsanches4@gmail.com"
-  ];
-
-  const [authorized, setAuthorized] =
-  useState(false);
-
-const [checkingAuth, setCheckingAuth] =
-  useState(true);
+  "crsanches4@gmail.com"
+];
 
   const [teamA, setTeamA] =
     useState("");
@@ -112,49 +103,6 @@ const [checkingAuth, setCheckingAuth] =
   
     );
 
-    useEffect(() => {
-
-      const unsubscribe =
-        onAuthStateChanged(
-          auth,
-          (user) => {
-    
-            if (!user) {
-
-              setCheckingAuth(false);
-    
-              window.location.href =
-                "/admin-login";
-    
-              return;
-    
-            }
-    
-            if (
-              !ADMIN_EMAILS.includes(
-                user.email || ""
-              )
-            ) {
-              setCheckingAuth(false);
-              alert("Acesso negado");
-    
-              window.location.href = "/";
-    
-              return;
-    
-            }
-    
-            setAuthorized(true);
-            setCheckingAuth(false);
-    
-          }
-        );
-    
-      return () => unsubscribe();
-    
-    }, []);
-
-
   async function carregarJogos() {
 
     const snapshot =
@@ -194,13 +142,15 @@ const [checkingAuth, setCheckingAuth] =
 
   useEffect(() => {
 
-    if (!authorized) return;
-  
-    carregarJogos();
-  
-  }, [authorized]);
+    const timeout = setTimeout(() => {
 
+      carregarJogos();
 
+    }, 0);
+
+    return () => clearTimeout(timeout);
+
+  }, []);
 
   async function criarJogo() {
 
@@ -294,22 +244,6 @@ const [checkingAuth, setCheckingAuth] =
 
     carregarJogos();
 
-  }
-
-  if (checkingAuth) {
-
-    return (
-      <div className="p-10">
-        Verificando acesso...
-      </div>
-    );
-  
-  }
-  
-  if (!authorized) {
-  
-    return null;
-  
   }
 
   return (
