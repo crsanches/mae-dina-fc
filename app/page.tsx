@@ -578,6 +578,20 @@ export default function Home() {
 
         <GroupCard />
 
+        {/* BOTÃO ADMIN - só aparece para o admin */}
+        {auth.currentUser?.uid === "s45fFE4vSrOmnpQIcjuWnWU0pKB3" && (
+          <Link
+            href="/admin/dashboard"
+            className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-600 rounded-3xl p-5 flex items-center gap-4"
+          >
+            <div className="text-5xl">👑</div>
+            <div>
+              <h2 className="text-2xl font-black">Painel Admin</h2>
+              <p className="text-zinc-400 text-sm mt-1">Gerenciar jogos e resultados</p>
+            </div>
+          </Link>
+        )}
+
         {/* APOSTAS */}
 
         <Link
