@@ -95,6 +95,18 @@ type Stats = {
   
   };
 
+  type LeagueUser = {
+    uid: string;
+    nome: string;
+    username: string;
+  };
+
+  type LeagueWithUsers = {
+    groupId: string;
+    groupName: string;
+    users: LeagueUser[];
+  };
+
 
 
 export default function EstatisticasPage() {
@@ -158,6 +170,11 @@ export default function EstatisticasPage() {
       ] = useState<
         GlobalRankingUser[]
       >([]);
+
+      const [
+        leagueWithUsers,
+        setLeagueWithUsers
+      ] = useState<LeagueWithUsers[]>([]);
       
 
     useEffect(() => {
@@ -410,24 +427,11 @@ export default function EstatisticasPage() {
             );
 
             const median =
-
-            sorted.length % 2 === 0
-
-                ? (
-                    sorted[
-                    sorted.length / 2 - 1
-                    ] +
-
-                    sorted[
-                    sorted.length / 2
-                    ]
-                ) / 2
-
-                : sorted[
-                    Math.floor(
-                    sorted.length / 2
-                    )
-                ];
+            sorted.length === 0
+              ? 0
+              : sorted.length % 2 === 0
+                ? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
+                : sorted[Math.floor(sorted.length / 2)];
 
             //DESCIO PADRAO
 
@@ -451,9 +455,9 @@ export default function EstatisticasPage() {
             points.length;
 
             const stdDev =
-            Math.sqrt(
-                variance
-            );
+            points.length === 0
+          ? 0
+          : Math.sqrt(variance);
 
 
             const finishedGames =
@@ -517,6 +521,36 @@ export default function EstatisticasPage() {
               groupsSnap.size
       
           });
+
+          // USUÁRIOS POR LIGA
+          const ligasComUsuarios: LeagueWithUsers[] =
+            groupsSnap.docs.map((groupDoc) => {
+
+              const groupId = groupDoc.id;
+              const groupName = groupDoc.data().name;
+
+              const membros = usersSnap.docs
+                .filter((userDoc) => {
+                  const data = userDoc.data();
+                  const groups: string[] = data.groups || [];
+                  return groups.includes(groupId);
+                })
+                .map((userDoc) => {
+                  const data = userDoc.data();
+                  return {
+                    uid: userDoc.id,
+                    nome: data.nome || data.displayName || "—",
+                    username: data.username || data.displayName || "—",
+                  };
+                })
+                .sort((a, b) => a.nome.localeCompare(b.nome));
+
+              return { groupId, groupName, users: membros };
+
+            })
+            .sort((a, b) => a.groupName.localeCompare(b.groupName));
+
+          setLeagueWithUsers(ligasComUsuarios);
       
         }
       
@@ -621,6 +655,63 @@ export default function EstatisticasPage() {
         </div>
 
         </div>
+
+    {/* =============*/}   
+    {/* USUÁRIOS POR LIGA */}
+    {/* =============*/}   
+
+    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-8 mb-8">
+
+      <h2 className="text-3xl font-black mb-6">
+        👥 Usuários por Liga
+      </h2>
+
+      <div className="space-y-6">
+
+        {leagueWithUsers.map((liga) => (
+
+          <div key={liga.groupId}>
+
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <p className="font-black text-lg">{liga.groupName}</p>
+                <p className="text-zinc-500 text-xs font-mono mt-0.5">
+                  {liga.groupId}
+                </p>
+              </div>
+              <span className="bg-zinc-800 text-zinc-300 text-xs font-bold px-2 py-1 rounded-lg">
+                {liga.users.length} usuário{liga.users.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+
+            <div className="space-y-1">
+              {liga.users.map((user) => (
+                <div
+                  key={user.uid}
+                  className="bg-zinc-800 rounded-xl px-3 py-2"
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-sm">{user.nome}</span>
+                    <span className="text-zinc-400 text-xs">{user.username}</span>
+                  </div>
+                  <span className="text-zinc-500 text-xs font-mono">{user.uid}</span>
+                </div>
+              ))}
+              {liga.users.length === 0 && (
+                <p className="text-zinc-600 text-sm italic">Nenhum usuário encontrado</p>
+              )}
+            </div>
+
+            <div className="border-b border-zinc-800 mt-4" />
+
+          </div>
+
+        ))}
+
+      </div>
+
+    </div>
+
     {/* =============*/}   
     {/* NOVO BLOCO   */}
     {/* =============*/}   

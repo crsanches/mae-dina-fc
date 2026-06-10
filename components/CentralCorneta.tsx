@@ -760,21 +760,24 @@ export default function CentralCorneta({
                 (usuario) => {
 
                   const usuarioId =
-
                     usuario.uid ||
                     usuario.id;
 
-                  const usuarioNome =
-
+                  const apelido =
                     usuario.username ||
-
                     usuario.displayName ||
-
-                    usuario.nome ||
-
                     usuario.email ||
-
                     "Jogador";
+
+                  const nomeReal =
+                    usuario.nome ||
+                    usuario.displayName ||
+                    "";
+
+                  const labelExibido =
+                    nomeReal && nomeReal !== apelido
+                      ? `${apelido} (${nomeReal})`
+                      : apelido;
 
                   return (
 
@@ -805,7 +808,7 @@ export default function CentralCorneta({
                       "
                     >
 
-                      {usuarioNome}
+                      {labelExibido}
 
                     </button>
 
@@ -1023,17 +1026,14 @@ export default function CentralCorneta({
 
                       <button
 
-                        onClick={() =>
-
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setMenuAbertoId(
-
                             menuAbertoId === mensagem.id
                               ? null
                               : mensagem.id
-
-                          )
-
-                        }
+                          );
+                        }}
 
                         className="
                           bg-zinc-700
@@ -1052,47 +1052,53 @@ export default function CentralCorneta({
 
                       {menuAbertoId === mensagem.id && (
 
-                        <div
-                          className="
-                            absolute left-0
-                            z-50 mt-2
-                            bg-zinc-900
-                            border border-zinc-700
-                            rounded-2xl
-                            p-3
-                            flex flex-wrap
-                            gap-2
-                            w-72
-                            shadow-md
-                          "
-                        >
+                        <>
+                          {/* overlay para fechar ao clicar fora */}
+                          <div
+                            className="fixed inset-0 z-40"
+                            onClick={() => setMenuAbertoId(null)}
+                          />
 
-                          {reactionEmojis.map(
-                            (emoji) => (
+                          <div
+                            className="
+                              absolute left-0
+                              z-50 mt-2
+                              bg-zinc-900
+                              border border-zinc-700
+                              rounded-2xl
+                              p-3
+                              flex flex-wrap
+                              gap-2
+                              w-72
+                              shadow-md
+                            "
+                          >
 
-                              <button
-                                key={emoji}
-                                onClick={() =>
-                                  reagirMensagem(
-                                    mensagem,
-                                    emoji
-                                  )
-                                }
-                                className="
-                                  text-2xl
-                                  hover:scale-125
-                                  transition-transform
-                                "
-                              >
+                            {reactionEmojis.map(
+                              (emoji) => (
 
-                                {emoji}
+                                <button
+                                  key={emoji}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    reagirMensagem(mensagem, emoji);
+                                  }}
+                                  className="
+                                    text-2xl
+                                    hover:scale-125
+                                    transition-transform
+                                  "
+                                >
 
-                              </button>
+                                  {emoji}
 
-                            )
-                          )}
+                                </button>
 
-                        </div>
+                              )
+                            )}
+
+                          </div>
+                        </>
 
                       )}
 

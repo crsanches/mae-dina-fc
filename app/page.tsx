@@ -1,5 +1,9 @@
 "use client";
 
+
+// página principal
+//pagina principal
+
 import {
   useEffect,
   useState,
@@ -104,6 +108,7 @@ type Game = {
 type UsuarioLiga = {
   id: string;
   nome: string;
+  username: string;
   activeGroupId: string;
 };
 
@@ -360,8 +365,8 @@ export default function Home() {
             query(
               collection(db, "users"),
               where(
-                "activeGroupId",
-                "==",
+                "groups",
+                "array-contains",
                 activeGroupId
               )
             );
@@ -384,6 +389,11 @@ export default function Home() {
                   data.displayName ||
                   data.username ||
                   "Jogador",
+
+                username: 
+                  data.username || 
+                  data.displayName ||
+                   "Jogador",
 
                 activeGroupId:
                   data.activeGroupId,

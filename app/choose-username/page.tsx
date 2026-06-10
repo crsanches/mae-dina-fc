@@ -1,151 +1,81 @@
 "use client";
 
-import {
+import { useState } from "react";
 
-  useState
+import { auth, db } from "../../lib/firebase";
 
-} from "react";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-import {
-
-  auth,
-
-  db
-
-} from "../../lib/firebase";
-
-import {
-
-  doc,
-
-  setDoc,
-
-  getDoc
-
-} from "firebase/firestore";
-
-import {
-
-  useRouter
-
-} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export default function ChooseUsernamePage() {
 
-  const [username, setUsername] =
-    useState("");
+  const [nome, setNome] = useState("");
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const [loading, setLoading] =
-    useState(false);
+  const router = useRouter();
 
-  const router =
-    useRouter();
-  
-    const invitedGroupId =
-
+  const invitedGroupId =
     typeof window !== "undefined"
-  
-      ? new URLSearchParams(
-          window.location.search
-        ).get("groupId")
-  
+      ? new URLSearchParams(window.location.search).get("groupId")
       : null;
-      
+
   async function salvarUsername() {
 
-    const user =
-      auth.currentUser;
+    const user = auth.currentUser;
 
     if (!user) {
-
-      alert(
-        "Usuário não autenticado"
-      );
-
+      alert("Usuário não autenticado");
       return;
+    }
 
+    if (!nome.trim()) {
+      alert("Digite seu nome completo 😄");
+      return;
     }
 
     if (!username.trim()) {
-
-      alert(
-        "Digite um apelido 😄"
-      );
-
+      alert("Digite um apelido 😄");
       return;
-
     }
 
     try {
 
       setLoading(true);
 
-      const userRef =
-        doc(
-          db,
-          "users",
-          user.uid
-        );
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      const oldData = userSnap.exists() ? userSnap.data() : {};
 
-      const userSnap =
-        await getDoc(userRef);
+      await setDoc(
+        userRef,
+        {
+          ...oldData,
 
-      const oldData =
-        userSnap.exists()
-          ? userSnap.data()
-          : {};
+          uid: user.uid,
 
-          await setDoc(
+          email: user.email || "",
 
-            userRef,
-          
-            {
-          
-              ...oldData,
-          
-              uid:
-                user.uid,
-          
-              email:
-                user.email || "",
-          
-              username:
-                username.trim(),
-          
-              ...(invitedGroupId && {
-          
-                activeGroupId:
-                  invitedGroupId,
-          
-                groups:
-                  [invitedGroupId]
-          
-              })
-          
-            },
-          
-            {
-          
-              merge: true
-          
-            }
-          
-          );
+          nome: nome.trim(),
+
+          username: username.trim(),
+
+          ...(invitedGroupId && {
+            activeGroupId: invitedGroupId,
+            groups: [invitedGroupId]
+          })
+        },
+        { merge: true }
+      );
 
       router.push("/");
 
     } catch (error) {
-
       console.error(error);
-
-      alert(
-        "Erro ao salvar username 😥"
-      );
-
+      alert("Erro ao salvar cadastro 😥");
     } finally {
-
       setLoading(false);
-
     }
 
   }
@@ -157,26 +87,33 @@ export default function ChooseUsernamePage() {
       <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-6 w-full max-w-md">
 
         <h1 className="text-3xl font-black mb-2">
-
-          😎 Escolha seu apelido
-
+          😎 Crie seu perfil
         </h1>
 
         <p className="text-zinc-400 mb-6">
-
-          Esse nome aparecerá no ranking mundial da vergonha 😂
-
+          Seu nome aparecerá nos resultados e seu apelido no ranking da vergonha 😂
         </p>
 
+        {/* NOME */}
+        <label className="block text-sm font-semibold mb-1 text-zinc-300">
+          Nome completo
+        </label>
+        <input
+          value={nome}
+          onChange={(e) => setNome(e.target.value)}
+          placeholder="Ex: João Silva"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 outline-none mb-4"
+        />
+
+        {/* APELIDO */}
+        <label className="block text-sm font-semibold mb-1 text-zinc-300">
+          Apelido no bolão
+        </label>
         <input
           value={username}
-          onChange={(e) =>
-            setUsername(
-              e.target.value
-            )
-          }
+          onChange={(e) => setUsername(e.target.value)}
           placeholder="Ex: Nostradamus FC"
-          className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 outline-none mb-4"
+          className="w-full bg-zinc-800 border border-zinc-700 rounded-2xl p-4 outline-none mb-6"
         />
 
         <button
@@ -184,11 +121,7 @@ export default function ChooseUsernamePage() {
           disabled={loading}
           className="w-full bg-green-500 hover:bg-green-600 disabled:opacity-50 transition rounded-2xl p-4 font-black text-black"
         >
-
-          {loading
-            ? "Salvando..."
-            : "🔥 Continuar"}
-
+          {loading ? "Salvando..." : "🔥 Continuar"}
         </button>
 
       </div>
