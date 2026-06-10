@@ -39,8 +39,10 @@ export default function AdminResultsPage() {
     new Set(games.map((g) => g.grupo || "Sem Grupo"))
   ).sort((a, b) => a.localeCompare(b));
 
-  const jogosFiltrados = selectedGroup
-    ? games.filter((g) => (g.grupo || "Sem Grupo") === selectedGroup)
+  const activeGroup = selectedGroup || grupos[0] || "";
+
+  const jogosFiltrados = activeGroup
+    ? games.filter((g) => (g.grupo || "Sem Grupo") === activeGroup)
     : [];
 
   async function carregarJogos() {
@@ -72,13 +74,6 @@ export default function AdminResultsPage() {
     }, 0);
     return () => clearTimeout(timeout);
   }, []);
-
-  // Auto-seleciona o primeiro grupo após carregar
-  useEffect(() => {
-    if (grupos.length > 0 && !selectedGroup) {
-      setSelectedGroup(grupos[0]);
-    }
-  }, [grupos.length]);
 
   async function salvarResultado(
     gameId: string,
@@ -159,7 +154,7 @@ export default function AdminResultsPage() {
                 onClick={() => setSelectedGroup(grupo)}
                 className={`
                   px-3 py-1.5 rounded-xl text-sm font-bold transition
-                  ${selectedGroup === grupo
+                  ${activeGroup === grupo
                     ? "bg-yellow-400 text-black"
                     : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
                   }
@@ -172,12 +167,12 @@ export default function AdminResultsPage() {
         </div>
 
         {/* JOGOS DO GRUPO SELECIONADO */}
-        {selectedGroup && (
+        {activeGroup && (
           <div>
             <h2 className="text-base font-black text-yellow-400 mb-3">
-              {selectedGroup === "Sem Grupo"
+              {activeGroup === "Sem Grupo"
                 ? "Sem Grupo"
-                : `Grupo ${selectedGroup}`}
+                : `Grupo ${activeGroup}`}
             </h2>
 
             <div className="space-y-2">
