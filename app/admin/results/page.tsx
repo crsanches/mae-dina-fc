@@ -19,270 +19,192 @@ from "../../../lib/calculatePoints";
 
 type Game = {
   id: string;
-
   teamA: string;
   teamB: string;
-
   emojiA: string;
   emojiB: string;
-
   fase: string;
-
   grupo?: string;
-
   matchDate: string;
-
   resultadoA?: number;
   resultadoB?: number;
 };
 
 export default function AdminResultsPage() {
 
-  const [games, setGames] =
-    useState<Game[]>([]);
-    const groupedGames =
-    games.reduce(
-  
-      (acc, game) => {
-  
-        const grupo =
-          game.grupo || "Sem Grupo";
-  
-        if (!acc[grupo]) {
-  
-          acc[grupo] = [];
-  
-        }
-  
-        acc[grupo].push(game);
-  
-        return acc;
-  
-      },
-  
-      {} as Record<
-        string,
-        Game[]
-      >
-  
-    );
+  const [games, setGames] = useState<Game[]>([]);
+  const [selectedGroup, setSelectedGroup] = useState<string>("");
+
+  const grupos = Array.from(
+    new Set(games.map((g) => g.grupo || "Sem Grupo"))
+  ).sort((a, b) => a.localeCompare(b));
+
+  const jogosFiltrados = selectedGroup
+    ? games.filter((g) => (g.grupo || "Sem Grupo") === selectedGroup)
+    : [];
+
   async function carregarJogos() {
-
-    const snapshot =
-      await getDocs(
-        collection(db, "games")
-      );
-
+    const snapshot = await getDocs(collection(db, "games"));
     const loadedGames: Game[] = [];
 
     snapshot.forEach((docItem) => {
-
       const data = docItem.data();
-
       loadedGames.push({
-
         id: docItem.id,
-
         teamA: data.teamA,
         teamB: data.teamB,
-
         emojiA: data.emojiA,
         emojiB: data.emojiB,
-
         fase: data.fase || data.phase,
-
         matchDate: data.matchDate,
-
         grupo: data.grupo,
-
         resultadoA: data.resultadoA,
-        resultadoB: data.resultadoB
-
+        resultadoB: data.resultadoB,
       });
-
     });
 
     setGames(loadedGames);
-
   }
 
   useEffect(() => {
-
     const timeout = setTimeout(() => {
-
       carregarJogos();
-
     }, 0);
-
     return () => clearTimeout(timeout);
-
   }, []);
+
+  // Auto-seleciona o primeiro grupo após carregar
+  useEffect(() => {
+    if (grupos.length > 0 && !selectedGroup) {
+      setSelectedGroup(grupos[0]);
+    }
+  }, [grupos.length]);
 
   async function salvarResultado(
     gameId: string,
     resultadoA: number,
     resultadoB: number
   ) {
+    await updateDoc(doc(db, "games", gameId), {
+      resultadoA,
+      resultadoB,
+    });
 
-    // salva resultado oficial
-    await updateDoc(
-      doc(db, "games", gameId),
-      {
-        resultadoA,
-        resultadoB
-      }
-    );
-
-    // encontra o jogo
-    const game =
-      games.find(
-        (g) => g.id === gameId
-      );
+    const game = games.find((g) => g.id === gameId);
 
     if (!game) {
-
       alert("Jogo não encontrado 😥");
-
       return;
-
     }
 
-    // busca apostas do jogo
-    const match =
-      `${game.teamA} x ${game.teamB}`;
+    const match = `${game.teamA} x ${game.teamB}`;
 
-    const betsQuery =
-      query(
-        collection(db, "bets"),
-        where("match", "==", match)
-      );
-
-    const betsSnapshot =
-      await getDocs(betsQuery);
-
-    // recalcula pontos
-    for (const betDoc of betsSnapshot.docs) {
-
-      const bet =
-        betDoc.data();
-
-      const points =
-        calculatePoints({
-
-          apostaA:
-            Number(bet.golsA),
-
-          apostaB:
-            Number(bet.golsB),
-
-          resultadoA,
-
-          resultadoB
-
-        });
-
-      await updateDoc(
-        doc(db, "bets", betDoc.id),
-        {
-          points
-        }
-      );
-
-    }
-
-    alert(
-      "Resultado salvo e apostas atualizadas 😎"
+    const betsQuery = query(
+      collection(db, "bets"),
+      where("match", "==", match)
     );
 
-    carregarJogos();
+    const betsSnapshot = await getDocs(betsQuery);
 
+    for (const betDoc of betsSnapshot.docs) {
+      const bet = betDoc.data();
+
+      const points = calculatePoints({
+        apostaA: Number(bet.golsA),
+        apostaB: Number(bet.golsB),
+        resultadoA,
+        resultadoB,
+      });
+
+      await updateDoc(doc(db, "bets", betDoc.id), { points });
+    }
+
+    alert("Resultado salvo e apostas atualizadas 😎");
+    carregarJogos();
   }
 
   return (
+    <main className="min-h-screen bg-zinc-950 text-white p-4">
+      <div className="max-w-2xl mx-auto">
 
-    <main className="min-h-screen bg-zinc-950 text-white p-6">
-
-      <div className="max-w-4xl mx-auto">
-
-        <div className="mb-6 flex gap-3">
-
+        {/* NAV */}
+        <div className="mb-4 flex gap-2">
           <Link
             href="/admin/dashboard"
-            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
+            className="inline-flex items-center gap-1 bg-zinc-800 hover:bg-zinc-700 transition px-4 py-2 rounded-xl font-bold text-sm"
           >
             ← Dashboard
           </Link>
-
           <Link
             href="/"
-            className="inline-flex items-center gap-2 bg-blue-900 hover:bg-blue-800 transition px-5 py-3 rounded-2xl font-bold"
+            className="inline-flex items-center gap-1 bg-blue-900 hover:bg-blue-800 transition px-4 py-2 rounded-xl font-bold text-sm"
           >
             ⚽ Bolão
           </Link>
-
         </div>
 
-        <h1 className="text-4xl font-black mb-8">
+        <h1 className="text-2xl font-black mb-4">
           🏆 Resultados Oficiais
         </h1>
 
-        <div className="space-y-10">
-
-      {Object
-      .entries(groupedGames)
-      .sort(
-        ([grupoA], [grupoB]) =>
-          grupoA.localeCompare(grupoB)
-      ).map(
-
-        ([grupo, jogos]) => (
-
-         <div key={grupo}>
-
-        <h2
-          className="
-            text-3xl
-            font-black
-            mb-4
-            text-yellow-400
-          "
-        >
-          Grupo {grupo}
-        </h2>
-
-        <div className="space-y-4">
-
-          {jogos.map((game) => (
-
-            <GameResultCard
-              key={game.id}
-              game={game}
-              onSave={salvarResultado}
-            />
-
-          ))}
-
+        {/* SELETOR DE GRUPO */}
+        <div className="mb-4">
+          <p className="text-zinc-400 text-xs mb-2 font-semibold uppercase tracking-wide">
+            Selecionar grupo
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {grupos.map((grupo) => (
+              <button
+                key={grupo}
+                onClick={() => setSelectedGroup(grupo)}
+                className={`
+                  px-3 py-1.5 rounded-xl text-sm font-bold transition
+                  ${selectedGroup === grupo
+                    ? "bg-yellow-400 text-black"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }
+                `}
+              >
+                {grupo === "Sem Grupo" ? grupo : `Grupo ${grupo}`}
+              </button>
+            ))}
+          </div>
         </div>
 
+        {/* JOGOS DO GRUPO SELECIONADO */}
+        {selectedGroup && (
+          <div>
+            <h2 className="text-base font-black text-yellow-400 mb-3">
+              {selectedGroup === "Sem Grupo"
+                ? "Sem Grupo"
+                : `Grupo ${selectedGroup}`}
+            </h2>
+
+            <div className="space-y-2">
+              {jogosFiltrados.map((game) => (
+                <GameResultCard
+                  key={game.id}
+                  game={game}
+                  onSave={salvarResultado}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!selectedGroup && games.length === 0 && (
+          <p className="text-zinc-500 text-sm">
+            Carregando jogos...
+          </p>
+        )}
+
       </div>
-
-    )
-
-  )}
-
-</div>
-
-      </div>
-
     </main>
-
   );
-
 }
 
 type CardProps = {
   game: Game;
-
   onSave: (
     gameId: string,
     resultadoA: number,
@@ -290,92 +212,66 @@ type CardProps = {
   ) => void;
 };
 
-function GameResultCard({
-  game,
-  onSave
-}: CardProps) {
+function GameResultCard({ game, onSave }: CardProps) {
 
-  const [resultadoA, setResultadoA] =
-    useState(
-      game.resultadoA?.toString() || ""
-    );
+  const [resultadoA, setResultadoA] = useState(
+    game.resultadoA?.toString() || ""
+  );
+  const [resultadoB, setResultadoB] = useState(
+    game.resultadoB?.toString() || ""
+  );
 
-  const [resultadoB, setResultadoB] =
-    useState(
-      game.resultadoB?.toString() || ""
-    );
+  const temResultado =
+    game.resultadoA != null && game.resultadoB != null;
 
   return (
+    <div className={`
+      border rounded-2xl p-3
+      ${temResultado
+        ? "bg-zinc-900 border-green-800"
+        : "bg-zinc-900 border-zinc-800"
+      }
+    `}>
 
-    <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
-
-      <div className="flex justify-between items-center mb-4">
-
-        <div>
-
-          <h2 className="text-2xl font-black">
-
-            {game.emojiA}
-            {" "}
-            {game.teamA}
-
-            {" x "}
-
-            {game.emojiB}
-            {" "}
-            {game.teamB}
-
-          </h2>
-
-          <p className="text-zinc-400">
-            {game.fase}
-          </p>
-
-        </div>
-
+      {/* TIME E DATA */}
+      <div className="flex justify-between items-start mb-2">
+        <p className="text-sm font-black leading-tight">
+          {game.emojiA} {game.teamA}
+          <span className="text-zinc-500 font-normal"> x </span>
+          {game.emojiB} {game.teamB}
+        </p>
+        {temResultado && (
+          <span className="text-green-400 text-xs font-bold ml-2 shrink-0">
+            ✅
+          </span>
+        )}
       </div>
 
-      <div className="flex items-center gap-4">
-
+      {/* INPUTS */}
+      <div className="flex items-center gap-2">
         <input
           type="number"
           value={resultadoA}
-          onChange={(e) =>
-            setResultadoA(e.target.value)
-          }
-          className="w-24 bg-zinc-800 rounded-xl p-3 text-center text-2xl"
+          onChange={(e) => setResultadoA(e.target.value)}
+          className="w-14 bg-zinc-800 rounded-lg p-2 text-center text-base font-black"
         />
-
-        <span className="text-2xl font-black">
-          x
-        </span>
-
+        <span className="text-zinc-500 font-bold text-sm">x</span>
         <input
           type="number"
           value={resultadoB}
-          onChange={(e) =>
-            setResultadoB(e.target.value)
-          }
-          className="w-24 bg-zinc-800 rounded-xl p-3 text-center text-2xl"
+          onChange={(e) => setResultadoB(e.target.value)}
+          className="w-14 bg-zinc-800 rounded-lg p-2 text-center text-base font-black"
         />
-
         <button
           onClick={() =>
-            onSave(
-              game.id,
-              Number(resultadoA),
-              Number(resultadoB)
-            )
+            onSave(game.id, Number(resultadoA), Number(resultadoB))
           }
-          className="bg-green-500 hover:bg-green-600 transition text-black font-black rounded-2xl px-5 py-3"
+          className="ml-auto bg-green-500 hover:bg-green-600 transition text-black font-black rounded-xl px-4 py-2 text-sm"
         >
           Salvar
         </button>
-
       </div>
 
     </div>
-
   );
-
 }
