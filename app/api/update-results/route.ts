@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-//import { db } from "@/lib/firebase";
+
 import { adminDb } from "@/lib/firebaseAdmin";
 
 
@@ -124,8 +124,6 @@ export async function GET() {
         game.intAwayScore !== null
     );
   
-
-
     const gamesSnapshot =
     await adminDb
       .collection("games")
