@@ -178,27 +178,21 @@ export async function GET() {
 
           if (localGame === undefined) continue;
    
-          if (apiGame.strStatus === "FT") {
+          await adminDb
+          .collection("games")
+          .doc(localGame.id)
+          .update({
 
-            await adminDb
-            .collection("games")
-            .doc(localGame.id)
-            .update({
-    
-        
-                resultadoA:
-                  Number(apiGame.intHomeScore),
-    
-                resultadoB:
-                  Number(apiGame.intAwayScore),
-    
-                finished: true
-    
-              }
-    
-            );
+            resultadoA:
+              Number(apiGame.intHomeScore),
 
-      }
+            resultadoB:
+              Number(apiGame.intAwayScore),
+
+            finished:
+              apiGame.strStatus === "FT"
+
+          });
 
     }
 
