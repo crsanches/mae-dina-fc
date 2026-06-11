@@ -494,9 +494,10 @@ export default function Home() {
      FILTERS
   ========================= */
 
-  function getStatusJogo(matchDate: string) {
-
-    const agora = Date.now();
+  function getStatusJogo(
+    matchDate: string,
+    agora: number
+  ) {
   
     const inicioJogo =
       new Date(matchDate).getTime();
@@ -586,6 +587,8 @@ export default function Home() {
   /* =========================
      LOGIN SCREEN
   ========================= */
+
+  const agora = new Date().getTime();
 
   if (!isLogged) {
 
@@ -871,7 +874,10 @@ export default function Home() {
                         </p>
 
                        <p className="text-zinc-400 text-xs">
-                        {getStatusJogo(jogo.matchDate)}
+                       {getStatusJogo(
+                          jogo.matchDate,
+                          agora
+                        )}
                       </p>
 
                       </div>
