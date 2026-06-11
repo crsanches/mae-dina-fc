@@ -873,6 +873,11 @@ export default function Home() {
 
                         </p>
 
+                      <p className="text-zinc-500 text-xs">
+                      {new Date(jogo.matchDate).toLocaleString("pt-BR")}
+                      </p>
+
+                      
                        <p className="text-zinc-400 text-xs">
                        {getStatusJogo(
                           jogo.matchDate,
@@ -882,9 +887,6 @@ export default function Home() {
 
                       </div>
 
-                      <p className="text-zinc-500 text-xs">
-                      {new Date(jogo.matchDate).toLocaleString("pt-BR")}
-                    </p>
 
                     <p className="font-black text-lg">
 
