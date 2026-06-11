@@ -125,33 +125,26 @@ export default function BetProgress({
   
     betsSnapshot.forEach(
       (betDoc) => {
-  
+    
         const bet =
           betDoc.data();
-  
-        const nome =
-  
-          bet.username ||
-  
-          bet.userName ||
-  
-          bet.nome;
-  
-        if (
-          possibleNames.includes(
-            nome
-          )
-        ) {
-  
+    
+        const isOwner =
+          bet.uid === user.uid ||
+          possibleNames.includes(bet.userName) ||
+          possibleNames.includes(bet.nome);
+    
+        if (isOwner) {
+    
           total++;
-  
+    
           apostas.push({
             match:
               bet.match
           });
-  
+    
         }
-  
+    
       }
     );
   

@@ -95,11 +95,7 @@ export default function BetTable() {
       currentGroupId
     ),
 
-    where(
-      "userName",
-      "==",
-      currentUserName
-    ),
+    where("uid", "==", loggedUser.uid),
 
     orderBy(
       "createdAt",
@@ -214,38 +210,23 @@ export default function BetTable() {
       (() => void) | undefined;
 
     const unsubscribeAuth =
-      onAuthStateChanged(
-
-        auth,
-
-        (user) => {
-
-          if (!user) {
-
-            setBets([]);
-
-            return;
-
-          }
-
-          unsubscribeBets =
-            onSnapshot(
-
-              collection(db, "bets"),
-
-              () => {
-
-                carregarApostas(
-                  user.displayName || ""
-                );
-
-              }
-
-            );
-
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setBets([]);
+        return;
+      }
+    
+      const userSnap = await getDoc(doc(db, "users", user.uid));
+      if (!userSnap.exists()) return;
+      const userName = userSnap.data().nome;
+    
+      unsubscribeBets = onSnapshot(
+        collection(db, "bets"),
+        () => {
+          carregarApostas(userName);
         }
-
       );
+    });
 
     return () => {
 
