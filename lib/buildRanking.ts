@@ -136,7 +136,7 @@ import {
     groupId: string
   ) {
   
-    console.time("buildRanking");
+   
 
     const betsQuery =
       query(
@@ -189,8 +189,8 @@ import {
       Record<string, RankingUser> = {};
   
     /* =========================
-   REMOVE DUPLICADAS
-========================= */
+    REMOVE DUPLICADAS
+    ========================= */
 
 const latestBetsMap:
 Record<string, BetData> = {};
@@ -575,7 +575,7 @@ rankingMap[username]
 
 }
 
-console.timeEnd("buildRanking");
+
 
 return Object
   .values(rankingMap)

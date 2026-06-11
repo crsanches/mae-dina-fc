@@ -159,9 +159,7 @@ export default function RealRanking() {
           }
   
           // carrega imediatamente
-          console.log(
-            "REALRANKING DESABILITADO"
-          );
+         
   
           //carregarRanking();
   
@@ -187,11 +185,8 @@ export default function RealRanking() {
   
               () => {
   
-                console.log(
-                  "REALRANKING SNAPSHOT"
-                );
+          
   
-                //carregarRanking();
   
               }
   

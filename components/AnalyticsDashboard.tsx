@@ -1,7 +1,5 @@
 "use client";
 
-
-
 import {
   auth,
   db
@@ -103,7 +101,6 @@ export default function AnalyticsPage() {
         value: 0
       },
 
-  
       totalBets: 0,
 
       totalGames: 0,
@@ -120,28 +117,32 @@ export default function AnalyticsPage() {
   const [usersToShow, setUsersToShow] =
     useState<string[]>([]);
 
-    const [analyticsWinners, setAnalyticsWinners] =
-  useState({
+  const [analyticsWinners, setAnalyticsWinners] =
+    useState({
 
-    exactMasterWinner: 
-     null as [string, number] | null,
+      exactMasterWinner:
+        null as [string, number] | null,
 
-    prophetEntry: 
-     null as [string, number] | null,
+      prophetEntry:
+        null as [string, number] | null,
 
-    incendiaryEntry: 
-     null as [string, number] | null,
+      incendiaryEntry:
+        null as [string, number] | null,
 
-    retranqueiroEntry: 
-     null as [string, number] | null,
+      retranqueiroEntry:
+        null as [string, number] | null,
 
-    chaosEntry: 
-     null as [string, number] | null,
+      chaosEntry:
+        null as [string, number] | null,
 
-    almostEntry: 
-     null as [string, number] | null,
+      almostEntry:
+        null as [string, number] | null,
 
-  });
+    });
+
+  // mapa userName (nome completo) → username (apelido)
+  const [nicknameMap, setNicknameMap] =
+    useState<Record<string, string>>({});
 
   useEffect(() => {
 
@@ -171,7 +172,10 @@ export default function AnalyticsPage() {
       }
 
       const currentGroupId =
-      userSnap.data().activeGroupId;
+        userSnap.data().activeGroupId;
+
+
+
 
       const betsSnapshot =
         await getDocs(
@@ -182,6 +186,30 @@ export default function AnalyticsPage() {
         await getDocs(
           collection(db, "games")
         );
+     // Busca todos os usuários e monta o mapa nome → apelido
+
+        const usersSnapshot =
+          await getDocs(collection(db, "users"));
+
+        const nameToNickname: Record<string, string> = {};
+        const uidToNickname: Record<string, string> = {};
+
+        usersSnapshot.forEach((userDoc) => {
+          const data = userDoc.data();
+          if (data.uid && data.username) {
+            uidToNickname[data.uid] = data.username;
+            if (data.nome) nameToNickname[data.nome] = data.username;
+          }
+        });
+
+        betsSnapshot.forEach((betDoc) => {
+          const bet = betDoc.data();
+          if (bet.uid && bet.userName && uidToNickname[bet.uid]) {
+            nameToNickname[bet.userName] = uidToNickname[bet.uid];
+          }
+        });
+
+        setNicknameMap(nameToNickname);
 
       const ranking:
         Record<string, number> = {};
@@ -189,53 +217,50 @@ export default function AnalyticsPage() {
       const drawCount:
         Record<string, number> = {};
 
-      
-
-        const exactCount:
+      const exactCount:
         Record<string, number> = {};
 
-        const exactNoDraw:
+      const exactNoDraw:
         Record<string, number> = {};
 
-        const exactDraw:
+      const exactDraw:
         Record<string, number> = {};
-      
-        const totalBetsPerUser:
+
+      const totalBetsPerUser:
         Record<string, number> = {};
-        
-        const exactRateMap:
+
+      const exactRateMap:
         Record<string, number> = {};
-        
-        const winnerHits:
+
+      const winnerHits:
         Record<string, number> = {};
-        
-        const winnerRate:
+
+      const winnerRate:
         Record<string, number> = {};
-        
-        const totalGoalsBet:
+
+      const totalGoalsBet:
         Record<string, number> = {};
-        
-        const averageGoals:
+
+      const averageGoals:
         Record<string, number> = {};
-        
-        const chaosScore:
+
+      const chaosScore:
         Record<string, number> = {};
-        
-        const almostHits:
+
+      const almostHits:
         Record<string, number> = {};
-        
-        const maxZeroStreak:
+
+      const maxZeroStreak:
         Record<string, number> = {};
-        
-        const biggestClimbMap:
+
+      const biggestClimbMap:
         Record<string, number> = {};
-        
-        const previousPositions:
+
+      const previousPositions:
         Record<string, number> = {};
-        
-        const roundPoints:
+
+      const roundPoints:
         Record<string, number[]> = {};
-      
 
       let totalExactScores = 0;
 
@@ -261,66 +286,66 @@ export default function AnalyticsPage() {
 
         const user =
           bet.userName;
-        
-          if (!totalBetsPerUser[user]) {
-            totalBetsPerUser[user] = 0;
-          }
-          
-          if (!winnerHits[user]) {
-            winnerHits[user] = 0;
-          }
-          
-          if (!totalGoalsBet[user]) {
-            totalGoalsBet[user] = 0;
-          }
-          
-          if (!chaosScore[user]) {
-            chaosScore[user] = 0;
-          }
-          
-          if (!almostHits[user]) {
-            almostHits[user] = 0;
-          }
-          
-          totalBetsPerUser[user]++;
-          
-          const golsA =
-            Number(bet.golsA);
-          
-          const golsB =
-            Number(bet.golsB);
-          
-          totalGoalsBet[user] +=
-            golsA + golsB;
-            if (
-              golsA >= 6 ||
-              golsB >= 6
-            ) {
-            
-              totalCrazyBets++;
-            
-            }
-          
-          
-          if (
-            Math.abs(golsA - golsB) >= 5
-          ) {
-            chaosScore[user] += 1;
-          }
-          
-          if (
-            golsA >= 7 ||
-            golsB >= 7
-          ) {
-            chaosScore[user] += 3;
-          }
-          
-          if (
-            golsA === golsB &&
-            golsA >= 4
-          ) {
-            chaosScore[user] += 2;
-          }
+
+        if (!totalBetsPerUser[user]) {
+          totalBetsPerUser[user] = 0;
+        }
+
+        if (!winnerHits[user]) {
+          winnerHits[user] = 0;
+        }
+
+        if (!totalGoalsBet[user]) {
+          totalGoalsBet[user] = 0;
+        }
+
+        if (!chaosScore[user]) {
+          chaosScore[user] = 0;
+        }
+
+        if (!almostHits[user]) {
+          almostHits[user] = 0;
+        }
+
+        totalBetsPerUser[user]++;
+
+        const golsA =
+          Number(bet.golsA);
+
+        const golsB =
+          Number(bet.golsB);
+
+        totalGoalsBet[user] +=
+          golsA + golsB;
+
+        if (
+          golsA >= 6 ||
+          golsB >= 6
+        ) {
+
+          totalCrazyBets++;
+
+        }
+
+        if (
+          Math.abs(golsA - golsB) >= 5
+        ) {
+          chaosScore[user] += 1;
+        }
+
+        if (
+          golsA >= 7 ||
+          golsB >= 7
+        ) {
+          chaosScore[user] += 3;
+        }
+
+        if (
+          golsA === golsB &&
+          golsA >= 4
+        ) {
+          chaosScore[user] += 2;
+        }
 
         if (!ranking[user]) {
           ranking[user] = 0;
@@ -330,15 +355,14 @@ export default function AnalyticsPage() {
           drawCount[user] = 0;
         }
 
-        
-
         if (!exactCount[user]) {
           exactCount[user] = 0;
         }
+
         if (!exactNoDraw[user]) {
           exactNoDraw[user] = 0;
         }
-        
+
         if (!exactDraw[user]) {
           exactDraw[user] = 0;
         }
@@ -351,9 +375,6 @@ export default function AnalyticsPage() {
           drawCount[user]++;
 
         }
-
-        
-         
 
         gamesSnapshot.forEach((gameDoc) => {
 
@@ -457,30 +478,30 @@ export default function AnalyticsPage() {
             if (
 
               Number(bet.golsA) === Number(game.resultadoA) &&
-            
+
               Number(bet.golsB) === Number(game.resultadoB)
-            
+
             ) {
-            
+
               exactCount[user]++;
-            
+
               totalExactScores++;
-            
+
               const empate =
-            
+
                 Number(game.resultadoA) ===
                 Number(game.resultadoB);
-            
+
               if (empate) {
-            
+
                 exactDraw[user]++;
-            
+
               } else {
-            
+
                 exactNoDraw[user]++;
-            
+
               }
-            
+
             }
 
           }
@@ -515,7 +536,6 @@ export default function AnalyticsPage() {
             (a, b) =>
               b[1] - a[1]
           )[0];
-         
 
       const evolution:
         ChartRow[] = [];
@@ -559,113 +579,83 @@ export default function AnalyticsPage() {
 
         Object.entries(ranking)
 
-        .sort((a, b) => {
+          .sort((a, b) => {
 
-          const userA = a[0];
-          const userB = b[0];
-        
-          const pointsA = a[1];
-          const pointsB = b[1];
-        
-          /*
-          ========================
-          1. PONTOS
-          ========================
-          */
-        
-          if (pointsB !== pointsA) {
-        
-            return pointsB - pointsA;
-        
-          }
-        
-          /*
-          ========================
-          2. EXATOS SEM EMPATE
-          ========================
-          */
-        
-          const exactNoDrawA =
-            exactNoDraw[userA] || 0;
-        
-          const exactNoDrawB =
-            exactNoDraw[userB] || 0;
-        
-          if (
-            exactNoDrawB !==
-            exactNoDrawA
-          ) {
-        
-            return (
-              exactNoDrawB -
+            const userA = a[0];
+            const userB = b[0];
+
+            const pointsA = a[1];
+            const pointsB = b[1];
+
+            if (pointsB !== pointsA) {
+
+              return pointsB - pointsA;
+
+            }
+
+            const exactNoDrawA =
+              exactNoDraw[userA] || 0;
+
+            const exactNoDrawB =
+              exactNoDraw[userB] || 0;
+
+            if (
+              exactNoDrawB !==
               exactNoDrawA
-            );
-        
-          }
-        
-          /*
-          ========================
-          3. EXATOS COM EMPATE
-          ========================
-          */
-        
-          const exactDrawA =
-            exactDraw[userA] || 0;
-        
-          const exactDrawB =
-            exactDraw[userB] || 0;
-        
-          if (
-            exactDrawB !==
-            exactDrawA
-          ) {
-        
-            return (
-              exactDrawB -
+            ) {
+
+              return (
+                exactNoDrawB -
+                exactNoDrawA
+              );
+
+            }
+
+            const exactDrawA =
+              exactDraw[userA] || 0;
+
+            const exactDrawB =
+              exactDraw[userB] || 0;
+
+            if (
+              exactDrawB !==
               exactDrawA
-            );
-        
-          }
-        
-          /*
-          ========================
-          4. ACERTOS DE VENCEDOR
-          ========================
-          */
-        
-          const winnerA =
-            winnerHits[userA] || 0;
-        
-          const winnerB =
-            winnerHits[userB] || 0;
-        
-          if (
-            winnerB !==
-            winnerA
-          ) {
-        
-            return (
-              winnerB -
+            ) {
+
+              return (
+                exactDrawB -
+                exactDrawA
+              );
+
+            }
+
+            const winnerA =
+              winnerHits[userA] || 0;
+
+            const winnerB =
+              winnerHits[userB] || 0;
+
+            if (
+              winnerB !==
               winnerA
-            );
-        
-          }
-        
-          /*
-          ========================
-          5. MENOR CAOS
-          ========================
-          */
-        
-          const chaosA =
-            chaosScore[userA] || 0;
-        
-          const chaosB =
-            chaosScore[userB] || 0;
-        
-          return chaosA - chaosB;
-        
-        });
+            ) {
+
+              return (
+                winnerB -
+                winnerA
+              );
+
+            }
+
+            const chaosA =
+              chaosScore[userA] || 0;
+
+            const chaosB =
+              chaosScore[userB] || 0;
+
+            return chaosA - chaosB;
+
+          });
 
       const topUsers =
 
@@ -693,11 +683,12 @@ export default function AnalyticsPage() {
 
             ...bottomUsers,
 
-            currentUser.displayName || ""
+            userSnap.data().nome || currentUser.displayName || ""
 
           ])
 
         );
+
 
       gamesSnapshot.docs
 
@@ -720,7 +711,7 @@ export default function AnalyticsPage() {
 
           const processedUsers =
             new Set();
-          
+
           const rodadaAtual:
             Record<string, number> = {};
 
@@ -782,19 +773,19 @@ export default function AnalyticsPage() {
               rodadaAtual[
                 bet.userName
               ] = points;
-              
+
               if (
                 !roundPoints[
                   bet.userName
                 ]
               ) {
-              
+
                 roundPoints[
                   bet.userName
                 ] = [];
-              
+
               }
-              
+
               roundPoints[
                 bet.userName
               ].push(points);
@@ -802,18 +793,6 @@ export default function AnalyticsPage() {
             }
 
           });
-
-              const rodadaRanking =
-
-              Object.entries(cumulative)
-
-                .sort(
-                  (a, b) =>
-                    b[1] - a[1]
-                );
-
-            
-           
 
           const row: ChartRow = {
 
@@ -833,410 +812,392 @@ export default function AnalyticsPage() {
 
         });
 
+      Object.entries(
+        roundPoints
+      )
 
-        Object.entries(
-          roundPoints
-        )
-        
         .forEach(
-        
+
           ([user, rounds]) => {
-        
+
             let current = 0;
-        
+
             let max = 0;
-        
+
             rounds.forEach((pts) => {
-        
+
               if (pts === 0) {
-        
+
                 current++;
-        
+
                 if (
                   current > max
                 ) {
-        
+
                   max = current;
-        
+
                 }
-        
+
               } else {
-        
+
                 current = 0;
-        
+
               }
-        
+
             });
-        
+
             maxZeroStreak[
               user
             ] = max;
-        
+
           }
-        
+
         );
 
-        Object.keys(totalBetsPerUser)
+      Object.keys(totalBetsPerUser)
 
-  .forEach((user) => {
+        .forEach((user) => {
 
-    exactRateMap[user] =
+          exactRateMap[user] =
 
-      (
-        exactCount[user] || 0
-      ) /
+            (
+              exactCount[user] || 0
+            ) /
 
-      totalBetsPerUser[user];
+            totalBetsPerUser[user];
 
-    winnerRate[user] =
+          winnerRate[user] =
 
-      (
-        winnerHits[user] || 0
-      ) /
+            (
+              winnerHits[user] || 0
+            ) /
 
-      totalBetsPerUser[user];
+            totalBetsPerUser[user];
 
-    averageGoals[user] =
+          averageGoals[user] =
 
-      (
-        totalGoalsBet[user] || 0
-      ) /
+            (
+              totalGoalsBet[user] || 0
+            ) /
 
-      totalBetsPerUser[user];
+            totalBetsPerUser[user];
 
-  });
+        });
 
-const exactMasterWinner =
+      const exactMasterWinner =
 
-  Object.entries(exactRateMap)
+        Object.entries(exactRateMap)
 
-    .filter(
+          .filter(
 
-      ([user, rate]) =>
+            ([user, rate]) =>
 
-        totalBetsPerUser[user] >= 10 &&
+              totalBetsPerUser[user] >= 10 &&
 
-        (exactCount[user] || 0) >= 3 &&
+              (exactCount[user] || 0) >= 3 &&
 
-        rate >= 0.15
+              rate >= 0.15
 
-    )
+          )
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const prophetEntry =
+      const prophetEntry =
 
-  Object.entries(winnerRate)
+        Object.entries(winnerRate)
 
-    .filter(
+          .filter(
 
-      ([user, rate]) =>
+            ([user, rate]) =>
 
-        totalBetsPerUser[user] >= 10 &&
+              totalBetsPerUser[user] >= 10 &&
 
-        rate >= 0.6
+              rate >= 0.6
 
-    )
+          )
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const incendiaryEntry =
+      const incendiaryEntry =
 
-  Object.entries(averageGoals)
+        Object.entries(averageGoals)
 
-    .filter(([, avg]) => avg >= 4)
+          .filter(([, avg]) => avg >= 4)
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const retranqueiroEntry =
+      const retranqueiroEntry =
 
-  Object.entries(averageGoals)
+        Object.entries(averageGoals)
 
-    .filter(([, avg]) => avg <= 2)
+          .filter(([, avg]) => avg <= 2)
 
-    .sort((a, b) => a[1] - b[1])[0];
+          .sort((a, b) => a[1] - b[1])[0];
 
-const chaosEntry =
+      const chaosEntry =
 
-  Object.entries(chaosScore)
+        Object.entries(chaosScore)
 
-    .filter(([, chaos]) => chaos >= 5)
+          .filter(([, chaos]) => chaos >= 5)
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const coldStreakEntry =
+      const coldStreakEntry =
 
-  Object.entries(maxZeroStreak)
+        Object.entries(maxZeroStreak)
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const biggestClimbEntry =
+      const biggestClimbEntry =
 
-  Object.entries(biggestClimbMap)
+        Object.entries(biggestClimbMap)
 
-    .sort((a, b) => b[1] - a[1])[0];
+          .sort((a, b) => b[1] - a[1])[0];
 
-const almostEntry =
+      const almostEntry =
 
-    Object.entries(almostHits)
-  
-      .sort((a, b) => b[1] - a[1])[0];
-  
-  setChartData(evolution);
-  
-  setUsersToShow(
-    visibleUsers
-  );
-  
-  setAnalyticsWinners({
-  
-    exactMasterWinner,
-  
-    prophetEntry,
-  
-    incendiaryEntry,
-  
-    retranqueiroEntry,
-  
-    chaosEntry,
-  
-    almostEntry,
-  
-  });
-  
-  setStats({
-  
-    coldStreak: {
-  
-      user:
-        coldStreakEntry?.[0] || "-",
-  
-      value:
-        coldStreakEntry?.[1] || 0
-  
-    },
-  
-    biggestClimb: {
-  
-      user:
-        biggestClimbEntry?.[0] || "-",
-  
-      value:
-        biggestClimbEntry?.[1] || 0
-  
-    },
-  
-    leader: {
-  
-      user:
-        leaderEntry?.[0] || "-",
-  
-      value:
-        leaderEntry?.[1] || 0
-  
-    },
-  
-    lastPlace: {
-  
-      user:
-        lastPlaceEntry?.[0] || "-",
-  
-      value:
-        lastPlaceEntry?.[1] || 0
-  
-    },
-  
-    drawKing: {
-  
-      user:
-        drawKingEntry?.[0] || "-",
-  
-      value:
-        drawKingEntry?.[1] || 0
-  
-    },
-  
-    totalBets,
-  
-    totalGames:
-      gamesSnapshot.size,
-  
-    totalExactScores,
-  
-    totalCrazyBets
-  
-  });
-  
-  }
-  
-  carregarAnalytics();
-  
+        Object.entries(almostHits)
+
+          .sort((a, b) => b[1] - a[1])[0];
+
+      setChartData(evolution);
+
+      setUsersToShow(
+        visibleUsers
+      );
+
+      setAnalyticsWinners({
+
+        exactMasterWinner,
+
+        prophetEntry,
+
+        incendiaryEntry,
+
+        retranqueiroEntry,
+
+        chaosEntry,
+
+        almostEntry,
+
+      });
+
+      setStats({
+
+        coldStreak: {
+
+          user:
+            coldStreakEntry?.[0] || "-",
+
+          value:
+            coldStreakEntry?.[1] || 0
+
+        },
+
+        biggestClimb: {
+
+          user:
+            biggestClimbEntry?.[0] || "-",
+
+          value:
+            biggestClimbEntry?.[1] || 0
+
+        },
+
+        leader: {
+
+          user:
+            leaderEntry?.[0] || "-",
+
+          value:
+            leaderEntry?.[1] || 0
+
+        },
+
+        lastPlace: {
+
+          user:
+            lastPlaceEntry?.[0] || "-",
+
+          value:
+            lastPlaceEntry?.[1] || 0
+
+        },
+
+        drawKing: {
+
+          user:
+            drawKingEntry?.[0] || "-",
+
+          value:
+            drawKingEntry?.[1] || 0
+
+        },
+
+        totalBets,
+
+        totalGames:
+          gamesSnapshot.size,
+
+        totalExactScores,
+
+        totalCrazyBets
+
+      });
+
+    }
+
+    carregarAnalytics();
+
   }, []);
+
+  // Helper: retorna o apelido se existir, senão o nome original
+  function apelido(userName: string): string {
+    return nicknameMap[userName] || userName;
+  }
 
   const cards: {
 
     emoji: string;
-  
+
     title: string;
-  
+
     user: string;
-  
+
     value: string;
-  
+
     badge: string;
-  
+
   }[] = [];
 
-cards.push({
-
-  emoji: "👑",
-  title: "Líder Supremo",
-  user: stats.leader.user,
-  value: `${stats.leader.value} pts`,
-  badge: "🏆 Dono do campeonato"
-
-});
-
-if (stats.totalGames >= 5) {
-
   cards.push({
 
-    emoji: "🐢",
-    title: "Lanterna da Vergonha",
-    user: stats.lastPlace.user,
-    value: `${stats.lastPlace.value} pts`,
-    badge: "⚽ Técnico do Íbis FC"
+    emoji: "👑",
+    title: "Líder Supremo",
+    user: apelido(stats.leader.user),
+    value: `${stats.leader.value} pts`,
+    badge: "🏆 Dono do campeonato"
 
   });
 
-}
+  if (stats.totalGames >= 5) {
 
-if (analyticsWinners.exactMasterWinner) {
+    cards.push({
 
-  cards.push({
+      emoji: "🐢",
+      title: "Lanterna da Vergonha",
+      user: apelido(stats.lastPlace.user),
+      value: `${stats.lastPlace.value} pts`,
+      badge: "⚽ Técnico do Íbis FC"
 
-    emoji: "🎯",
-    title: "Mestre dos Placares",
-    user: analyticsWinners
-    .exactMasterWinner?.[0],
-    value:
-      `${Math.round( analyticsWinners
-        .exactMasterWinner[1] * 100)}% de precisão`,
-    badge: "🏹 Sniper do futebol"
+    });
 
-  });
+  }
 
-}
+  if (analyticsWinners.exactMasterWinner) {
 
-if ( analyticsWinners.prophetEntry) {
+    cards.push({
 
-  cards.push({
+      emoji: "🎯",
+      title: "Mestre dos Placares",
+      user: apelido(analyticsWinners.exactMasterWinner[0]),
+      value:
+        `${Math.round(analyticsWinners.exactMasterWinner[1] * 100)}% de precisão`,
+      badge: "🏹 Sniper do futebol"
 
-    emoji: "🧠",
-    title: "Profeta",
-    user: analyticsWinners
-    .prophetEntry[0],
-    value:
-      `${Math.round( analyticsWinners
-        .prophetEntry[1] * 100)}% de acertos`,
-    badge: "🔮 Vidente esportivo"
+    });
 
-  });
+  }
 
-}
+  if (analyticsWinners.prophetEntry) {
 
-if (stats.coldStreak.value >= 3) {
+    cards.push({
 
-  cards.push({
+      emoji: "🧠",
+      title: "Profeta",
+      user: apelido(analyticsWinners.prophetEntry[0]),
+      value:
+        `${Math.round(analyticsWinners.prophetEntry[1] * 100)}% de acertos`,
+      badge: "🔮 Vidente esportivo"
 
-    emoji: "🥶",
-    title: "Geladeira FC",
-    user: stats.coldStreak.user,
-    value:
-      `${stats.coldStreak.value} jogos sem pontuar`,
-    badge: "❄️ Congelado"
+    });
 
-  });
+  }
 
-}
+  if (stats.coldStreak.value >= 3) {
 
-{/*
+    cards.push({
 
-if (stats.totalGames >= 10) {
+      emoji: "🥶",
+      title: "Geladeira FC",
+      user: apelido(stats.coldStreak.user),
+      value:
+        `${stats.coldStreak.value} jogos sem pontuar`,
+      badge: "❄️ Congelado"
 
-  cards.push({
+    });
 
-    emoji: "🚀",
-    title: "Arrancada Heroica",
-    user: stats.biggestClimb.user,
-    value:
-      `${stats.biggestClimb.value} posições subidas`,
-    badge: "📈 Saiu do abismo"
+  }
 
-  });
-}
-*/
-}
+  if (analyticsWinners.chaosEntry) {
 
-if ( analyticsWinners.chaosEntry) {
+    cards.push({
 
-  cards.push({
+      emoji: "💣",
+      title: "Agente do Caos",
+      user: apelido(analyticsWinners.chaosEntry[0]),
+      value:
+        `${analyticsWinners.chaosEntry[1]} pontos de insanidade`,
+      badge: "🔥 Futebol sem limites"
 
-    emoji: "💣",
-    title: "Agente do Caos",
-    user:  analyticsWinners.chaosEntry[0],
-    value:
-      `${ analyticsWinners.chaosEntry[1]} pontos de insanidade`,
-    badge: "🔥 Futebol sem limites"
+    });
 
-  });
+  }
 
-}
+  if (analyticsWinners.incendiaryEntry) {
 
-if ( analyticsWinners.incendiaryEntry) {
+    cards.push({
 
-  cards.push({
+      emoji: "🔥",
+      title: "Incendiário",
+      user: apelido(analyticsWinners.incendiaryEntry[0]),
+      value:
+        `${analyticsWinners.incendiaryEntry[1].toFixed(1)} gols/jogo`,
+      badge: "⚽ Viciado em goleada"
 
-    emoji: "🔥",
-    title: "Incendiário",
-    user:  analyticsWinners.incendiaryEntry[0],
-    value:
-      `${ analyticsWinners.incendiaryEntry[1].toFixed(1)} gols/jogo`,
-    badge: "⚽ Viciado em goleada"
+    });
 
-  });
+  }
 
-}
+  if (analyticsWinners.retranqueiroEntry) {
 
-if ( analyticsWinners.retranqueiroEntry) {
+    cards.push({
 
-  cards.push({
+      emoji: "🧱",
+      title: "Retranqueiro",
+      user: apelido(analyticsWinners.retranqueiroEntry[0]),
+      value:
+        `${analyticsWinners.retranqueiroEntry[1].toFixed(1)} gols/jogo`,
+      badge: "🚌 Estacionou o ônibus"
 
-    emoji: "🧱",
-    title: "Retranqueiro",
-    user:  analyticsWinners.retranqueiroEntry[0],
-    value:
-      `${ analyticsWinners.retranqueiroEntry[1].toFixed(1)} gols/jogo`,
-    badge: "🚌 Estacionou o ônibus"
+    });
 
-  });
+  }
 
-}
+  if (analyticsWinners.almostEntry) {
 
-if (analyticsWinners.almostEntry) {
+    cards.push({
 
-  cards.push({
+      emoji: "🎯",
+      title: "Bateu na Trave",
+      user: apelido(analyticsWinners.almostEntry[0]),
+      value:
+        `${analyticsWinners.almostEntry[1]} quase acertos`,
+      badge: "😩 Quase foi"
 
-    emoji: "🎯",
-    title: "Bateu na Trave",
-    user:  analyticsWinners.almostEntry[0],
-    value:
-      `${ analyticsWinners.almostEntry[1]} quase acertos`,
-    badge: "😩 Quase foi"
+    });
 
-  });
-
-}
+  }
 
   const colors = [
 
@@ -1250,174 +1211,126 @@ if (analyticsWinners.almostEntry) {
   ];
 
   const insights: string[] = [];
+
   if (
     stats.leader.user !== "-"
   ) {
-  
+
     insights.push(
-  
-      `${stats.leader.user} lidera o campeonato com ${stats.leader.value} pontos e já começou a falar em soberba esportiva.`
-  
+
+      `${apelido(stats.leader.user)} lidera o campeonato com ${stats.leader.value} pontos e já começou a falar em soberba esportiva.`
+
     );
-  
+
   }
-  
+
   if (
     stats.coldStreak.value >= 3
   ) {
-  
+
     insights.push(
-  
-      `${stats.coldStreak.user} está há ${stats.coldStreak.value} jogos sem pontuar e entrou oficialmente em crise.`
-  
+
+      `${apelido(stats.coldStreak.user)} está há ${stats.coldStreak.value} jogos sem pontuar e entrou oficialmente em crise.`
+
     );
-  
+
   }
+
   if (
     analyticsWinners.chaosEntry
   ) {
-  
-    insights.push(
-  
-      `${analyticsWinners.chaosEntry[0]} segue produzindo apostas incompatíveis com qualquer realidade conhecida.`
-  
-    );
-  
-  }
 
+    insights.push(
+
+      `${apelido(analyticsWinners.chaosEntry[0])} segue produzindo apostas incompatíveis com qualquer realidade conhecida.`
+
+    );
+
+  }
 
   if (
     stats.biggestClimb.value >= 2
   ) {
-  
+
     insights.push(
-  
-      `${stats.biggestClimb.user} protagonizou a maior recuperação já registrada pelo instituto DataDináh.`
-  
+
+      `${apelido(stats.biggestClimb.user)} protagonizou a maior recuperação já registrada pelo instituto DataDináh.`
+
     );
-  
+
   }
-  
+
   if (
     stats.drawKing.value >= 5
   ) {
-  
+
     insights.push(
-  
-      `${stats.drawKing.user} continua acreditando que todo jogo termina empatado.`
-  
+
+      `${apelido(stats.drawKing.user)} continua acreditando que todo jogo termina empatado.`
+
     );
-  
+
   }
 
+  const achievements: {
 
+    user: string;
 
-const achievements: {
+    title: string;
 
-  user: string;
+    emoji: string;
 
-  title: string;
+    description: string;
 
-  emoji: string;
+  }[] = [];
 
-  description: string;
+  if (
+    stats.coldStreak.value >= 5
+  )
 
-}[] = [];
+  if (
+    analyticsWinners.chaosEntry
+  ) {
 
-if (
-  stats.coldStreak.value >= 5
-) 
+    achievements.push({
 
-if (
-  analyticsWinners.chaosEntry
-) {
+      user:
+        apelido(analyticsWinners.chaosEntry[0]),
 
-  achievements.push({
+      title:
+        "Agente do Caos",
 
-    user:
-      analyticsWinners.chaosEntry[0],
+      emoji:
+        "💣",
 
-    title:
-      "Agente do Caos",
+      description:
+        `${analyticsWinners.chaosEntry[1]} pontos de insanidade`
 
-    emoji:
-      "💣",
+    });
 
-    description:
-      `${analyticsWinners.chaosEntry[1]} pontos de insanidade`
+  }
 
-  });
+  if (
+    stats.drawKing.value >= 10
+  ) {
 
-}
+    achievements.push({
 
-/* {
-if (
-  stats.exactMaster.value >= 3
-)
-  achievements.push({
+      user:
+        apelido(stats.drawKing.user),
 
-    user:
-      stats.exactMaster.user,
+      title:
+        "Diplomata do Empate",
 
-    title:
-      "Sniper de Placares",
+      emoji:
+        "🤝",
 
-    emoji:
-      "🎯",
+      description:
+        `${stats.drawKing.value} empates apostados`
 
-    description:
-      `${stats.exactMaster.value} placares exatos`
+    });
 
-  });
-
-}
-*/
-
-
-/*{
-if (
-  stats.mostLeaderRounds.value >= 5
-) 
-  achievements.push({
-
-    user:
-      stats.mostLeaderRounds.user,
-
-    title:
-      "Imperador do Palpite",
-
-    emoji:
-      "👑",
-
-    description:
-      `${stats.mostLeaderRounds.value} rodadas líder`
-
-  });
-
-}
-*/
-
-if (
-  stats.drawKing.value >= 10
-) {
-
-  achievements.push({
-
-    user:
-      stats.drawKing.user,
-
-    title:
-      "Diplomata do Empate",
-
-    emoji:
-      "🤝",
-
-    description:
-      `${stats.drawKing.value} empates apostados`
-
-  });
-
-}
+  }
 
   return (
 
@@ -1433,8 +1346,6 @@ if (
 
           </h1>
 
-          
-
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -1444,7 +1355,6 @@ if (
             <p className="text-3xl font-black text-green-400">
 
               {stats.totalBets}
-
 
             </p>
 
@@ -1567,257 +1477,254 @@ if (
 
         <div className="mb-6 bg-gradient-to-br from-purple-950 to-zinc-900 border border-purple-700 rounded-3xl p-6">
 
-  <div className="flex items-center gap-3 mb-5">
+          <div className="flex items-center gap-3 mb-5">
 
-    <div className="text-5xl">
-      🤖
-    </div>
+            <div className="text-5xl">
+              🤖
+            </div>
 
-    <div>
+            <div>
 
-      <h2 className="text-2xl font-black text-purple-300">
+              <h2 className="text-2xl font-black text-purple-300">
 
-        Análise Fundamentalista da IA
+                Análise Fundamentalista da IA
 
-      </h2>
+              </h2>
 
-      <p className="text-zinc-400 text-sm">
+              <p className="text-zinc-400 text-sm">
 
-        Relatório automático da insanidade esportiva
+                Relatório automático da insanidade esportiva
 
-      </p>
+              </p>
 
-    </div>
+            </div>
 
-  </div>
+          </div>
 
-  <div className="space-y-3">
+          <div className="space-y-3">
 
-  {insights.length === 0 && (
+            {insights.length === 0 && (
 
-<div
-  className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-4 text-zinc-400"
->
+              <div
+                className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-4 text-zinc-400"
+              >
 
-  🤖 A IA ainda está coletando dados para humilhar os participantes.
-
-</div>
-
-)}
-
-    {insights.map((text, index) => (
-
-      <div
-        key={index}
-        className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-4 text-zinc-200 leading-relaxed"
-      >
-
-        {text}
-
-      </div>
-
-    ))}
-
-  </div>
-
-</div>
-
-        <div className="mb-6">
-
-      
-
-        <div className="grid md:grid-cols-2 gap-4">
-
-          {achievements.map((item, index) => (
-
-            <div
-              key={index}
-              className="bg-gradient-to-br from-yellow-900 to-zinc-900 border border-yellow-700 rounded-3xl p-5"
-            >
-
-              <div className="text-5xl mb-4">
-
-                {item.emoji}
+                🤖 A IA ainda está coletando dados para humilhar os participantes.
 
               </div>
 
-              <h3 className="text-xl font-black text-yellow-300">
+            )}
 
-                {item.title}
+            {insights.map((text, index) => (
 
-              </h3>
+              <div
+                key={index}
+                className="bg-zinc-950/60 border border-zinc-800 rounded-2xl p-4 text-zinc-200 leading-relaxed"
+              >
 
-              <p className="text-2xl font-black mt-2 text-white">
+                {text}
 
-                {item.user}
+              </div>
 
-              </p>
+            ))}
 
-              <p className="text-zinc-300 text-sm mt-2">
-
-                {item.description}
-
-              </p>
-
-            </div>
-
-          ))}
+          </div>
 
         </div>
+
+        <div className="mb-6">
+
+          <div className="grid md:grid-cols-2 gap-4">
+
+            {achievements.map((item, index) => (
+
+              <div
+                key={index}
+                className="bg-gradient-to-br from-yellow-900 to-zinc-900 border border-yellow-700 rounded-3xl p-5"
+              >
+
+                <div className="text-5xl mb-4">
+
+                  {item.emoji}
+
+                </div>
+
+                <h3 className="text-xl font-black text-yellow-300">
+
+                  {item.title}
+
+                </h3>
+
+                <p className="text-2xl font-black mt-2 text-white">
+
+                  {item.user}
+
+                </p>
+
+                <p className="text-zinc-300 text-sm mt-2">
+
+                  {item.description}
+
+                </p>
+
+              </div>
+
+            ))}
+
+          </div>
 
         </div>
 
         <div
-  className="
-    fixed
-    top-0
-    left-0
-    right-0
-    z-50
-    px-2
-    drop-shadow-md
-  "
->
-
-    <div className="
-      bg-zinc-950
-      border
-      border-zinc-800
-      rounded-3xl
-      overflow-hidden
-      shadow-2xl
-    ">
-
-    <div className="
-      px-5
-      pt-4
-      pb-2
-      border-b
-      border-zinc-800
-      bg-zinc-900
-    ">
-
-<div className="text-center mb-4">
-
-<div className="flex items-center justify-center gap-3">
-
-  <img
-    src="/icon.png"
-    alt="Mãe Diná FC"
-    className="w-10 h-10 rounded-xl"
-  />
-
-  <h1 className="text-3xl font-black">
-
-    ⚽ Mãe Diná FC ⚽
-
-  </h1>
-
-</div>
-
-<p className="text-zinc-400 text-sm mt-2">
-
-  O único bolão onde errar feio também vira troféu.
-
-</p>
-
-</div>
-
-<div className="border-t border-zinc-800 pt-4">
-
-<h2 className="text-2xl font-black">
-
-  🏅 Conquistas da Vergonha
-
-</h2>
-
-</div>
-
-    </div>
-
-    <div className="
-      flex
-      gap-4
-      py-4
-      px-4
-      animate-marquee
-      w-max
-    ">
-
-      {[...cards, ...cards].map((card, index) => (
-
-        <div
-          key={`${card.title}-${index}`}
           className="
-            min-w-[320px]
-            bg-zinc-900
-            border
-            border-zinc-700
-            rounded-3xl
-            p-5
-            flex
-            items-center
-            gap-4
-            shadow-xl
+            fixed
+            top-0
+            left-0
+            right-0
+            z-50
+            px-2
+            drop-shadow-md
           "
         >
 
-          <div className="text-5xl">
-            {card.emoji}
-          </div>
-
-          <div>
-
-            <h2 className="font-black text-lg text-white">
-
-              {card.title}
-
-            </h2>
-
-            <p className="text-green-400 font-black text-xl">
-
-              {card.user}
-
-            </p>
-
-            <p className="text-zinc-400 text-sm">
-
-              {card.value}
-
-            </p>
+          <div className="
+            bg-zinc-950
+            border
+            border-zinc-800
+            rounded-3xl
+            overflow-hidden
+            shadow-2xl
+          ">
 
             <div className="
-              mt-2
-              inline-flex
-              items-center
-              gap-2
-              bg-purple-900
-              border
-              border-purple-700
-              rounded-full
-              px-3
-              py-1
-              text-xs
-              font-bold
-              text-purple-200
+              px-5
+              pt-4
+              pb-2
+              border-b
+              border-zinc-800
+              bg-zinc-900
             ">
 
-              {card.badge}
+              <div className="text-center mb-4">
+
+                <div className="flex items-center justify-center gap-3">
+
+                  <img
+                    src="/icon.png"
+                    alt="Mãe Diná FC"
+                    className="w-10 h-10 rounded-xl"
+                  />
+
+                  <h1 className="text-3xl font-black">
+
+                    ⚽ Mãe Diná FC ⚽
+
+                  </h1>
+
+                </div>
+
+                <p className="text-zinc-400 text-sm mt-2">
+
+                  O único bolão onde errar feio também vira troféu.
+
+                </p>
+
+              </div>
+
+              <div className="border-t border-zinc-800 pt-4">
+
+                <h2 className="text-2xl font-black">
+
+                  🏅 Conquistas da Vergonha
+
+                </h2>
+
+              </div>
+
+            </div>
+
+            <div className="
+              flex
+              gap-4
+              py-4
+              px-4
+              animate-marquee
+              w-max
+            ">
+
+              {[...cards, ...cards].map((card, index) => (
+
+                <div
+                  key={`${card.title}-${index}`}
+                  className="
+                    min-w-[320px]
+                    bg-zinc-900
+                    border
+                    border-zinc-700
+                    rounded-3xl
+                    p-5
+                    flex
+                    items-center
+                    gap-4
+                    shadow-xl
+                  "
+                >
+
+                  <div className="text-5xl">
+                    {card.emoji}
+                  </div>
+
+                  <div>
+
+                    <h2 className="font-black text-lg text-white">
+
+                      {card.title}
+
+                    </h2>
+
+                    <p className="text-green-400 font-black text-xl">
+
+                      {card.user}
+
+                    </p>
+
+                    <p className="text-zinc-400 text-sm">
+
+                      {card.value}
+
+                    </p>
+
+                    <div className="
+                      mt-2
+                      inline-flex
+                      items-center
+                      gap-2
+                      bg-purple-900
+                      border
+                      border-purple-700
+                      rounded-full
+                      px-3
+                      py-1
+                      text-xs
+                      font-bold
+                      text-purple-200
+                    ">
+
+                      {card.badge}
+
+                    </div>
+
+                  </div>
+
+                </div>
+
+              ))}
 
             </div>
 
           </div>
 
         </div>
-
-      ))}
-
-    </div>
-
-  </div>
-
-</div>
-
 
       </div>
 

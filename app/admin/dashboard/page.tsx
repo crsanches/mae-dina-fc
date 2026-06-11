@@ -84,16 +84,6 @@ useEffect(() => {
     ]);
 
 
-    console.log(
-      "BET EXEMPLO:",
-      betsSnap.docs[0]?.data()
-    );
-
-    console.log(
-      "GROUP EXEMPLO:",
-      groupsSnap.docs[0]?.id,
-      groupsSnap.docs[0]?.data()
-    );
 
     const finishedGames =
 
@@ -213,20 +203,7 @@ useEffect(() => {
 
     (user) => {
 
-      console.log(
-        "USUARIO LOGADO:",
-        user?.uid
-      );
-
-      console.log(
-        "EMAIL:",
-        user?.email
-      );
       
-      console.log(
-        "UID:",
-        user?.uid
-      );
 
       if (!user) {
 

@@ -91,10 +91,6 @@ export default function GroupCard() {
             const userData =
               userSnap.data();
 
-            console.log(
-              "USER DATA:",
-              userData
-            );
 
             const userGroups =
               userData.groups || [];
@@ -109,10 +105,7 @@ export default function GroupCard() {
               const groupId of userGroups
             ) {
 
-              console.log(
-                "LOOP GROUP:",
-                groupId
-              );
+            
 
               const groupRef =
                 doc(
@@ -124,11 +117,7 @@ export default function GroupCard() {
               const groupSnap =
                 await getDoc(groupRef);
 
-              console.log(
-                "GROUP EXISTS:",
-                groupId,
-                groupSnap.exists()
-              );
+             
 
               if (
                 groupSnap.exists()
@@ -155,10 +144,7 @@ export default function GroupCard() {
 
             }
 
-            console.log(
-              "GROUPS:",
-              loadedGroups
-            );
+          
 
             // limpa grupos mortos
             if (

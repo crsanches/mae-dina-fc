@@ -149,10 +149,7 @@ export default function UserStats() {
         )
   
       );
-      console.log(
-        "BETS:",
-        betsSnapshot.size
-      );
+      
 
 betsSnapshot.forEach((betDoc) => {
 
@@ -162,11 +159,7 @@ betsSnapshot.forEach((betDoc) => {
       await getDocs(
         collection(db, "games")
       );
-      console.log(
-        "GAMES:",
-        gamesSnapshot.size
-      );
-  
+     
       type GameData = {
 
         teamA: string;
@@ -279,8 +272,8 @@ betsSnapshot.forEach((betDoc) => {
       );
 
 
-      //console.table(history);
-      console.timeEnd("carregarPalpites");
+
+      
       setBetHistory(history);
 
       
@@ -528,10 +521,7 @@ betsSnapshot.forEach((betDoc) => {
               ),
               (snapshot) => {
 
-                console.log(
-                  "USERSTATS SNAPSHOT RECEBIDO",
-                  snapshot.docs.length
-                );
+                
     
                 carregarStats();
     
