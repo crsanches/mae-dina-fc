@@ -149,9 +149,7 @@ export default function InvitePage() {
 
       if (!userSnap.exists()) {
 
-        setMessage(
-          "⚠️ Finalize seu cadastro primeiro."
-        );
+        setLoading(false);
 
         router.push(
           `/choose-username?groupId=${groupId}`
@@ -235,6 +233,8 @@ export default function InvitePage() {
       setMessage(
         "Erro ao entrar na liga 😥"
       );
+
+    } finally {
 
       setLoading(false);
 
