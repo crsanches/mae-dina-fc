@@ -120,7 +120,8 @@ export async function GET() {
 
     const recentGames = (data.events || []).filter(
       (game: ApiGame) =>
-        game.strStatus === "FT"
+        game.intHomeScore !== null &&
+        game.intAwayScore !== null
     );
   
 
@@ -165,7 +166,10 @@ export async function GET() {
           if (localGame !== undefined) {
 
           // Já foi processado anteriormente?
-          if (localGame.data().finished === true) {
+          if (
+            localGame.data().finished === true &&
+            apiGame.strStatus === "FT"
+          ) {
             continue;
           }
           
@@ -176,71 +180,25 @@ export async function GET() {
 
           if (localGame === undefined) continue;
    
-      if (apiGame.strStatus === "FT") {
+          if (apiGame.strStatus === "FT") {
 
-        await adminDb
-        .collection("games")
-        .doc(localGame.id)
-        .update({
-
+            await adminDb
+            .collection("games")
+            .doc(localGame.id)
+            .update({
     
-            resultadoA:
-              Number(apiGame.intHomeScore),
-
-            resultadoB:
-              Number(apiGame.intAwayScore),
-
-            finished: true
-
-          }
-
-        );
-
-      // 🔥 RECALCULAR APOSTAS
-
-const betsSnapshot =
-await adminDb
-  .collection("bets")
-  .where(
-    "match",
-    "==",
-    `${localGame.data().teamA} x ${localGame.data().teamB}`
-  )
-  .get();
-
-for (const betDoc of betsSnapshot.docs) {
-
-const bet = betDoc.data();
-
-const points =
-  calculatePoints({
-
-    apostaA:
-      Number(bet.golsA),
-
-    apostaB:
-      Number(bet.golsB),
-
-    resultadoA:
-      Number(apiGame.intHomeScore),
-
-    resultadoB:
-      Number(apiGame.intAwayScore)
-
-  });
-
-await adminDb
-  .collection("bets")
-  .doc(betDoc.id)
-  .update({
-    points
-  });
-
-console.log(
-  `✅ ${bet.userName}: ${points} pontos`
-);
-
-}
+        
+                resultadoA:
+                  Number(apiGame.intHomeScore),
+    
+                resultadoB:
+                  Number(apiGame.intAwayScore),
+    
+                finished: true
+    
+              }
+    
+            );
 
       }
 

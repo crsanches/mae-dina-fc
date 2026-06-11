@@ -1,8 +1,8 @@
 "use client";
 
 
-// página principal
-//pagina principal
+//PAGINA PRINCIPAL DO APP
+
 
 import {
   useEffect,
@@ -494,6 +494,51 @@ export default function Home() {
      FILTERS
   ========================= */
 
+  function getStatusJogo(matchDate: string) {
+
+    const agora = Date.now();
+  
+    const inicioJogo =
+      new Date(matchDate).getTime();
+  
+    const fechamentoApostas =
+      inicioJogo - (60 * 60 * 1000);
+  
+    const encerramentoJogo =
+      inicioJogo + (125 * 60 * 1000);
+  
+    if (agora < fechamentoApostas) {
+      return "🟢 Apostas abertas";
+    }
+  
+    if (agora < inicioJogo) {
+      return "🔒 Apostas encerradas";
+    }
+  
+    if (agora < encerramentoJogo) {
+      return "⚽ Jogo em andamento";
+    }
+  
+    return "✅ Jogo encerrado";
+  }
+
+  // funçao para saber se o jogo acabou
+
+  function jogoEstaEncerrado(
+    matchDate: string
+  ) {
+  
+    const inicioJogo =
+      new Date(matchDate).getTime();
+  
+    const encerramentoJogo =
+      inicioJogo + (125 * 60 * 1000);
+  
+    return Date.now() >= encerramentoJogo;
+  }
+
+
+
   const jogosEncerrados =
     jogos.filter((jogo) => {
 
@@ -678,60 +723,60 @@ export default function Home() {
         {/* link para auditoria */}
 
         <div
-  className="
-    relative
-    overflow-hidden
-    bg-gradient-to-br from-zinc-900 to-zinc-950
-    rounded-2xl
-    px-5 py-3
-    border border-red-800/40
-    shadow-xl shadow-red-950/30
-  "
->
+            className="
+              relative
+              overflow-hidden
+              bg-gradient-to-br from-zinc-900 to-zinc-950
+              rounded-2xl
+              px-5 py-3
+              border border-red-800/40
+              shadow-xl shadow-red-950/30
+            "
+          >
 
-  <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between">
 
-    <div>
-      <h2
-        className="
-          text-2xl
-          font-black
-          text-yellow-300
-          tracking-wide
-          leading-none
-        "
-      >
-        Relatório de Auditoria
-      </h2>
+              <div>
+                <h2
+                  className="
+                    text-2xl
+                    font-black
+                    text-yellow-300
+                    tracking-wide
+                    leading-none
+                  "
+                >
+                  Relatório de Auditoria
+                </h2>
 
-      <p className="text-zinc-400 text-sm mt-1">
-        Transparência total da rodada
-      </p>
-    </div>
+                <p className="text-zinc-400 text-sm mt-1">
+                  Transparência total da rodada
+                </p>
+              </div>
 
-  </div>
+            </div>
 
-  <div className="mt-2 flex justify-end">
-    <Link
-      href="/auditoria"
-      className="
-        hover:scale-105
-        transition-all duration-300
-      "
-    >
-      <img
-        src="/logos/casa_mae_joana.png"
-        alt="Auditoria"
-        className="
-          w-84
-          object-contain
-          drop-shadow-2xl
-        "
-      />
-    </Link>
-  </div>
+            <div className="mt-2 flex justify-end">
+              <Link
+                href="/auditoria"
+                className="
+                  hover:scale-105
+                  transition-all duration-300
+                "
+              >
+                <img
+                  src="/logos/casa_mae_joana.png"
+                  alt="Auditoria"
+                  className="
+                    w-84
+                    object-contain
+                    drop-shadow-2xl
+                  "
+                />
+              </Link>
+            </div>
 
-</div>
+          </div>
 
 
 
@@ -825,17 +870,24 @@ export default function Home() {
 
                         </p>
 
-                        <p className="text-zinc-400 text-xs">
-                          🔒 Encerrado
-                        </p>
+                       <p className="text-zinc-400 text-xs">
+                        {getStatusJogo(jogo.matchDate)}
+                      </p>
 
                       </div>
 
-                      <p className="font-black text-lg">
-                        {jogo.resultadoA}
-                        {" x "}
-                        {jogo.resultadoB}
-                      </p>
+                      <p className="text-zinc-500 text-xs">
+                      {new Date(jogo.matchDate).toLocaleString("pt-BR")}
+                    </p>
+
+                    <p className="font-black text-lg">
+
+                    {jogo.resultadoA != null &&
+                    jogo.resultadoB != null
+                      ? `${jogo.resultadoA} x ${jogo.resultadoB}`
+                      : "⏳"}
+
+                  </p>
 
                     </div>
 
