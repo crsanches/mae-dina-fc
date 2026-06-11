@@ -3,9 +3,6 @@ import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 
 
-import { calculatePoints }
-from "@/lib/calculatePoints";
-
 function normalize(text?: string) {
   if (!text) return "";
 
