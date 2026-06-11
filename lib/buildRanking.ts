@@ -226,6 +226,8 @@ if (
 const uniqueBets =
 Object.values(latestBetsMap);
 
+
+
 /* =========================
  LOOP APOSTAS
 ========================= */
@@ -274,6 +276,9 @@ if (
   game.resultadoA == null ||
   game.resultadoB == null
 ) {
+
+  
+
   continue;
 }
 

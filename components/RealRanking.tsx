@@ -161,7 +161,7 @@ export default function RealRanking() {
           // carrega imediatamente
          
   
-          //carregarRanking();
+          carregarRanking();
   
           // escuta apenas apostas da liga atual
   
