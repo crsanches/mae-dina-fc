@@ -1,196 +1,196 @@
 import {
-    collection,
-    getDocs,
-    query,
-    where
-  } from "firebase/firestore";
-  
-  import { db }
-  from "./firebase";
-  
-  import { calculatePoints }
-  from "./calculatePoints";
+  collection,
+  getDocs,
+  query,
+  where
+} from "firebase/firestore";
 
-  import {
-    FaseCopa,
-    obterPesoDaFase
-  } from "./copas";
+import { db }
+from "./firebase";
 
-  
-  /* =========================
-     TYPES
-  ========================= */
-  
-  export type AuditGame = {
-  
-    jogo: string;
-  
-    resultado: string;
-  
-    palpite: string;
-  
-    pontosPlacar: number;
-  
-    pontosVencedor: number;
-  
-    pontosEmpate: number;
-  
-    total: number;
-  
-    desempate: number | null;
-  
-    exato: boolean;
-  
-    createdAt?: number;
+import { calculatePoints }
+from "./calculatePoints";
 
-    fase?: string;
-  
+import {
+  FaseCopa,
+  obterPesoDaFase
+} from "./copas";
+
+
+/* =========================
+   TYPES
+========================= */
+
+export type AuditGame = {
+
+  jogo: string;
+
+  resultado: string;
+
+  palpite: string;
+
+  pontosPlacar: number;
+
+  pontosVencedor: number;
+
+  pontosEmpate: number;
+
+  total: number;
+
+  desempate: number | null;
+
+  exato: boolean;
+
+  createdAt?: number;
+
+  fase?: string;
+
+};
+
+export type RankingUser = {
+
+  uid?: string;
+
+  username: string;
+
+  nome: string;
+
+  points: number;
+
+  porFase: {
+    Grupos: number;
+    Fase32: number;
+    Oitavas: number;
+    Quartas: number;
+    Semi: number;
+    Terceiro: number;
+    Final: number;
   };
-  
-  export type RankingUser = {
 
-    uid?: string;
-  
-    username: string;
-  
-    nome: string;
-  
-    points: number;
+  exatos: number;
 
-    porFase: {
-      Grupos: number;
-      Fase32: number;
-      Oitavas: number;
-      Quartas: number;
-      Semi: number;
-      Terceiro: number;
-      Final: number;
-    };
-  
-    exatos: number;
-  
-    aproximacaoVencedor: number;
-  
-    aproximacaoEmpate: number;
-  
-    acertosParciais: number;
-  
-    ultimoHorarioAposta: number;
+  aproximacaoVencedor: number;
 
-    acertosVencedor: number;
+  aproximacaoEmpate: number;
 
-    acertosEmpate: number;
-  
-    jogos: AuditGame[];
-  
+  acertosParciais: number;
+
+  ultimoHorarioAposta: number;
+
+  acertosVencedor: number;
+
+  acertosEmpate: number;
+
+  jogos: AuditGame[];
+
+};
+
+type Game = {
+
+  teamA: string;
+
+  teamB: string;
+
+  resultadoA: number;
+
+  resultadoB: number;
+
+  fase?: FaseCopa;
+
+  grupo?: string;
+
+};
+
+type BetData = {
+
+  userName: string;
+
+  match: string;
+
+  golsA: string;
+
+  golsB: string;
+
+  createdAt?: {
+    seconds: number;
   };
-  
-  type Game = {
-  
-    teamA: string;
-  
-    teamB: string;
-  
-    resultadoA: number;
-  
-    resultadoB: number;
 
-    fase?: FaseCopa;
+  nome?: string;
 
-    grupo?: string;
-  
-  };
-  
-  type BetData = {
-  
-    userName: string;
-  
-    match: string;
-  
-    golsA: string;
-  
-    golsB: string;
-  
-    createdAt?: {
-      seconds: number;
-    };
-  
-    nome?: string;
-  
-    username?: string;
-  
-    uid?: string;
-  
-  };
-  
-  interface UserData {
-    username?: string;
-    displayName?: string;
-  }
-  
-  /* =========================
-     BUILD RANKING
-  ========================= */
-  
-  export async function buildRanking(
-    groupId: string
-  ) {
-  
-   
+  username?: string;
 
-    const betsQuery =
-      query(
-        collection(db, "bets"),
-        where(
-          "groupId",
-          "==",
-          groupId
-        )
-      );
+  uid?: string;
+
+};
+
+interface UserData {
+  username?: string;
+  displayName?: string;
+}
+
+/* =========================
+   BUILD RANKING
+========================= */
+
+export async function buildRanking(
+  groupId: string
+) {
+
+ 
+
+  const betsQuery =
+    query(
+      collection(db, "bets"),
+      where(
+        "groupId",
+        "==",
+        groupId
+      )
+    );
+
+  const betsSnapshot =
+    await getDocs(betsQuery);
+
+  const gamesSnapshot =
+    await getDocs(
+      collection(db, "games")
+    );
   
-    const betsSnapshot =
-      await getDocs(betsQuery);
+    const gamesMap:
+    Record<string, Game> = {};
   
-    const gamesSnapshot =
-      await getDocs(
-        collection(db, "games")
-      );
+    gamesSnapshot.forEach((gameDoc) => {
     
-      const gamesMap:
-      Record<string, Game> = {};
+      const game =
+        gameDoc.data() as Game;
     
-      gamesSnapshot.forEach((gameDoc) => {
-      
-        const game =
-          gameDoc.data() as Game;
-      
-        gamesMap[
-          `${game.teamA} x ${game.teamB}`
-        ] = game;
-      
-      });
-
-      const usersSnapshot =
-      await getDocs(
-        collection(db, "users")
-      );
-
-    const usersMap:
-      Record<string, UserData> = {};
-
-    usersSnapshot.forEach((userDoc) => {
-
-      usersMap[userDoc.id] =
-        userDoc.data();
-
+      gamesMap[
+        `${game.teamA} x ${game.teamB}`
+      ] = game;
+    
     });
-  
-    const rankingMap:
-      Record<string, RankingUser> = {};
-  
-    /* =========================
-    REMOVE DUPLICADAS
-    ========================= */
+
+    const usersSnapshot =
+    await getDocs(
+      collection(db, "users")
+    );
+
+  const usersMap:
+    Record<string, UserData> = {};
+
+  usersSnapshot.forEach((userDoc) => {
+
+    usersMap[userDoc.id] =
+      userDoc.data();
+
+  });
+
+  const rankingMap:
+    Record<string, RankingUser> = {};
+
+  /* =========================
+  REMOVE DUPLICADAS
+  ========================= */
 
 const latestBetsMap:
 Record<string, BetData> = {};
@@ -198,26 +198,26 @@ Record<string, BetData> = {};
 betsSnapshot.forEach((betDoc) => {
 
 const bet =
-  betDoc.data() as BetData;
+betDoc.data() as BetData;
 
 const key =
-  `${bet.userName}__${bet.match}`;
+`${bet.uid || bet.userName}__${bet.match}`;
 
 const current =
-  latestBetsMap[key];
+latestBetsMap[key];
 
 const currentTime =
-  current?.createdAt?.seconds || 0;
+current?.createdAt?.seconds || 0;
 
 const newTime =
-  bet.createdAt?.seconds || 0;
+bet.createdAt?.seconds || 0;
 
 if (
-  !current ||
-  newTime > currentTime
+!current ||
+newTime > currentTime
 ) {
 
-  latestBetsMap[key] = bet;
+latestBetsMap[key] = bet;
 
 }
 
@@ -229,95 +229,100 @@ Object.values(latestBetsMap);
 
 
 /* =========================
- LOOP APOSTAS
+LOOP APOSTAS
 ========================= */
 
 for (const bet of uniqueBets) {
 
-    const nome =
+  const nome =
 
-    bet.username ||
-  
-    bet.userName ||
-  
-    bet.nome ||
-  
-    "Anônimo";
+  bet.username ||
 
-    let username =
-  nome;
+  bet.userName ||
+
+  bet.nome ||
+
+  "Anônimo";
+
+  let username =
+nome;
 
 // =========================
 // FALLBACK USERNAME
 // =========================
 
 if (
-  !bet.username &&
-  bet.uid
+!bet.username &&
+bet.uid
 ) {
 
-  username =
+username =
 
-    usersMap[bet.uid]
-      ?.username ||
+  usersMap[bet.uid]
+    ?.username ||
 
-    nome;
+  nome;
 
 }
+
+// uid como chave primária garante que
+// apostas do mesmo usuário sempre caiam
+// na mesma entrada do rankingMap
+const rankingKey = bet.uid || username;
 
 // =========================
 // BUSCA JOGO
 // =========================
 const game =
-  gamesMap[bet.match];
+gamesMap[bet.match];
 
 if (
-  !game ||
-  game.resultadoA == null ||
-  game.resultadoB == null
+!game ||
+game.resultadoA == null ||
+game.resultadoB == null
 ) {
 
-  
 
-  continue;
+
+continue;
 }
 
 
 const resultadoA =
-  Number(game.resultadoA);
+Number(game.resultadoA);
 
 const resultadoB =
-  Number(game.resultadoB);
+Number(game.resultadoB);
 
 const apostaA =
-  Number(bet.golsA);
+Number(bet.golsA);
 
 const apostaB =
-  Number(bet.golsB);
+Number(bet.golsB);
 
 // =========================
 // PONTOS
 // =========================
 
 const total =
-  calculatePoints({
+calculatePoints({
 
-    apostaA,
-    apostaB,
+  apostaA,
+  apostaB,
 
-    resultadoA,
-    resultadoB
+  resultadoA,
+  resultadoB
 
-  });
+});
 
-  const fase =
-  game.fase || "Grupos";
+const fase =
+game.fase || "Grupos";
 
 const peso =
-  obterPesoDaFase(fase);
+obterPesoDaFase(fase);
 
 const totalPonderado =
-  total * peso;
+total * peso;
 
 // =========================
 // EXATO
@@ -325,8 +330,8 @@ const totalPonderado =
 
 const exato =
 
-  apostaA === resultadoA &&
-  apostaB === resultadoB;
+apostaA === resultadoA &&
+apostaB === resultadoB;
 
 // =========================
 // DISTÂNCIA
@@ -334,13 +339,13 @@ const exato =
 
 const distancia =
 
-  Math.abs(
-    apostaA - resultadoA
-  ) +
+Math.abs(
+  apostaA - resultadoA
+) +
 
-  Math.abs(
-    apostaB - resultadoB
-  );
+Math.abs(
+  apostaB - resultadoB
+);
 
 // =========================
 // ACERTOS PARCIAIS
@@ -349,71 +354,71 @@ const distancia =
 let acertosParciais = 0;
 
 if (apostaA === resultadoA) {
-  acertosParciais += 1;
+acertosParciais += 1;
 }
 
 if (apostaB === resultadoB) {
-  acertosParciais += 1;
+acertosParciais += 1;
 }
 
 if (exato) {
-  acertosParciais = 0;
+acertosParciais = 0;
 }
 
 // =========================
 // CRIA USER
 // =========================
 
-if (!rankingMap[username]) {
+if (!rankingMap[rankingKey]) {
 
-  rankingMap[username] = {
+rankingMap[rankingKey] = {
 
-    acertosVencedor: 0,
+  acertosVencedor: 0,
 
-    acertosEmpate: 0,
+  acertosEmpate: 0,
 
-  uid:
-  bet.uid ||
+uid:
+bet.uid ||
 
-  "",
+"",
 
-    username,
+  username,
 
-    nome,
+  nome,
 
-    points: 0,
+  points: 0,
 
-    porFase: {
+  porFase: {
 
-        Grupos: 0,
+      Grupos: 0,
 
-        Fase32: 0,
-      
-        Oitavas: 0,
-      
-        Quartas: 0,
-      
-        Semi: 0,
+      Fase32: 0,
+    
+      Oitavas: 0,
+    
+      Quartas: 0,
+    
+      Semi: 0,
 
-        Terceiro: 0,
-      
-        Final: 0,
-      
-      },
+      Terceiro: 0,
+    
+      Final: 0,
+    
+    },
 
-    exatos: 0,
+  exatos: 0,
 
-    aproximacaoVencedor: 0,
+  aproximacaoVencedor: 0,
 
-    aproximacaoEmpate: 0,
+  aproximacaoEmpate: 0,
 
-    acertosParciais: 0,
+  acertosParciais: 0,
 
-    ultimoHorarioAposta: 0,
+  ultimoHorarioAposta: 0,
 
-    jogos: []
+  jogos: []
 
-  };
+};
 
 }
 
@@ -421,12 +426,12 @@ if (!rankingMap[username]) {
 // SOMA PONTOS
 // =========================
 
-rankingMap[username].points +=
-  totalPonderado;
+rankingMap[rankingKey].points +=
+totalPonderado;
 
-rankingMap[username]
-  .porFase[fase] +=
-    totalPonderado;
+rankingMap[rankingKey]
+.porFase[fase] +=
+  totalPonderado;
 
 // =========================
 // EXATOS
@@ -434,8 +439,8 @@ rankingMap[username]
 
 if (exato) {
 
-  rankingMap[username]
-    .exatos += 1;
+rankingMap[rankingKey]
+  .exatos += 1;
 
 }
 
@@ -443,9 +448,9 @@ if (exato) {
 // ACERTOS PARCIAIS
 // =========================
 
-rankingMap[username]
-  .acertosParciais +=
-    acertosParciais;
+rankingMap[rankingKey]
+.acertosParciais +=
+  acertosParciais;
 
 // =========================
 // ACERTOU VENCEDOR
@@ -453,19 +458,19 @@ rankingMap[username]
 
 const acertouVencedor =
 
-  (
-    apostaA > apostaB &&
-    resultadoA > resultadoB
-  ) ||
+(
+  apostaA > apostaB &&
+  resultadoA > resultadoB
+) ||
 
-  (
-    apostaA < apostaB &&
-    resultadoA < resultadoB
-  );
+(
+  apostaA < apostaB &&
+  resultadoA < resultadoB
+);
 if (acertouVencedor) {
 
-  rankingMap[username]
-    .acertosVencedor += 1;
+rankingMap[rankingKey]
+  .acertosVencedor += 1;
 
 }
 // =========================
@@ -474,23 +479,23 @@ if (acertouVencedor) {
 
 const acertouEmpate =
 
-  apostaA === apostaB &&
-  resultadoA === resultadoB;
-  if (acertouEmpate) {
+apostaA === apostaB &&
+resultadoA === resultadoB;
+if (acertouEmpate) {
 
-    rankingMap[username]
-      .acertosEmpate += 1;
-  
-  }
+  rankingMap[rankingKey]
+    .acertosEmpate += 1;
+
+}
 // =========================
 // APROXIMAÇÃO VENCEDOR
 // =========================
 
 if (acertouVencedor) {
 
-  rankingMap[username]
-    .aproximacaoVencedor +=
-      distancia;
+rankingMap[rankingKey]
+  .aproximacaoVencedor +=
+    distancia;
 
 }
 
@@ -500,9 +505,9 @@ if (acertouVencedor) {
 
 if (acertouEmpate) {
 
-  rankingMap[username]
-    .aproximacaoEmpate +=
-      distancia;
+rankingMap[rankingKey]
+  .aproximacaoEmpate +=
+    distancia;
 
 }
 
@@ -511,22 +516,22 @@ if (acertouEmpate) {
 // =========================
 
 const horario =
-  bet.createdAt?.seconds || 0;
+bet.createdAt?.seconds || 0;
 
 if (
 
-  horario <
-    rankingMap[username]
-      .ultimoHorarioAposta ||
+horario <
+  rankingMap[rankingKey]
+    .ultimoHorarioAposta ||
 
-  rankingMap[username]
-    .ultimoHorarioAposta === 0
+rankingMap[rankingKey]
+  .ultimoHorarioAposta === 0
 
 ) {
 
-  rankingMap[username]
-    .ultimoHorarioAposta =
-      horario;
+rankingMap[rankingKey]
+  .ultimoHorarioAposta =
+    horario;
 
 }
 
@@ -534,121 +539,121 @@ if (
 // JOGOS (AUDITORIA)
 // =========================
 
-rankingMap[username]
-  .jogos.push({
+rankingMap[rankingKey]
+.jogos.push({
 
 
-    fase:
-     game.fase || "Grupos",
+  fase:
+   game.fase || "Grupos",
 
-    jogo:
-      bet.match,
+  jogo:
+    bet.match,
 
-    resultado:
-      `${resultadoA} x ${resultadoB}`,
+  resultado:
+    `${resultadoA} x ${resultadoB}`,
 
-    palpite:
-      `${apostaA} x ${apostaB}`,
+  palpite:
+    `${apostaA} x ${apostaB}`,
 
-    pontosPlacar:
-      exato ? 5 : 0,
+  pontosPlacar:
+    exato ? 5 : 0,
 
-    pontosVencedor:
-      acertouVencedor ? 3 : 0,
+  pontosVencedor:
+    acertouVencedor ? 3 : 0,
 
-    pontosEmpate:
-      acertouEmpate ? 2 : 0,
+  pontosEmpate:
+    acertouEmpate ? 2 : 0,
 
-    total,
+  total,
 
-    desempate:
+  desempate:
 
-      acertouVencedor ||
-      acertouEmpate ||
-      exato
+    acertouVencedor ||
+    acertouEmpate ||
+    exato
 
-        ? distancia
+      ? distancia
 
-        : null,
+      : null,
 
-    exato,
+  exato,
 
-    createdAt:
-      bet.createdAt?.seconds
+  createdAt:
+    bet.createdAt?.seconds
 
-  });
+});
 
 }
 
 
 
 return Object
-  .values(rankingMap)
+.values(rankingMap)
 
-  .sort((a, b) => {
+.sort((a, b) => {
 
-    if (
-      b.points !== a.points
-    ) {
-
-      return (
-        b.points - a.points
-      );
-
-    }
-
-    if (
-      b.exatos !== a.exatos
-    ) {
-
-      return (
-        b.exatos - a.exatos
-      );
-
-    }
-
-    if (
-      a.aproximacaoVencedor !==
-      b.aproximacaoVencedor
-    ) {
-
-      return (
-        a.aproximacaoVencedor -
-        b.aproximacaoVencedor
-      );
-
-    }
-
-    if (
-      a.aproximacaoEmpate !==
-      b.aproximacaoEmpate
-    ) {
-
-      return (
-        a.aproximacaoEmpate -
-        b.aproximacaoEmpate
-      );
-
-    }
-
-    if (
-      b.acertosParciais !==
-      a.acertosParciais
-    ) {
-
-      return (
-        b.acertosParciais -
-        a.acertosParciais
-      );
-
-    }
+  if (
+    b.points !== a.points
+  ) {
 
     return (
-      a.ultimoHorarioAposta -
-      b.ultimoHorarioAposta
+      b.points - a.points
     );
 
-  });
-
-  
   }
+
+  if (
+    b.exatos !== a.exatos
+  ) {
+
+    return (
+      b.exatos - a.exatos
+    );
+
+  }
+
+  if (
+    a.aproximacaoVencedor !==
+    b.aproximacaoVencedor
+  ) {
+
+    return (
+      a.aproximacaoVencedor -
+      b.aproximacaoVencedor
+    );
+
+  }
+
+  if (
+    a.aproximacaoEmpate !==
+    b.aproximacaoEmpate
+  ) {
+
+    return (
+      a.aproximacaoEmpate -
+      b.aproximacaoEmpate
+    );
+
+  }
+
+  if (
+    b.acertosParciais !==
+    a.acertosParciais
+  ) {
+
+    return (
+      b.acertosParciais -
+      a.acertosParciais
+    );
+
+  }
+
+  return (
+    a.ultimoHorarioAposta -
+    b.ultimoHorarioAposta
+  );
+
+});
+
+
+}
