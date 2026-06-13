@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 const frases = [
   "📈 A IA detectou que o líder está completamente iludido.",
   "🚨 Existem fortes indícios de sorte temporária no topo da tabela.",
@@ -18,15 +16,10 @@ const frases = [
 ];
 
 export default function FundamentalistaIA() {
-  const [frase, setFrase] = useState("");
+  const indiceDoDia =
+    Math.floor(Date.now() / 86400000) % frases.length;
 
-  useEffect(() => {
-    // Troca uma vez por dia
-    const indice =
-      Math.floor(Date.now() / 86400000) % frases.length;
-
-    setFrase(frases[indice]);
-  }, []);
+  const frase = frases[indiceDoDia];
 
   return (
     <div
