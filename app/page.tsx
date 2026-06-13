@@ -802,12 +802,11 @@ export default function Home() {
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
         <div className="flex items-start justify-between">
-  
         <h2 className="text-xl font-bold">
           Resultados Oficiais dos úlimos dois dias.
-              <p className="text-zinc-400 text-sm mt-1">
-              Os demais resultados você vê em "seus palpites"
-              </p>
+          <p className="text-zinc-400 text-sm mt-1">
+            Os demais resultados você vê em &quot;seus palpites&quot;
+          </p>
         </h2>
       </div>
 
