@@ -1657,20 +1657,20 @@ export default function AnalyticsPage() {
                 <div
                   key={`${card.title}-${index}`}
                   className="
-                    min-w-[320px]
+                    min-w-[260px]
                     bg-zinc-900
                     border
                     border-zinc-700
                     rounded-3xl
-                    p-5
+                    p-3
                     flex
                     items-center
-                    gap-4
+                    gap-3
                     shadow-xl
                   "
                 >
 
-                  <div className="text-5xl">
+                  <div className="text-5lg">
                     {card.emoji}
                   </div>
 

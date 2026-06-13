@@ -28,6 +28,10 @@ import {
   buildRanking
 } from "../lib/buildRanking";
 
+import {
+  calculatePoints
+} from "../lib/calculatePoints";
+
 type UserData = {
 
   position: number;
@@ -221,6 +225,31 @@ betsSnapshot.forEach((betDoc) => {
         return;
     
       }
+      let pontosCalculados = 0;
+
+if (
+  game.resultadoA != null &&
+  game.resultadoB != null
+) {
+
+  pontosCalculados =
+    calculatePoints({
+
+      apostaA:
+        Number(bet.golsA),
+
+      apostaB:
+        Number(bet.golsB),
+
+      resultadoA:
+        Number(game.resultadoA),
+
+      resultadoB:
+        Number(game.resultadoB),
+
+    });
+
+}
     
 
       history.push({
@@ -241,7 +270,7 @@ betsSnapshot.forEach((betDoc) => {
             : undefined,
   
         pontos:
-          bet.points,
+        pontosCalculados,
   
         fase:
           game.fase,
