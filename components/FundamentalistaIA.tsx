@@ -1,46 +1,165 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
-const frases = [
-  "🔥 A IA detectou que o líder está completamente iludido.",
-  "🚨 Existem fortes indícios de sorte temporária no topo da tabela.",
-  "🤖 Nosso algoritmo prevê corneta intensa nas próximas 48 horas.",
-  "🤖 O lanterna segue firme no projeto de longo prazo.",
-  "⚽ Estatisticamente, alguém vai reclamar da pontuação hoje.",
-  "🔥 O mercado de palpites opera em forte tendência de emoção.",
-];
+import { auth, db } from "../lib/firebase";
+
+import {
+  doc,
+  getDoc
+} from "firebase/firestore";
+
+import {
+  buildRanking
+} from "../lib/buildRanking";
+
+import {
+  gerarAnaliseIA
+} from "../lib/fundamentalistaIA";
 
 export default function FundamentalistaIA() {
-  const [indice, setIndice] = useState(0);
+
+  const [analises, setAnalises] =
+    useState<string[]>([]);
+
+  const [pagina, setPagina] =
+    useState(0);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
-    const atualizarFrase = () => {
-      const agora = new Date();
 
-      // muda a cada 10 minutos:
-      // 00-09 => frase 0
-      // 10-19 => frase 1
-      // ...
-      // 50-59 => frase 5
-      const novoIndice = Math.floor(
-        agora.getMinutes() / 10
-      );
+    async function carregarAnalise() {
 
-      setIndice(novoIndice);
-    };
+      try {
 
-    atualizarFrase();
+        const user =
+          auth.currentUser;
 
-    const timer = setInterval(
-      atualizarFrase,
-      60 * 1000 // verifica a cada minuto
-    );
+        if (!user) {
 
-    return () => clearInterval(timer);
+          setLoading(false);
+
+          return;
+
+        }
+
+        const userRef =
+          doc(
+            db,
+            "users",
+            user.uid
+          );
+
+        const userSnap =
+          await getDoc(userRef);
+
+        if (!userSnap.exists()) {
+
+          setLoading(false);
+
+          return;
+
+        }
+
+        const activeGroupId =
+          userSnap.data()
+            .activeGroupId;
+
+        if (!activeGroupId) {
+
+          setLoading(false);
+
+          return;
+
+        }
+
+        const ranking =
+          await buildRanking(
+            activeGroupId
+          );
+
+          console.log(
+            "Ranking carregado:",
+            ranking.length,
+            ranking
+          );
+
+        const resultado =
+          gerarAnaliseIA(
+            ranking
+          );
+
+        setAnalises(resultado);
+        console.log(
+  "Resultado retornado:",
+  resultado.length,
+  resultado
+);
+
+      } catch (error) {
+
+        console.error(
+          "Erro Fundamentalista IA:",
+          error
+        );
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    }
+
+    carregarAnalise();
+
   }, []);
 
+  useEffect(() => {
+
+    const timer =
+      setInterval(() => {
+  
+        setPagina((anterior) =>
+          anterior + 1
+        );
+  
+      }, 180000); // 3 minutos
+  
+    return () =>
+      clearInterval(timer);
+  
+  }, []);
+
+  // iniciando temporizador de mensagens
+
+  const analisesPorPagina = 3;
+
+  const totalPaginas =
+    Math.max(
+      1,
+      Math.ceil(
+        analises.length /
+        analisesPorPagina
+      )
+    );
+  
+  const paginaAtual =
+    pagina % totalPaginas;
+  
+  const analisesVisiveis =
+    analises.slice(
+      paginaAtual *
+        analisesPorPagina,
+  
+      (paginaAtual + 1) *
+        analisesPorPagina
+    );
+
   return (
+
     <div
       className="
         bg-gradient-to-r
@@ -50,15 +169,62 @@ export default function FundamentalistaIA() {
         p-5
         border
         border-purple-700
+        shadow-lg
       "
     >
-      <h2 className="text-xl font-black mb-3">
-        🧠 Análise Fundamentalista IA
-      </h2>
 
-      <p className="text-zinc-100">
-        {frases[indice]}
-      </p>
+      <div className="flex items-center gap-3 mb-4">
+
+        <span className="text-4xl">
+          🧠
+        </span>
+
+        <div>
+
+          <h2 className="text-xl font-black text-purple-200">
+            Análise Fundamentalista IA
+          </h2>
+
+          <p className="text-xs text-purple-300">
+            Powered by Mãe Diná Analytics™
+          </p>
+
+        </div>
+
+      </div>
+
+      {loading ? (
+
+        <p className="text-zinc-300">
+          Analisando mercado de palpites...
+        </p>
+
+      ) : (
+
+        <div className="space-y-3">
+
+          {analisesVisiveis.map(
+            (item, index) => (
+
+              <p
+                key={index}
+                className="
+                  text-zinc-100
+                  leading-relaxed
+                "
+              >
+                {item}
+              </p>
+
+            )
+          )}
+
+        </div>
+
+      )}
+
     </div>
+
   );
+
 }
