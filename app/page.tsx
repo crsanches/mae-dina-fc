@@ -567,29 +567,26 @@ export default function Home() {
 
     });
 
-  const jogosEncerradosPorFase =
-    jogosEncerrados.reduce(
+ 
 
-      (acc, jogo) => {
+  const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
 
-        if (!acc[jogo.fase]) {
+    const duasDiasAtras = new Date(hoje);
+    duasDiasAtras.setDate(hoje.getDate() - 2);
 
-          acc[jogo.fase] = [];
-
-        }
-
-        acc[jogo.fase].push(jogo);
-
-        return acc;
-
-      },
-
-      {} as Record<
-        string,
-        typeof jogos[number][]
-      >
-
-    );
+    const jogosEncerradosPorFase = jogosEncerrados
+      .filter((jogo) => new Date(jogo.matchDate) >= duasDiasAtras)
+      .reduce(
+        (acc, jogo) => {
+          if (!acc[jogo.fase]) {
+            acc[jogo.fase] = [];
+          }
+          acc[jogo.fase].push(jogo);
+          return acc;
+        },
+        {} as Record<string, typeof jogos[number][]>
+      );
 
   /* =========================
      LOGIN SCREEN
@@ -807,9 +804,11 @@ export default function Home() {
         <div className="flex items-start justify-between">
   
         <h2 className="text-xl font-bold">
-          Resultados Oficiais
+          Resultados Oficiais dos úlimos dois dias.
+              <p className="text-zinc-400 text-sm mt-1">
+              Os demais resultados você vê em "seus palpites"
+              </p>
         </h2>
-
       </div>
 
           {Object.entries(

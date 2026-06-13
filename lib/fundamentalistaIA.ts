@@ -65,6 +65,27 @@ const maisPreciso =
         b.aproximacaoVencedor
     )[0];
 
+    const piorDosExatos =
+  [...ranking]
+    .sort(
+      (a, b) =>
+        a.exatos - b.exatos
+    )[0];
+
+  // =========================
+  // PIORES EXATOS
+  // =========================
+
+
+
+    analises.push(
+        `🎯 ${reiDosExatos.nome} lidera os placares exatos com ${reiDosExatos.exatos} acertos.`
+      );
+      
+      analises.push(
+        `😬 ${piorDosExatos.nome} ainda busca seu relacionamento definitivo com os placares exatos.`
+      );
+
   // =========================
   // LÍDER ISOLADO
   // =========================
@@ -215,6 +236,7 @@ analises.push(
     );
   
   }
+  
 
    // =========================
   // ESPECIALISTA EM EMPATES
