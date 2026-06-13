@@ -592,7 +592,7 @@ export default function Home() {
     );
 
   /* =========================
-     LOGIN SCREEN  
+     LOGIN SCREEN
   ========================= */
 
   const agora = new Date().getTime();
@@ -694,14 +694,14 @@ export default function Home() {
         {showHeavyComponents && (
           <>
             <UserStats />
-
             <FundamentalistaIA />
-
             <RealRanking />
 
             <CentralCorneta
               ligaId={ligaId}
               usuarios={usuariosLiga}/>
+
+            <AnalyticsDashboard />
 
             <BetTable />
 
@@ -709,32 +709,32 @@ export default function Home() {
 
         )}
 
-        {/* MEME */}
+        {/* ======================================*/}
+        {/* MEMES */}
+        {/* ======================================*/}
 
         {automaticMeme && (
 
-        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
+          <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
 
+            {automaticMeme.image && (
 
-          {automaticMeme.image && (
+              <img
+                src={automaticMeme.image}
+                alt="Meme"
+                loading="lazy"
+                className="rounded-2xl mb-4 w-full"
+              />
 
-            <img
-              src={automaticMeme.image}
-              alt="Meme"
-              loading="lazy"
-              className="rounded-2xl mb-4 w-full"
-            />
+            )}
 
-          )}
+            <p className="text-lg font-black">
+              🤖 {automaticMeme.text}
+            </p>
 
-          <p className="text-lg font-black">
-            🤖 {automaticMeme.text}
-          </p>
-
-        </div>
+          </div>
 
         )}
-
 
 
         {/* ======================================*/}
@@ -775,22 +775,21 @@ export default function Home() {
 
             </div>
 
-            <div className="mt-1 flex justify-center">
-            <Link
-              href="/auditoria"
-              className="
-                hover:scale-105
-                transition-all duration-300
-              "
-            >
-              <img
-                src="/logos/casa_mae_joana.png"
-                alt="Auditoria"
+            <div className="mt-2 flex justify-end">
+              <Link
+                href="/auditoria"
                 className="
-                  w-40
-                  md:w-56
-                  object-contain
-                  drop-shadow-2xl
+                  hover:scale-105
+                  transition-all duration-300
+                "
+              >
+                <img
+                  src="/logos/casa_mae_joana.png"
+                  alt="Auditoria"
+                  className="
+                    w-84
+                    object-contain
+                    drop-shadow-2xl
                   "
                 />
               </Link>
@@ -802,7 +801,6 @@ export default function Home() {
 
         {/* ======================================*/}
         {/* RESULTADOS */}
-        {/* ======================================*/}
 
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 

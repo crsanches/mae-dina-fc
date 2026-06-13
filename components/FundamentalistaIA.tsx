@@ -3,10 +3,10 @@
 import { useState, useEffect } from "react";
 
 const frases = [
-  "📈 A IA detectou que o líder está completamente iludido.",
+  "🔥 A IA detectou que o líder está completamente iludido.",
   "🚨 Existem fortes indícios de sorte temporária no topo da tabela.",
   "🤖 Nosso algoritmo prevê corneta intensa nas próximas 48 horas.",
-  "📊 O lanterna segue firme no projeto de longo prazo.",
+  "🤖 O lanterna segue firme no projeto de longo prazo.",
   "⚽ Estatisticamente, alguém vai reclamar da pontuação hoje.",
   "🔥 O mercado de palpites opera em forte tendência de emoção.",
 ];

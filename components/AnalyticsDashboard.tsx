@@ -1475,7 +1475,7 @@ export default function AnalyticsPage() {
 
         </div>
 
-        <div className="mb-6 bg-gradient-to-br from-purple-950 to-zinc-900 border border-purple-700 rounded-3xl p-6">
+        <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
 
           <div className="flex items-center gap-3 mb-5">
 
@@ -1485,15 +1485,15 @@ export default function AnalyticsPage() {
 
             <div>
 
-              <h2 className="text-2xl font-black text-purple-300">
+              <h2 className="text-2xl font-black text-green-300">
 
-                Análise Fundamentalista da IA
+              Relatório automático da insanidade esportiva
 
               </h2>
 
               <p className="text-zinc-400 text-sm">
 
-                Relatório automático da insanidade esportiva
+                Não temos responsabilidade alguma sobre isso....
 
               </p>
 
