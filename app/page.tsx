@@ -61,6 +61,13 @@ const RealRanking = dynamic(
   }
 );
 
+const FundamentalistaIA = dynamic(
+  () => import("../components/FundamentalistaIA"),
+  {
+    ssr: false,
+  }
+);
+
 const AnalyticsDashboard = dynamic(
   () => import("../components/AnalyticsDashboard"),
   {
@@ -636,7 +643,10 @@ export default function Home() {
 
         <GroupCard />
 
+        {/* ======================================*/}
         {/* BOTÃO ADMIN - só aparece para o admin */}
+        {/* ======================================*/}
+
         {auth.currentUser?.uid === "s45fFE4vSrOmnpQIcjuWnWU0pKB3" && (
           <Link
             href="/admin/dashboard"
@@ -650,7 +660,9 @@ export default function Home() {
           </Link>
         )}
 
+        {/* ======================================*/}
         {/* APOSTAS */}
+        {/* ======================================*/}
 
         <Link
           href="/play"
@@ -675,22 +687,21 @@ export default function Home() {
 
         </Link>
 
+        {/* ======================================*/}
         {/* COMPONENTES PESADOS */}
+        {/* ======================================*/}
 
         {showHeavyComponents && (
-
           <>
-
             <UserStats />
+
+            <FundamentalistaIA />
 
             <RealRanking />
 
             <CentralCorneta
               ligaId={ligaId}
-              usuarios={usuariosLiga}
-            />
-
-            <AnalyticsDashboard />
+              usuarios={usuariosLiga}/>
 
             <BetTable />
 
@@ -698,32 +709,12 @@ export default function Home() {
 
         )}
 
-        {/* MEME */}
+       
 
-        {automaticMeme && (
 
-          <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
-
-            {automaticMeme.image && (
-
-              <img
-                src={automaticMeme.image}
-                alt="Meme"
-                loading="lazy"
-                className="rounded-2xl mb-4 w-full"
-              />
-
-            )}
-
-            <p className="text-lg font-black">
-              🤖 {automaticMeme.text}
-            </p>
-
-          </div>
-
-        )}
-
+        {/* ======================================*/}
         {/* link para auditoria */}
+        {/* ======================================*/}
 
         <div
             className="
@@ -759,21 +750,22 @@ export default function Home() {
 
             </div>
 
-            <div className="mt-2 flex justify-end">
-              <Link
-                href="/auditoria"
+            <div className="mt-1 flex justify-center">
+            <Link
+              href="/auditoria"
+              className="
+                hover:scale-105
+                transition-all duration-300
+              "
+            >
+              <img
+                src="/logos/casa_mae_joana.png"
+                alt="Auditoria"
                 className="
-                  hover:scale-105
-                  transition-all duration-300
-                "
-              >
-                <img
-                  src="/logos/casa_mae_joana.png"
-                  alt="Auditoria"
-                  className="
-                    w-84
-                    object-contain
-                    drop-shadow-2xl
+                  w-40
+                  md:w-56
+                  object-contain
+                  drop-shadow-2xl
                   "
                 />
               </Link>
@@ -783,7 +775,9 @@ export default function Home() {
 
 
 
+        {/* ======================================*/}
         {/* RESULTADOS */}
+        {/* ======================================*/}
 
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
