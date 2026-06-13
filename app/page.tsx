@@ -577,6 +577,11 @@ export default function Home() {
 
     const jogosEncerradosPorFase = jogosEncerrados
       .filter((jogo) => new Date(jogo.matchDate) >= duasDiasAtras)
+      .sort(
+        (a, b) =>
+          new Date(b.matchDate).getTime() -
+          new Date(a.matchDate).getTime()
+      )
       .reduce(
         (acc, jogo) => {
           if (!acc[jogo.fase]) {
