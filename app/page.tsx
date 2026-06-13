@@ -592,7 +592,7 @@ export default function Home() {
     );
 
   /* =========================
-     LOGIN SCREEN
+     LOGIN SCREEN  
   ========================= */
 
   const agora = new Date().getTime();
@@ -709,7 +709,32 @@ export default function Home() {
 
         )}
 
-       
+        {/* MEME */}
+
+        {automaticMeme && (
+
+        <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
+
+
+          {automaticMeme.image && (
+
+            <img
+              src={automaticMeme.image}
+              alt="Meme"
+              loading="lazy"
+              className="rounded-2xl mb-4 w-full"
+            />
+
+          )}
+
+          <p className="text-lg font-black">
+            🤖 {automaticMeme.text}
+          </p>
+
+        </div>
+
+        )}
+
 
 
         {/* ======================================*/}
