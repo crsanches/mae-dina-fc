@@ -3,7 +3,14 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 
-function normalize(text?: string) {
+type SportsDbEvent = {
+  idEvent: string;
+  strHomeTeam: string;
+  strAwayTeam: string;
+  strTimestamp: string;
+};
+
+function normalize(text?: string): string {
   if (!text) return "";
 
   let value = text
@@ -85,7 +92,7 @@ function datasProximas(date1: string, date2: string): boolean {
   return diff < 4 * 60 * 60 * 1000;
 }
 
-async function fetchJson(url: string): Promise<any> {
+async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
   try {
     const res = await fetch(url);
     const text = await res.text();
@@ -93,7 +100,7 @@ async function fetchJson(url: string): Promise<any> {
       console.log(`Resposta inválida para ${url} — provavelmente rate limit`);
       return null;
     }
-    return JSON.parse(text);
+    return JSON.parse(text) as Record<string, unknown>;
   } catch {
     console.log(`Erro ao buscar ${url}`);
     return null;
@@ -111,34 +118,31 @@ export async function GET() {
     const datas = gerarDatas("2026-06-11", "2026-07-19");
     console.log(`Buscando eventos para ${datas.length} datas...`);
 
-    const todosEventos: any[] = [];
+    const todosEventos: SportsDbEvent[] = [];
 
-    // Busca por data em lotes de 3 com pausa de 500ms
     for (let i = 0; i < datas.length; i += 3) {
       const lote = datas.slice(i, i + 3);
       const respostas = await Promise.all(
         lote.map((d) =>
           fetchJson(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${d}&l=4429`)
-            .then((data) => data?.events || [])
+            .then((data) => (data?.events as SportsDbEvent[]) || [])
         )
       );
       respostas.forEach((eventos) => todosEventos.push(...eventos));
       await new Promise((r) => setTimeout(r, 500));
     }
 
-    // Busca pelo eventsseason com proteção
     const dataSeason = await fetchJson(
       `https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4429&s=2026`
     );
     if (dataSeason?.events) {
-      todosEventos.push(...dataSeason.events);
+      todosEventos.push(...(dataSeason.events as SportsDbEvent[]));
     } else {
       console.log("eventsseason não retornou dados válidos — pulando");
     }
 
-    // Remove duplicatas pelo idEvent
-    const seenIds = new Set();
-    const eventosUnicos = todosEventos.filter((e: any) => {
+    const seenIds = new Set<string>();
+    const eventosUnicos = todosEventos.filter((e) => {
       if (!e?.idEvent) return false;
       if (seenIds.has(e.idEvent)) return false;
       seenIds.add(e.idEvent);
@@ -147,7 +151,6 @@ export async function GET() {
 
     console.log(`Total de eventos encontrados na API: ${eventosUnicos.length}`);
 
-    // Para cada jogo do Firebase, tenta encontrar o idEvent
     for (const gameDoc of gamesSnapshot.docs) {
       const game = gameDoc.data();
 
@@ -159,7 +162,7 @@ export async function GET() {
       const firebaseA = normalize(game.teamA);
       const firebaseB = normalize(game.teamB);
 
-      const encontrado = eventosUnicos.find((e: any) => {
+      const encontrado = eventosUnicos.find((e) => {
         const apiHome = normalize(e.strHomeTeam);
         const apiAway = normalize(e.strAwayTeam);
 

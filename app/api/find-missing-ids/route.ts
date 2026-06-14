@@ -3,10 +3,18 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
 
-function normalize(text?: string) {
+type SportsDbEvent = {
+  idEvent: string;
+  idLeague: string;
+  strHomeTeam: string;
+  strAwayTeam: string;
+  strTimestamp: string;
+};
+
+function normalize(text?: string): string {
   if (!text) return "";
 
-  let value = text
+  const value = text
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
@@ -67,13 +75,11 @@ function normalize(text?: string) {
     "croatia": "croacia",
     "ghana": "gana",
     "panama": "panama",
-
   };
 
   return aliases[value] || value;
 }
 
-// Converte nome em português para inglês para buscar na API
 const ptToEn: Record<string, string> = {
   "australia": "Australia",
   "turquia": "Turkey",
@@ -107,12 +113,12 @@ function toEnglish(name: string): string {
   return ptToEn[norm] || name;
 }
 
-async function fetchJson(url: string): Promise<any> {
+async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
   try {
     const res = await fetch(url);
     const text = await res.text();
     if (!text.startsWith("{") && !text.startsWith("[")) return null;
-    return JSON.parse(text);
+    return JSON.parse(text) as Record<string, unknown>;
   } catch {
     return null;
   }
@@ -122,12 +128,11 @@ function datasProximas(date1: string, date2: string): boolean {
   const d1 = new Date(date1).getTime();
   const d2 = new Date(date2).getTime();
   const diff = Math.abs(d1 - d2);
-  return diff < 6 * 60 * 60 * 1000; // 6h de tolerância
+  return diff < 6 * 60 * 60 * 1000;
 }
 
 export async function GET() {
   try {
-    // Busca jogos sem idEventSportsDB
     const gamesSnapshot = await adminDb.collection("games").get();
     const jogosSemId = gamesSnapshot.docs.filter((g) => !g.data().idEventSportsDB);
 
@@ -142,7 +147,6 @@ export async function GET() {
       const teamAEn = toEnglish(game.teamA);
       const teamBEn = toEnglish(game.teamB);
 
-      // Tenta buscar pelo nome do time A
       const query = `${teamAEn} vs ${teamBEn}`.replace(/ /g, "+");
       const url = `https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${query}&s=2026`;
 
@@ -151,15 +155,15 @@ export async function GET() {
       const data = await fetchJson(url);
       await new Promise((r) => setTimeout(r, 400));
 
-      const eventos = data?.event || data?.events || [];
+      const eventos = (
+        (data?.event as SportsDbEvent[]) ||
+        (data?.events as SportsDbEvent[]) ||
+        []
+      );
 
-      // Tenta achar o evento pela data
-      const encontrado = eventos.find((e: any) => {
-        return (
-          e.idLeague === "4429" &&
-          datasProximas(game.matchDate, e.strTimestamp)
-        );
-      });
+      const encontrado = eventos.find((e) =>
+        e.idLeague === "4429" && datasProximas(game.matchDate, e.strTimestamp)
+      );
 
       if (encontrado) {
         await adminDb.collection("games").doc(gameDoc.id).update({
@@ -168,21 +172,21 @@ export async function GET() {
         encontrados.push(`✅ ${game.match} → idEvent: ${encontrado.idEvent}`);
         console.log(`✅ ${game.match} → ${encontrado.idEvent}`);
       } else {
-        // Tenta invertido (teamB vs teamA)
         const queryInv = `${teamBEn} vs ${teamAEn}`.replace(/ /g, "+");
         const urlInv = `https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${queryInv}&s=2026`;
 
         const dataInv = await fetchJson(urlInv);
         await new Promise((r) => setTimeout(r, 400));
 
-        const eventosInv = dataInv?.event || dataInv?.events || [];
+        const eventosInv = (
+          (dataInv?.event as SportsDbEvent[]) ||
+          (dataInv?.events as SportsDbEvent[]) ||
+          []
+        );
 
-        const encontradoInv = eventosInv.find((e: any) => {
-          return (
-            e.idLeague === "4429" &&
-            datasProximas(game.matchDate, e.strTimestamp)
-          );
-        });
+        const encontradoInv = eventosInv.find((e) =>
+          e.idLeague === "4429" && datasProximas(game.matchDate, e.strTimestamp)
+        );
 
         if (encontradoInv) {
           await adminDb.collection("games").doc(gameDoc.id).update({
@@ -201,11 +205,7 @@ export async function GET() {
     console.log("Encontrados:", encontrados);
     console.log("Não encontrados:", naoEncontrados);
 
-    return NextResponse.json({
-      success: true,
-      encontrados,
-      naoEncontrados,
-    });
+    return NextResponse.json({ success: true, encontrados, naoEncontrados });
 
   } catch (error) {
     console.error("ERRO:", error);
