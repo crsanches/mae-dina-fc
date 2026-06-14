@@ -67,8 +67,7 @@ function normalize(text?: string) {
     "croatia": "croacia",
     "ghana": "gana",
     "panama": "panama",
-    "sweden": "suecia",
-    "bosnia herzegovinaborg": "bosnia e herzegovina",
+
   };
 
   return aliases[value] || value;
