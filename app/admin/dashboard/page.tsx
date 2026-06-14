@@ -13,380 +13,320 @@ import { db } from "../../../lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../lib/firebase";
 
+import { calculatePoints } from "../../../lib/calculatePoints";
 
 type GroupStats = {
-
   id: string;
-
   name: string;
-
   users: number;
-
   bets: number;
-
   coverage: number;
-
 };
 
 type DashboardStats = {
-
   games: number;
-
   finishedGames: number;
-
   memes: number;
-
   groups: GroupStats[];
-
 };
 
+type Game = {
+  id: string;
+  teamA: string;
+  teamB: string;
+  match: string;
+  resultadoA?: number;
+  resultadoB?: number;
+};
 
-
-
+type BetResult = {
+  userName: string;
+  golsA: string;
+  golsB: string;
+  points: number;
+  acertouPlacar: boolean;
+};
 
 export default function AdminDashboard() {
 
-  const ADMIN_EMAILS = [
-    "crsanches4@gmail.com"
-  ];
+  const ADMIN_EMAILS = ["crsanches4@gmail.com"];
 
-const [stats, setStats] =
-  useState<DashboardStats>({
+  const [stats, setStats] = useState<DashboardStats>({
     games: 0,
     finishedGames: 0,
     memes: 0,
     groups: []
   });
 
+  // Pesquisa de palpites
+  const [games, setGames] = useState<Game[]>([]);
+  const [selectedGame, setSelectedGame] = useState<string>("");
+  const [betResults, setBetResults] = useState<BetResult[]>([]);
+  const [searching, setSearching] = useState(false);
 
-useEffect(() => {
-  async function loadStats() {
+  useEffect(() => {
+    async function loadStats() {
+      const groupsSnap = await getDocs(collection(db, "groups"));
 
-    const groupsSnap =
-  await getDocs(
-    collection(db, "groups")
-  );
-  
+      const [gamesSnap, betsSnap, memesSnap] = await Promise.all([
+        getDocs(collection(db, "games")),
+        getDocs(collection(db, "bets")),
+        getDocs(collection(db, "memes")),
+      ]);
 
-    const [
-      gamesSnap,
-      betsSnap,
-      memesSnap
+      const finishedGames = gamesSnap.docs.filter((doc) => {
+        const data = doc.data();
+        return data.resultadoA != null && data.resultadoB != null;
+      }).length;
 
-    ] = await Promise.all([
-
-      getDocs(collection(db, "games")),
-      getDocs(collection(db, "bets")),
-      getDocs(collection(db, "memes")),
-      getDocs(collection(db, "groups"))
-      
-
-    ]);
-
-
-
-    const finishedGames =
-
-      gamesSnap.docs.filter(
-
-        (doc) => {
-
-          const data =
-            doc.data();
-
-          return (
-            data.resultadoA != null &&
-            data.resultadoB != null
-          );
-
-        }
-
-      ).length;
-
-
-    const groupsStats =
-
-      groupsSnap.docs.map(
-        (groupDoc) => {
-
-      const groupId =
-        groupDoc.id;
-
-      const groupName =
-        groupDoc.data().name;
-
-      const groupBets =
-
-        betsSnap.docs.filter(
-
-          (bet) =>
-
-            bet.data().groupId ===
-            groupId
-
+      const groupsStats = groupsSnap.docs.map((groupDoc) => {
+        const groupId = groupDoc.id;
+        const groupName = groupDoc.data().name;
+        const groupBets = betsSnap.docs.filter(
+          (bet) => bet.data().groupId === groupId
         );
+        const uniqueUsers = new Set(groupBets.map((bet) => bet.data().uid));
 
-      const uniqueUsers =
-        new Set(
-
-          groupBets.map(
-
-            (bet) =>
-
-              bet.data().uid
-
-          )
-
-        );
-
-      return {
-
-        id: groupId,
-
-        name: groupName,
-
-        users:
-          uniqueUsers.size,
-
-        bets:
-          groupBets.length,
-
-        coverage:
-
-          gamesSnap.size > 0
-
-            ? Number(
-                (
-                  groupBets.length /
-                  gamesSnap.size
-                ).toFixed(1)
-              )
-
+        return {
+          id: groupId,
+          name: groupName,
+          users: uniqueUsers.size,
+          bets: groupBets.length,
+          coverage: gamesSnap.size > 0
+            ? Number((groupBets.length / gamesSnap.size).toFixed(1))
             : 0
+        };
+      }).sort((a, b) => a.name.localeCompare(b.name));
 
-      };
+      // Carrega jogos para o seletor
+      const loadedGames: Game[] = gamesSnap.docs
+        .map((doc) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            teamA: data.teamA,
+            teamB: data.teamB,
+            match: data.match || `${data.teamA} x ${data.teamB}`,
+            resultadoA: data.resultadoA,
+            resultadoB: data.resultadoB,
+          };
+        })
+        .filter((g) => g.resultadoA != null && g.resultadoB != null)
+        .sort((a, b) => a.match.localeCompare(b.match));
 
+      setGames(loadedGames);
+
+      setStats({
+        games: gamesSnap.size,
+        finishedGames,
+        memes: memesSnap.size,
+        groups: groupsStats
+      });
     }
 
-  )
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "/";
+        return;
+      }
 
-  .sort(
+      if (!ADMIN_EMAILS.includes(user.email || "")) {
+        alert("Acesso negado");
+        window.location.href = "/";
+        return;
+      }
 
-    (a, b) =>
+      loadStats();
+    });
 
-      a.name.localeCompare(
-        b.name
-      )
+    return () => unsubscribe();
+  }, []);
 
-  );
+  async function pesquisarPalpites() {
+    if (!selectedGame) return;
 
-  setStats({
+    setSearching(true);
+    setBetResults([]);
 
-    games:
-      gamesSnap.size,
-  
-    finishedGames,
-  
-    memes:
-      memesSnap.size,
-  
-    groups:
-      groupsStats
-  
-  });
+    const game = games.find((g) => g.id === selectedGame);
+    if (!game) return;
 
+    const betsSnap = await getDocs(collection(db, "bets"));
+
+    const matchKey = game.match;
+
+    const resultados: BetResult[] = betsSnap.docs
+      .filter((doc) => {
+        const bet = doc.data();
+        return (
+          bet.match === matchKey ||
+          bet.match === `${game.teamA} x ${game.teamB}`
+        );
+      })
+      .map((doc) => {
+        const bet = doc.data();
+        const points = calculatePoints({
+          apostaA: Number(bet.golsA),
+          apostaB: Number(bet.golsB),
+          resultadoA: Number(game.resultadoA),
+          resultadoB: Number(game.resultadoB),
+        });
+
+        return {
+          userName: bet.userName || bet.nome || "?",
+          golsA: bet.golsA,
+          golsB: bet.golsB,
+          points,
+          acertouPlacar:
+            Number(bet.golsA) === Number(game.resultadoA) &&
+            Number(bet.golsB) === Number(game.resultadoB),
+        };
+      })
+      .sort((a, b) => b.points - a.points);
+
+    setBetResults(resultados);
+    setSearching(false);
   }
 
-  const unsubscribe = onAuthStateChanged(
-
-    auth,
-
-    (user) => {
-
-      
-
-      if (!user) {
-
-        window.location.href = "/";
-      
-        return;
-      
-      }
-      
-      if (
-        !ADMIN_EMAILS.includes(
-          user.email || ""
-        )
-      ) {
-      
-        alert("Acesso negado");
-      
-        window.location.href = "/";
-      
-        return;
-      
-      }
-      
-      loadStats();
-
-    }
-
-  );
-
-  return () => unsubscribe();
-
-}, []);
-
+  const gameSelected = games.find((g) => g.id === selectedGame);
 
   return (
-
     <main className="min-h-screen bg-zinc-950 text-white p-6">
-
       <div className="max-w-5xl mx-auto">
 
         <div className="mb-6">
-
           <Link
             href="/"
-            className="
-              inline-flex
-              items-center
-              gap-2
-              bg-zinc-800
-              hover:bg-zinc-700
-              transition
-              px-5
-              py-3
-              rounded-2xl
-              font-bold
-            "
+            className="inline-flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 transition px-5 py-3 rounded-2xl font-bold"
           >
             ← Voltar ao Bolão
           </Link>
-
         </div>
 
         <h1 className="text-5xl font-black mb-10">
           👑 Painel Administrativo
         </h1>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        {/* PESQUISA DE PALPITES */}
+        <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-10">
+          <h2 className="text-2xl font-black mb-4">🔍 Pesquisar Palpites por Jogo</h2>
 
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <select
+              value={selectedGame}
+              onChange={(e) => {
+                setSelectedGame(e.target.value);
+                setBetResults([]);
+              }}
+              className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-white font-semibold"
+            >
+              <option value="">Selecione um jogo...</option>
+              {games.map((game) => (
+                <option key={game.id} value={game.id}>
+                  {game.match} ({game.resultadoA} x {game.resultadoB})
+                </option>
+              ))}
+            </select>
+
+            <button
+              onClick={pesquisarPalpites}
+              disabled={!selectedGame || searching}
+              className="bg-yellow-400 hover:bg-yellow-300 disabled:opacity-40 transition text-black font-black rounded-xl px-6 py-3"
+            >
+              {searching ? "Buscando..." : "Buscar"}
+            </button>
+          </div>
+
+          {betResults.length > 0 && gameSelected && (
+            <div>
+              <p className="text-zinc-400 text-sm mb-3">
+                {betResults.length} palpite(s) encontrado(s) — Resultado oficial:{" "}
+                <span className="text-white font-black">
+                  {gameSelected.resultadoA} x {gameSelected.resultadoB}
+                </span>
+              </p>
+
+              <div className="space-y-2">
+                {betResults.map((bet, i) => (
+                  <div
+                    key={i}
+                    className={`flex justify-between items-center rounded-xl px-4 py-3 border ${
+                      bet.acertouPlacar
+                        ? "bg-green-950 border-green-700"
+                        : bet.points > 0
+                        ? "bg-zinc-800 border-zinc-600"
+                        : "bg-zinc-900 border-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-lg">
+                        {bet.acertouPlacar ? "🎯" : bet.points > 0 ? "✅" : "❌"}
+                      </span>
+                      <span className="font-bold">{bet.userName}</span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <span className="text-zinc-300 font-mono">
+                        {bet.golsA} x {bet.golsB}
+                      </span>
+                      <span className={`font-black text-lg ${
+                        bet.points >= 3 ? "text-green-400" :
+                        bet.points > 0 ? "text-yellow-400" : "text-zinc-500"
+                      }`}>
+                        {bet.points} pts
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!searching && selectedGame && betResults.length === 0 && (
+            <p className="text-zinc-500 text-sm">Nenhum palpite encontrado para este jogo.</p>
+          )}
+        </div>
+
+        {/* MENU ADMIN */}
+        <div className="grid md:grid-cols-2 gap-6">
           <Link
             href="/admin"
-            className="
-              bg-blue-950
-              hover:bg-blue-900
-              transition
-              border
-              border-blue-700
-              rounded-3xl
-              p-8
-            "
+            className="bg-blue-950 hover:bg-blue-900 transition border border-blue-700 rounded-3xl p-8"
           >
-
-            <div className="text-5xl mb-5">
-              ⚽
-            </div>
-
-            <h2 className="text-3xl font-black mb-3">
-              Jogos
-            </h2>
-
-            <p className="text-zinc-300">
-              Criar, editar e organizar jogos por grupo.
-            </p>
-
+            <div className="text-5xl mb-5">⚽</div>
+            <h2 className="text-3xl font-black mb-3">Jogos</h2>
+            <p className="text-zinc-300">Criar, editar e organizar jogos por grupo.</p>
           </Link>
 
           <Link
             href="/admin/results"
-            className="
-              bg-green-950
-              hover:bg-green-900
-              transition
-              border
-              border-green-700
-              rounded-3xl
-              p-8
-            "
+            className="bg-green-950 hover:bg-green-900 transition border border-green-700 rounded-3xl p-8"
           >
-
-            <div className="text-5xl mb-5">
-              🏆
-            </div>
-
-            <h2 className="text-3xl font-black mb-3">
-              Resultados Oficiais
-            </h2>
-
-            <p className="text-zinc-300">
-              Lance placares e atualize o ranking.
-            </p>
-
+            <div className="text-5xl mb-5">🏆</div>
+            <h2 className="text-3xl font-black mb-3">Resultados Oficiais</h2>
+            <p className="text-zinc-300">Lance placares e atualize o ranking.</p>
           </Link>
 
           <Link
             href="/admin/memes"
-            className="
-              bg-purple-950
-              hover:bg-purple-900
-              transition
-              border
-              border-purple-700
-              rounded-3xl
-              p-8
-            "
+            className="bg-purple-950 hover:bg-purple-900 transition border border-purple-700 rounded-3xl p-8"
           >
-
-            <div className="text-5xl mb-5">
-              🤡
-            </div>
-
-            <h2 className="text-3xl font-black mb-3">
-              Central de Memes
-            </h2>
-
-            <p className="text-zinc-300">
-              Gerencie memes globais e personalizados.
-            </p>
-
+            <div className="text-5xl mb-5">🤡</div>
+            <h2 className="text-3xl font-black mb-3">Central de Memes</h2>
+            <p className="text-zinc-300">Gerencie memes globais e personalizados.</p>
           </Link>
 
           <Link
             href="/admin/estatisticas"
-            className="
-              bg-yellow-950
-              hover:bg-yellow-900
-              transition
-              border
-              border-yellow-700
-              rounded-3xl
-              p-8
-            "
+            className="bg-yellow-950 hover:bg-yellow-900 transition border border-yellow-700 rounded-3xl p-8"
           >
-
-            <div className="text-5xl mb-5">
-              📈
-            </div>
-
-            <h2 className="text-3xl font-black mb-3">
-              Estatísticas
-            </h2>
-
-            <p className="text-zinc-300">
-              Métricas matemáticas,
-              desempenho,
-              precisão
-              e análise do bolão.
-            </p>
-
+            <div className="text-5xl mb-5">📈</div>
+            <h2 className="text-3xl font-black mb-3">Estatísticas</h2>
+            <p className="text-zinc-300">Métricas matemáticas, desempenho, precisão e análise do bolão.</p>
           </Link>
+        </div>
 
-       </div>
-       </div>
+      </div>
     </main>
-
   );
-
 }
