@@ -6,12 +6,6 @@ export function gerarAnaliseIA(
   ranking: RankingUser[]
 ): string[] {
 
-    console.log(
-        "Ranking recebido pela IA:",
-        ranking.length
-      );
-
-
   const analises: string[] = [];
 
   if (!ranking.length) {
@@ -263,11 +257,6 @@ analises.push(
   
   }
 
-  console.log(
-    "Analises geradas:",
-    analises.length,
-    analises
-  );
   analises.push(
     `🏆 ${lider.nome} lidera atualmente a competição com ${lider.points} pontos.`
   );

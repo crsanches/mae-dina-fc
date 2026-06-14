@@ -802,7 +802,8 @@ export default function Home() {
 
 
         {/* ======================================*/}
-        {/* RESULTADOS */}
+        {/* RESULTADOS ****************************/}
+        {/* ======================================*/}
 
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
 
@@ -908,14 +909,17 @@ export default function Home() {
                       </div>
 
 
-                    <p className="font-black text-lg">
-
-                    {jogo.resultadoA != null &&
-                    jogo.resultadoB != null
-                      ? `${jogo.resultadoA} x ${jogo.resultadoB}`
-                      : "⏳"}
-
-                  </p>
+                      <p className="font-black text-lg">
+                      {jogo.resultadoA != null && jogo.resultadoB != null
+                        ? <>
+                            {jogo.resultadoA} x {jogo.resultadoB}
+                            {/* se o jogo está em andamento, mostra "ao vivo" */}
+                            {getStatusJogo(jogo.matchDate, agora) === "⚽ Jogo em andamento" && (
+                              <span className="text-xs text-green-400 ml-2 animate-pulse">● AO VIVO</span>
+                            )}
+                          </>
+                        : "⏳"}
+                    </p>
 
                     </div>
 

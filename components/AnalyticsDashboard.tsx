@@ -140,6 +140,13 @@ export default function AnalyticsPage() {
 
     });
 
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+      // Pequeno delay garante que o DOM já calculou o tamanho do container
+      const timer = setTimeout(() => setMounted(true), 100);
+      return () => clearTimeout(timer);
+    }, []);
+
   // mapa userName (nome completo) → username (apelido)
   const [nicknameMap, setNicknameMap] =
     useState<Record<string, string>>({});
@@ -1417,63 +1424,38 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
+        <h2 className="text-2xl font-black mb-5">
+          🐢 Evolução dos Palpiteiros
+        </h2>
 
-          <h2 className="text-2xl font-black mb-5">
-
-            🐢 Evolução dos Palpiteiros
-
-          </h2>
-
-          <div className="h-[350px]">
-
-            <ResponsiveContainer
-              width="100%"
-              height="100%"
+        {mounted && chartData.length > 0 && (
+          <div style={{ width: '100%', height: 350, minHeight: 350 }}>
+            <LineChart
+              width={800}
+              height={350}
+              data={chartData}
+              style={{ width: '100%' }}
             >
-
-              <LineChart
-                data={chartData}
-              >
-
-                <CartesianGrid
-                  strokeDasharray="3 3"
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="jogo" />
+              <YAxis domain={[0, "dataMax + 5"]} />
+              <Tooltip />
+              <Legend />
+              {usersToShow.map((user, index) => (
+                <Line
+                  key={user}
+                  type="monotone"
+                  dataKey={user}
+                  strokeWidth={3}
+                  dot={false}
+                  connectNulls
+                  stroke={colors[index % colors.length]}
                 />
-
-                <XAxis dataKey="jogo" />
-
-                <YAxis
-                  domain={[0, "dataMax + 5"]}
-                />
-
-                <Tooltip />
-
-                <Legend />
-
-                {usersToShow.map((user, index) => (
-
-                  <Line
-                    key={user}
-                    type="monotone"
-                    dataKey={user}
-                    strokeWidth={3}
-                    dot={false}
-                    connectNulls
-                    stroke={
-                      colors[
-                        index % colors.length
-                      ]
-                    }
-                  />
-
-                ))}
-
-              </LineChart>
-
-            </ResponsiveContainer>
-
+              ))}
+            </LineChart>
           </div>
-
-        </div>
+        )}
+      </div>
 
         <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
 

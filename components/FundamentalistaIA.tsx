@@ -80,24 +80,13 @@ export default function FundamentalistaIA() {
             activeGroupId
           );
 
-          console.log(
-            "Ranking carregado:",
-            ranking.length,
-            ranking
-          );
-
         const resultado =
           gerarAnaliseIA(
             ranking
           );
 
         setAnalises(resultado);
-        console.log(
-  "Resultado retornado:",
-  resultado.length,
-  resultado
-);
-
+       
       } catch (error) {
 
         console.error(
