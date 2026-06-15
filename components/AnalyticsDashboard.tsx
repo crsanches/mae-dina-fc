@@ -80,12 +80,12 @@ export default function AnalyticsPage() {
     almostEntry: null as [string, number] | null,
   });
 
-  const [matchAnalytics, setMatchAnalytics] = useState<any[]>([]);
+  const [matchAnalytics, setMatchAnalytics] = useState<unknown[]>([]);
 
   // Estado do Profeta das Últimas 5 Rodadas
   const [prophetData, setProphetData] = useState<{
     entry: [string, { exactHits: number; totalDistance: number; games: number }] | undefined;
-    last5: any[];
+    last5: unknown[];
   }>({ entry: undefined, last5: [] });
 
   const [mounted, setMounted] = useState(false);
