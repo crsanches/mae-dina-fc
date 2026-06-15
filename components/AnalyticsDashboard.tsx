@@ -1457,9 +1457,9 @@ export default function AnalyticsPage() {
                       borderRadius: 12,
                     }}
                     labelStyle={{ color: '#fff' }}
-                    formatter={(value: number, name: string) => [
-                      `${value} pts`,
-                      nicknameMap[name] || name,
+                    formatter={(value, name) => [
+                      `${Number(value)} pts`,
+                      nicknameMap[name as string] || (name as string),
                     ]}
                   />
                   {usersToShow.map((user, index) => (
