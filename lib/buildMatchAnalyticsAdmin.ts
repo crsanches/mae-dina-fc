@@ -24,6 +24,12 @@ export async function buildMatchAnalyticsAdmin(
 
   let exactScoreHits = 0;
 
+  const distances: {
+    username: string;
+    distance: number;
+    palpite: string;
+  }[] = [];
+
   betsSnapshot.forEach((doc) => {
 
     const bet = doc.data();
@@ -40,19 +46,57 @@ export async function buildMatchAnalyticsAdmin(
     totalAwayGoals += apostaB;
 
     if (apostaA > apostaB) {
+
       homeWins++;
+
     } else if (apostaA < apostaB) {
+
       awayWins++;
+
     } else {
+
       draws++;
+
     }
 
     if (
       apostaA === resultadoA &&
       apostaB === resultadoB
     ) {
+
       exactScoreHits++;
+
     }
+
+    const distance =
+
+      Math.abs(
+        apostaA - resultadoA
+      ) +
+
+      Math.abs(
+        apostaB - resultadoB
+      );
+
+    distances.push({
+
+      username:
+
+        bet.username ||
+
+        bet.userName ||
+
+        bet.nome ||
+
+        "Anônimo",
+
+      distance,
+
+      palpite:
+        `${apostaA}x${apostaB}`
+
+    });
+
   });
 
   if (totalBets === 0) {
@@ -62,18 +106,24 @@ export async function buildMatchAnalyticsAdmin(
   let correctPredictionCount = 0;
 
   if (resultadoA > resultadoB) {
+
     correctPredictionCount =
       homeWins;
+
   }
 
   if (resultadoA < resultadoB) {
+
     correctPredictionCount =
       awayWins;
+
   }
 
   if (resultadoA === resultadoB) {
+
     correctPredictionCount =
       draws;
+
   }
 
   const surpriseIndex =
@@ -83,6 +133,106 @@ export async function buildMatchAnalyticsAdmin(
         totalBets) *
         100
     );
+
+  const homePercent =
+    Math.round(
+      (homeWins / totalBets) * 100
+    );
+
+  const drawPercent =
+    Math.round(
+      (draws / totalBets) * 100
+    );
+
+  const awayPercent =
+    Math.round(
+      (awayWins / totalBets) * 100
+    );
+
+  let realWinner = "draw";
+
+  if (resultadoA > resultadoB) {
+    realWinner = "home";
+  }
+
+  if (resultadoA < resultadoB) {
+    realWinner = "away";
+  }
+
+  const closestUsers =
+
+    distances
+
+      .sort(
+        (a, b) =>
+          a.distance -
+          b.distance
+      )
+
+      .slice(0, 5);
+
+  const visionaryUsers: string[] =
+    [];
+
+  const lowConsensus =
+    correctPredictionCount /
+    totalBets <
+    0.20;
+
+  if (lowConsensus) {
+
+    betsSnapshot.forEach((doc) => {
+
+      const bet = doc.data();
+
+      const apostaA =
+        Number(bet.golsA);
+
+      const apostaB =
+        Number(bet.golsB);
+
+      const acertou =
+
+        (
+          resultadoA >
+            resultadoB &&
+          apostaA >
+            apostaB
+        ) ||
+
+        (
+          resultadoA <
+            resultadoB &&
+          apostaA <
+            apostaB
+        ) ||
+
+        (
+          resultadoA ===
+            resultadoB &&
+          apostaA ===
+            apostaB
+        );
+
+      if (acertou) {
+
+        visionaryUsers.push(
+
+          bet.username ||
+
+          bet.userName ||
+
+          bet.nome ||
+
+          "Anônimo"
+
+        );
+
+      }
+
+    });
+
+  }
 
   await adminDb
     .collection(
@@ -95,10 +245,26 @@ export async function buildMatchAnalyticsAdmin(
 
       totalBets,
 
+      resultadoA,
+
+      resultadoB,
+
+      realWinner,
+
+      homePercent,
+
+      drawPercent,
+
+      awayPercent,
+
       winnerPredictions: {
+
         home: homeWins,
+
         draw: draws,
-        away: awayWins,
+
+        away: awayWins
+
       },
 
       avgHomeGoals:
@@ -121,8 +287,9 @@ export async function buildMatchAnalyticsAdmin(
 
       surpriseIndex,
 
-      resultadoA,
-      resultadoB,
+      closestUsers,
+
+      visionaryUsers,
 
       updatedAt:
         new Date()
