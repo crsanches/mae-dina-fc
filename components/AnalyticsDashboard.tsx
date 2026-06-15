@@ -680,20 +680,15 @@ export default function AnalyticsPage() {
 
           .map(([user]) => user);
 
-      const visibleUsers =
+      // — busca o userName nas bets pelo uid do usuário logado
+        const currentUserBet = betsSnapshot.docs
+        .map((d) => d.data())
+        .find((bet) => bet.uid === currentUser.uid && bet.groupId === currentGroupId);
 
-        Array.from(
+        const currentUserName = currentUserBet?.userName || userSnap.data().nome || currentUser.displayName || "";
 
-          new Set([
-
-            ...topUsers,
-
-            ...bottomUsers,
-
-            userSnap.data().nome || currentUser.displayName || ""
-
-          ])
-
+        const visibleUsers = Array.from(
+        new Set([...topUsers, ...bottomUsers, currentUserName])
         );
 
 
@@ -1424,38 +1419,66 @@ export default function AnalyticsPage() {
         </div>
 
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
-        <h2 className="text-2xl font-black mb-5">
-          🐢 Evolução dos Palpiteiros
-        </h2>
+          <h2 className="text-2xl font-black mb-5">
+            🐢 Evolução dos Palpiteiros
+          </h2>
 
-        {mounted && chartData.length > 0 && (
-          <div style={{ width: '100%', height: 350, minHeight: 350 }}>
-            <LineChart
-              width={800}
-              height={350}
-              data={chartData}
-              style={{ width: '100%' }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="jogo" />
-              <YAxis domain={[0, "dataMax + 5"]} />
-              <Tooltip />
-              <Legend />
-              {usersToShow.map((user, index) => (
-                <Line
-                  key={user}
-                  type="monotone"
-                  dataKey={user}
-                  strokeWidth={3}
-                  dot={false}
-                  connectNulls
-                  stroke={colors[index % colors.length]}
-                />
-              ))}
-            </LineChart>
-          </div>
-        )}
-      </div>
+          {mounted && chartData.length > 0 && (
+            <div style={{ width: '100%' }}>
+              {/* Legenda como lista vertical */}
+              <div className="flex flex-wrap gap-3 mb-4">
+                {usersToShow.map((user, index) => (
+                  <div key={user} className="flex items-center gap-2">
+                    <div
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: '50%',
+                        backgroundColor: colors[index % colors.length],
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span className="text-sm text-zinc-300">
+                      {nicknameMap[user] || user}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              <ResponsiveContainer width="100%" height={350}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#3f3f46" />
+                  <XAxis dataKey="jogo" stroke="#a1a1aa" />
+                  <YAxis domain={[0, 'dataMax + 5']} stroke="#a1a1aa" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: '#18181b',
+                      border: '1px solid #3f3f46',
+                      borderRadius: 12,
+                    }}
+                    labelStyle={{ color: '#fff' }}
+                    formatter={(value: number, name: string) => [
+                      `${value} pts`,
+                      nicknameMap[name] || name,
+                    ]}
+                  />
+                  {usersToShow.map((user, index) => (
+                    <Line
+                      key={user}
+                      type="monotone"
+                      dataKey={user}
+                      strokeWidth={3}
+                      dot={false}
+                      connectNulls
+                      stroke={colors[index % colors.length]}
+                      legendType="none"
+                    />
+                  ))}
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
 
         <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
 
