@@ -209,7 +209,8 @@ export async function GET() {
         await buildMatchAnalyticsAdmin(
           `${localGame.data().teamA} x ${localGame.data().teamB}`,
           Number(apiGame.intHomeScore),
-          Number(apiGame.intAwayScore)
+          Number(apiGame.intAwayScore),
+          localGame.data().groupId
         );
       
       }
@@ -237,7 +238,8 @@ export async function GET() {
         await buildMatchAnalyticsAdmin(
           `${localGame.data().teamA} x ${localGame.data().teamB}`,
           Number(event.intHomeScore),
-          Number(event.intAwayScore)
+          Number(event.intAwayScore),
+          localGame.data().groupId 
         );
       
       }
