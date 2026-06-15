@@ -6,6 +6,10 @@ import { db } from "../../../lib/firebase";
 import Link from "next/link";
 
 import {
+  buildMatchAnalytics
+} from "../../../lib/buildMatchAnalytics";
+
+import {
   collection,
   getDocs,
   updateDoc,
@@ -113,6 +117,13 @@ export default function AdminResultsPage() {
 
       await updateDoc(doc(db, "bets", betDoc.id), { points });
     }
+
+    await buildMatchAnalytics(
+      match,
+      resultadoA,
+      resultadoB
+    );
+
 
     alert("Resultado salvo e apostas atualizadas 😎");
     carregarJogos();

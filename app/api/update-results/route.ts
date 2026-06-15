@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebaseAdmin";
+import {
+  buildMatchAnalyticsAdmin
+}
+from "@/lib/buildMatchAnalyticsAdmin";
 
 type ApiGame = {
   strStatus: string;
@@ -198,6 +202,18 @@ export async function GET() {
         finished: apiGame.strStatus === "FT",
         status: apiGame.strStatus,
       });
+      if (
+        apiGame.strStatus === "FT"
+      ) {
+      
+        await buildMatchAnalyticsAdmin(
+          `${localGame.data().teamA} x ${localGame.data().teamB}`,
+          Number(apiGame.intHomeScore),
+          Number(apiGame.intAwayScore)
+        );
+      
+      }
+
     }
 
     // 2. Jogos com idEventSportsDB — lookup direto
@@ -214,6 +230,18 @@ export async function GET() {
         finished: event.strStatus === "FT",
         status: event.strStatus,
       });
+      if (
+        event.strStatus === "FT"
+      ) {
+      
+        await buildMatchAnalyticsAdmin(
+          `${localGame.data().teamA} x ${localGame.data().teamB}`,
+          Number(event.intHomeScore),
+          Number(event.intAwayScore)
+        );
+      
+      }
+
     }
 
     return NextResponse.json({
