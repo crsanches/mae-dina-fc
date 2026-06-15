@@ -124,7 +124,7 @@ export default function FundamentalistaIA() {
 
   // iniciando temporizador de mensagens
 
-  const analisesPorPagina = 3;
+  const analisesPorPagina = 5;
 
   const totalPaginas =
     Math.max(

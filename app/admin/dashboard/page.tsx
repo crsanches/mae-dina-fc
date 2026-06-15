@@ -14,6 +14,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../lib/firebase";
 
 import { calculatePoints } from "../../../lib/calculatePoints";
+import { FASES_COPA } from "../../../lib/copas";
 
 type GroupStats = {
   id: string;
@@ -35,6 +36,7 @@ type Game = {
   teamA: string;
   teamB: string;
   match: string;
+  fase: string;
   resultadoA?: number;
   resultadoB?: number;
 };
@@ -45,6 +47,12 @@ type BetResult = {
   golsB: string;
   points: number;
   acertouPlacar: boolean;
+  groupId: string;
+};
+
+type League = {
+  id: string;
+  name: string;
 };
 
 export default function AdminDashboard() {
@@ -58,9 +66,10 @@ export default function AdminDashboard() {
     groups: []
   });
 
-  // Pesquisa de palpites
   const [games, setGames] = useState<Game[]>([]);
+  const [leagues, setLeagues] = useState<League[]>([]);
   const [selectedGame, setSelectedGame] = useState<string>("");
+  const [selectedLeague, setSelectedLeague] = useState<string>("all");
   const [betResults, setBetResults] = useState<BetResult[]>([]);
   const [searching, setSearching] = useState(false);
 
@@ -98,7 +107,6 @@ export default function AdminDashboard() {
         };
       }).sort((a, b) => a.name.localeCompare(b.name));
 
-      // Carrega jogos para o seletor
       const loadedGames: Game[] = gamesSnap.docs
         .map((doc) => {
           const data = doc.data();
@@ -107,6 +115,7 @@ export default function AdminDashboard() {
             teamA: data.teamA,
             teamB: data.teamB,
             match: data.match || `${data.teamA} x ${data.teamB}`,
+            fase: data.fase || "Grupos",
             resultadoA: data.resultadoA,
             resultadoB: data.resultadoB,
           };
@@ -114,7 +123,13 @@ export default function AdminDashboard() {
         .filter((g) => g.resultadoA != null && g.resultadoB != null)
         .sort((a, b) => a.match.localeCompare(b.match));
 
+      const loadedLeagues: League[] = groupsSnap.docs.map((doc) => ({
+        id: doc.id,
+        name: doc.data().name || doc.id,
+      })).sort((a, b) => a.name.localeCompare(b.name));
+
       setGames(loadedGames);
+      setLeagues(loadedLeagues);
 
       setStats({
         games: gamesSnap.size,
@@ -153,13 +168,11 @@ export default function AdminDashboard() {
 
     const betsSnap = await getDocs(collection(db, "bets"));
 
-    const matchKey = game.match;
-
     const resultados: BetResult[] = betsSnap.docs
       .filter((doc) => {
         const bet = doc.data();
         return (
-          bet.match === matchKey ||
+          bet.match === game.match ||
           bet.match === `${game.teamA} x ${game.teamB}`
         );
       })
@@ -180,6 +193,7 @@ export default function AdminDashboard() {
           acertouPlacar:
             Number(bet.golsA) === Number(game.resultadoA) &&
             Number(bet.golsB) === Number(game.resultadoB),
+          groupId: bet.groupId || "",
         };
       })
       .sort((a, b) => b.points - a.points);
@@ -189,6 +203,11 @@ export default function AdminDashboard() {
   }
 
   const gameSelected = games.find((g) => g.id === selectedGame);
+
+  // Filtra por liga selecionada
+  const betResultsFiltrados = selectedLeague === "all"
+    ? betResults
+    : betResults.filter((b) => b.groupId === selectedLeague);
 
   return (
     <main className="min-h-screen bg-zinc-950 text-white p-6">
@@ -211,7 +230,8 @@ export default function AdminDashboard() {
         <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-10">
           <h2 className="text-2xl font-black mb-4">🔍 Pesquisar Palpites por Jogo</h2>
 
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          <div className="flex flex-col sm:flex-row gap-3 mb-3">
+            {/* Seletor de jogo agrupado por fase */}
             <select
               value={selectedGame}
               onChange={(e) => {
@@ -221,11 +241,19 @@ export default function AdminDashboard() {
               className="flex-1 bg-zinc-800 border border-zinc-600 rounded-xl px-4 py-3 text-white font-semibold"
             >
               <option value="">Selecione um jogo...</option>
-              {games.map((game) => (
-                <option key={game.id} value={game.id}>
-                  {game.match} ({game.resultadoA} x {game.resultadoB})
-                </option>
-              ))}
+              {FASES_COPA.map((fase) => {
+                const jogosDaFase = games.filter((g) => g.fase === fase.id);
+                if (jogosDaFase.length === 0) return null;
+                return (
+                  <optgroup key={fase.id} label={fase.nome}>
+                    {jogosDaFase.map((game) => (
+                      <option key={game.id} value={game.id}>
+                        {game.match} ({game.resultadoA} x {game.resultadoB})
+                      </option>
+                    ))}
+                  </optgroup>
+                );
+              })}
             </select>
 
             <button
@@ -237,17 +265,50 @@ export default function AdminDashboard() {
             </button>
           </div>
 
-          {betResults.length > 0 && gameSelected && (
+          {/* Filtro por liga — aparece só após buscar */}
+          {betResults.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              <button
+                onClick={() => setSelectedLeague("all")}
+                className={`px-3 py-1.5 rounded-xl text-sm font-bold transition ${
+                  selectedLeague === "all"
+                    ? "bg-yellow-400 text-black"
+                    : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                Todas as ligas ({betResults.length})
+              </button>
+              {leagues.map((league) => {
+                const count = betResults.filter((b) => b.groupId === league.id).length;
+                if (count === 0) return null;
+                return (
+                  <button
+                    key={league.id}
+                    onClick={() => setSelectedLeague(league.id)}
+                    className={`px-3 py-1.5 rounded-xl text-sm font-bold transition ${
+                      selectedLeague === league.id
+                        ? "bg-yellow-400 text-black"
+                        : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                    }`}
+                  >
+                    {league.name} ({count})
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {betResultsFiltrados.length > 0 && gameSelected && (
             <div>
               <p className="text-zinc-400 text-sm mb-3">
-                {betResults.length} palpite(s) encontrado(s) — Resultado oficial:{" "}
+                {betResultsFiltrados.length} palpite(s) — Resultado oficial:{" "}
                 <span className="text-white font-black">
                   {gameSelected.resultadoA} x {gameSelected.resultadoB}
                 </span>
               </p>
 
               <div className="space-y-2">
-                {betResults.map((bet, i) => (
+                {betResultsFiltrados.map((bet, i) => (
                   <div
                     key={i}
                     className={`flex justify-between items-center rounded-xl px-4 py-3 border ${
@@ -329,4 +390,4 @@ export default function AdminDashboard() {
       </div>
     </main>
   );
-}
+} 

@@ -9,7 +9,8 @@ const db = admin.firestore();
 
 async function updateUsername() {
   const snapshot = await db.collection("bets")
-    .where("uid", "==", "3jqD2ezE1JRataognzD7u1cnXKh1")
+    //.where("uid", "==", "3jqD2ezE1JRataognzD7u1cnXKh1")  
+    .where("uid", "==", "7Ffs8WGcmaWGailJk9Mb4WKV1xq2")
     .get();
 
   if (snapshot.empty) {
@@ -20,7 +21,8 @@ async function updateUsername() {
   const batch = db.batch();
 
   snapshot.forEach((doc) => {
-    batch.update(doc.ref, { username: "AvalloNini" });
+    //batch.update(doc.ref, { username: "AvalloNini" });
+    batch.update(doc.ref, { username: "Líder da porra toda!!!" });
   });
 
   await batch.commit();
