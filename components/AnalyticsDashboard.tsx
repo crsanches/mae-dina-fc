@@ -674,7 +674,7 @@ export default function AnalyticsPage() {
           </div>
         </div>
 
-        {/* Cards de analytics por jogo */}
+        {/* Cards de analytics por jogo 
         <div className="grid md:grid-cols-2 gap-4 mb-6">
 
           {biggestZebra && (
@@ -762,7 +762,7 @@ export default function AnalyticsPage() {
             </div>
           )}
 
-        </div>
+        </div> */}
 
         {/* Gráfico */}
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
