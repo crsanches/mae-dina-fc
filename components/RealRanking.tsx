@@ -2,6 +2,7 @@
 
 import {
   useEffect,
+  useRef,
   useState
 } from "react";
 
@@ -49,6 +50,9 @@ export default function RealRanking() {
 
   const [expandido, setExpandido] =
     useState(false);
+
+  // Ref para o container do ranking — usado para voltar ao topo ao recolher
+  const rankingRef = useRef<HTMLDivElement>(null);
 
   // =========================
   // CARREGA RANKING
@@ -143,11 +147,27 @@ export default function RealRanking() {
   const temMais = rankingExibido.length > listaVisivelCount;
 
   // =========================
+  // TOGGLE EXPANDIR / RECOLHER
+  // =========================
+
+  function handleToggle() {
+    if (expandido) {
+      // Recolhe e volta para o topo do componente
+      setExpandido(false);
+      setTimeout(() => {
+        rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50); // pequeno delay para o DOM recolher antes do scroll
+    } else {
+      setExpandido(true);
+    }
+  }
+
+  // =========================
   // RENDER
   // =========================
 
   return (
-    <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
+    <div ref={rankingRef} className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
 
       <h2 className="text-xl font-black mb-4">{getTituloRanking()}</h2>
 
@@ -256,7 +276,7 @@ export default function RealRanking() {
       {/* BOTÃO EXPANDIR / RECOLHER */}
       {temMais && (
         <button
-          onClick={() => setExpandido(!expandido)}
+          onClick={handleToggle}
           className="
             mt-4 w-full
             bg-zinc-800 hover:bg-zinc-700
