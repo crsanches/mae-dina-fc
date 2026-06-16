@@ -478,104 +478,57 @@ if (
 
   useEffect(() => {
 
-    let unsubscribeBets:
-      (() => void) | undefined;
-
-      const unsubscribeAuth =
-      onAuthStateChanged(
-    
-        auth,
-    
-        async (user) => {
-    
-          if (!user) {
-    
-            setData({
-    
-              position: 0,
-    
-              points: 0
-    
-            });
-    
-            setBetHistory([]);
-    
-            return;
-    
-          }
-    
-          const userRef =
-            doc(
-              db,
-              "users",
-              user.uid
-            );
-    
-          const userSnap =
-            await getDoc(userRef);
-    
-          if (!userSnap.exists()) {
-            return;
-          }
-    
-          const currentGroupId =
-            userSnap.data().activeGroupId;
-    
-          if (!currentGroupId) {
-            return;
-          }
-    
-          // carrega imediatamente
-    
-          carregarStats();
-    
-          // escuta somente apostas da liga atual
-    
-          unsubscribeBets =
-            onSnapshot(
-    
-              query(
-    
-                collection(
-                  db,
-                  "bets"
-                ),
-    
-                where(
-                  "groupId",
-                  "==",
-                  currentGroupId
-                )
-    
-              ),
-              (snapshot) => {
-
-                
-    
-                carregarStats();
-    
-              }
-    
-            );
-    
+    let unsubscribeBets: (() => void) | undefined;
+    let unsubscribeGames: (() => void) | undefined; // 👈 NOVO
+  
+    const unsubscribeAuth = onAuthStateChanged(
+      auth,
+      async (user) => {
+        if (!user) {
+          setData({ position: 0, points: 0 });
+          setBetHistory([]);
+          return;
         }
-    
-      );
-
-    return () => {
-
-      unsubscribeAuth();
-
-      if (
-        unsubscribeBets
-      ) {
-
-        unsubscribeBets();
-
+  
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+  
+        if (!userSnap.exists()) return;
+  
+        const currentGroupId = userSnap.data().activeGroupId;
+  
+        if (!currentGroupId) return;
+  
+        // Carrega imediatamente
+        carregarStats();
+  
+        // Escuta apostas da liga atual
+        unsubscribeBets = onSnapshot(
+          query(
+            collection(db, "bets"),
+            where("groupId", "==", currentGroupId)
+          ),
+          () => {
+            carregarStats();
+          }
+        );
+  
+        // 👇 NOVO: Escuta mudanças nos jogos (resultados)
+        unsubscribeGames = onSnapshot(
+          collection(db, "games"),
+          () => {
+            carregarStats();
+          }
+        );
       }
-
+    );
+  
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeBets) unsubscribeBets();
+      if (unsubscribeGames) unsubscribeGames(); // 👈 NOVO
     };
-
+  
   }, []);
 
 
