@@ -113,7 +113,7 @@ export default function AnalyticsPage() {
   // Estado do Profeta das Últimas 5 Rodadas
   const [prophetData, setProphetData] = useState<{
     entry: [string, { exactHits: number; totalDistance: number; games: number }] | undefined;
-    last5: any[];
+    last5: MatchAnalytics[];
   }>({ entry: undefined, last5: [] });
 
   const [mounted, setMounted] = useState(false);
