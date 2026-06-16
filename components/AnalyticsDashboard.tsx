@@ -33,6 +33,34 @@ import {
   calculatePoints
 } from "../lib/calculatePoints";
 
+type UserDistance = {
+  username: string;
+  distance: number;
+  exactHit: number;
+  palpite: string;
+};
+
+type MatchAnalytics = {
+  match: string;
+  groupId: string;
+  totalBets: number;
+  resultadoA: number;
+  resultadoB: number;
+  realWinner: string;
+  homePercent: number;
+  drawPercent: number;
+  awayPercent: number;
+  winnerPredictions: { home: number; draw: number; away: number };
+  avgHomeGoals: number;
+  avgAwayGoals: number;
+  exactScoreHits: number;
+  surpriseIndex: number;
+  closestUsers: UserDistance[];
+  allUserDistances: UserDistance[];
+  visionaryUsers: string[];
+  updatedAt: { toMillis?: () => number } | string | Date;
+};
+
 type StatItem = {
   user: string;
   value: number;
@@ -80,12 +108,12 @@ export default function AnalyticsPage() {
     almostEntry: null as [string, number] | null,
   });
 
-  const [matchAnalytics, setMatchAnalytics] = useState<unknown[]>([]);
+  const [matchAnalytics, setMatchAnalytics] = useState<MatchAnalytics[]>([]);
 
   // Estado do Profeta das Últimas 5 Rodadas
   const [prophetData, setProphetData] = useState<{
     entry: [string, { exactHits: number; totalDistance: number; games: number }] | undefined;
-    last5: unknown[];
+    last5: any[];
   }>({ entry: undefined, last5: [] });
 
   const [mounted, setMounted] = useState(false);
@@ -119,7 +147,7 @@ export default function AnalyticsPage() {
           getDocs(collection(db, "users")),
         ]);
 
-      const analyticsData = analyticsSnapshot.docs.map((doc) => doc.data());
+      const analyticsData = analyticsSnapshot.docs.map((doc) => doc.data() as MatchAnalytics);
       setMatchAnalytics(analyticsData);
 
       // ── Mapa nome → apelido ──
@@ -386,8 +414,8 @@ export default function AnalyticsPage() {
       const last5Matches = [...analyticsData]
         .filter((m) => m.updatedAt && m.allUserDistances?.length)
         .sort((a, b) => {
-          const tsA = a.updatedAt?.toMillis?.() ?? new Date(a.updatedAt).getTime();
-          const tsB = b.updatedAt?.toMillis?.() ?? new Date(b.updatedAt).getTime();
+          const getTs = (u: MatchAnalytics["updatedAt"]) => typeof u === "object" && u !== null && "toMillis" in u && (u as {toMillis?: () => number}).toMillis ? (u as {toMillis: () => number}).toMillis() : new Date(u as string | Date).getTime(); const tsA = getTs(a.updatedAt);
+          const tsB = getTs(b.updatedAt);
           return tsB - tsA;
         })
         .slice(0, 5);
