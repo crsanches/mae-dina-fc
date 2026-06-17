@@ -83,6 +83,9 @@ const ACCENTS: Record<Accent, { card: string; textBright: string }> = {
   lime: { card: "from-lime-950 to-zinc-900 border border-lime-700", textBright: "text-lime-400" },
 };
 
+
+
+
 // ────────────────────────────────────────────────────────────
 // Union de todos os cards de insight possíveis
 // ────────────────────────────────────────────────────────────
@@ -225,6 +228,8 @@ function buildStreaks(matches: MatchAnalytics[]): StreakInfo[] {
   });
   return result;
 }
+
+
 
 // ────────────────────────────────────────────────────────────
 // Builders: cada um lê os dados e devolve um card pronto, ou
@@ -885,6 +890,13 @@ function renderCard(card: InsightCard) {
 const ROTATION_INTERVAL_MS = 60_000;
 
 export default function MatchInsightCards() {
+
+  // criando const para girar cards na tela
+
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+
   const [insights, setInsights] = useState<InsightCard[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -926,12 +938,44 @@ export default function MatchInsightCards() {
   const goTo = (index: number) => {
     setActiveIndex(((index % insights.length) + insights.length) % insights.length);
   };
+  // pra girar cards
+
+const minSwipeDistance = 50;
+
+const onTouchStart = (e: React.TouchEvent) => {
+  setTouchEnd(null);
+  setTouchStart(e.targetTouches[0].clientX);
+};
+
+const onTouchMove = (e: React.TouchEvent) => {
+  setTouchEnd(e.targetTouches[0].clientX);
+};
+
+const onTouchEnd = () => {
+  if (!touchStart || !touchEnd) return;
+
+  const distance = touchStart - touchEnd;
+
+  const isLeftSwipe = distance > minSwipeDistance;
+  const isRightSwipe = distance < -minSwipeDistance;
+
+  if (isLeftSwipe) {
+    goTo(activeIndex + 1);
+  }
+
+  if (isRightSwipe) {
+    goTo(activeIndex - 1);
+  }
+};
 
   return (
     <div
-      className="flex flex-col gap-3"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+    className="flex flex-col gap-3"
+    onMouseEnter={() => setPaused(true)}
+    onMouseLeave={() => setPaused(false)}
+    onTouchStart={onTouchStart}
+    onTouchMove={onTouchMove}
+    onTouchEnd={onTouchEnd}
     >
       {renderCard(card)}
 
