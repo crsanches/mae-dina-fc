@@ -625,8 +625,28 @@ function CardShell({
   children: React.ReactNode;
 }) {
   const styles = ACCENTS[accent];
+
+
+// ────────────────────────────────────────────────────────────
+// renderizacao
+// ────────────────────────────────────────────────────────────
+
+
+
+
   return (
-    <div className={`bg-gradient-to-br ${styles.card} rounded-3xl p-5 min-h-[200px]`}>
+    <div
+    className={`
+      bg-gradient-to-br
+      ${styles.card}
+      rounded-3xl
+      p-5
+      h-[280px]
+      flex
+      flex-col
+      overflow-y-auto
+    `}
+  >
       <h3 className="text-xl font-black mb-1">
         {emoji} {title}
       </h3>
@@ -953,9 +973,17 @@ export default function MatchInsightCards() {
             );
   
             const analyticsData =
-              snapshot.docs.map(
+            snapshot.docs
+            // Ignora analytics antigos gerados pelo buildMatchAnalyticsAdmin
+              .filter((d) => !d.id.includes("___"))
+              .map(
                 (d) =>
                   d.data() as MatchAnalytics
+              );
+
+              console.log(
+                "TOTAL ANALYTICS DO GRUPO:",
+                analyticsData.length
               );
   
             setInsights(

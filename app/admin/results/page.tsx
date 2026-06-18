@@ -1,25 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-import { db } from "../../../lib/firebase";
+import { auth, db } from "../../../lib/firebase";
 import Link from "next/link";
-
-import {
-  buildMatchAnalytics
-} from "../../../lib/buildMatchAnalytics";
-
+import { buildMatchAnalytics } from "../../../lib/buildMatchAnalytics";
 import {
   collection,
   getDocs,
   updateDoc,
   doc,
   query,
-  where
+  where,
+  getDoc
 } from "firebase/firestore";
-
-import { calculatePoints }
-from "../../../lib/calculatePoints";
+import { calculatePoints } from "../../../lib/calculatePoints";
 
 type Game = {
   id: string;
@@ -38,6 +32,7 @@ export default function AdminResultsPage() {
 
   const [games, setGames] = useState<Game[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
+  const [groupId, setGroupId] = useState<string | null>(null);
 
   const grupos = Array.from(
     new Set(games.map((g) => g.grupo || "Sem Grupo"))
@@ -48,6 +43,14 @@ export default function AdminResultsPage() {
   const jogosFiltrados = activeGroup
     ? games.filter((g) => (g.grupo || "Sem Grupo") === activeGroup)
     : [];
+
+  async function carregarGroupId() {
+    const currentUser = auth.currentUser;
+    if (!currentUser) return;
+    const userSnap = await getDoc(doc(db, "users", currentUser.uid));
+    if (!userSnap.exists()) return;
+    setGroupId(userSnap.data().activeGroupId ?? null);
+  }
 
   async function carregarJogos() {
     const snapshot = await getDocs(collection(db, "games"));
@@ -71,8 +74,71 @@ export default function AdminResultsPage() {
 
     setGames(loadedGames);
   }
+  async function reprocessarTodos() {
+    if (!groupId) {
+      alert("Grupo não identificado. Tente recarregar a página 😥");
+      return;
+    }
+  
+    const jogosComResultado = games.filter(
+      (g) => g.resultadoA != null && g.resultadoB != null
+    );
+  
+    if (jogosComResultado.length === 0) {
+      alert("Nenhum jogo com resultado encontrado.");
+      return;
+    }
+  
+    const confirmou = confirm(
+      `Reprocessar ${jogosComResultado.length} jogos? Isso vai atualizar todos os analytics e pontos.`
+    );
+  
+    if (!confirmou) return;
+  
+    let sucesso = 0;
+    let falha = 0;
+  
+    for (const game of jogosComResultado) {
+      try {
+        const match = `${game.teamA} x ${game.teamB}`;
+        const resultadoA = game.resultadoA as number;
+        const resultadoB = game.resultadoB as number;
+  
+        const betsQuery = query(
+          collection(db, "bets"),
+          where("match", "==", match),
+          where("groupId", "==", groupId)
+        );
+  
+        const betsSnapshot = await getDocs(betsQuery);
+  
+        for (const betDoc of betsSnapshot.docs) {
+          const bet = betDoc.data();
+          const points = calculatePoints({
+            apostaA: Number(bet.golsA),
+            apostaB: Number(bet.golsB),
+            resultadoA,
+            resultadoB,
+          });
+          await updateDoc(doc(db, "bets", betDoc.id), { points });
+        }
+  
+        await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
+  
+        sucesso++;
+        console.log(`✅ ${match} reprocessado (${sucesso}/${jogosComResultado.length})`);
+      } catch (err) {
+        falha++;
+        console.error(`❌ Erro em ${game.teamA} x ${game.teamB}:`, err);
+      }
+    }
+  
+    alert(`Reprocessamento concluído!\n✅ ${sucesso} jogos atualizados\n❌ ${falha} erros`);
+    carregarJogos();
+  }
 
   useEffect(() => {
+    carregarGroupId();
     const timeout = setTimeout(() => {
       carregarJogos();
     }, 0);
@@ -84,49 +150,64 @@ export default function AdminResultsPage() {
     resultadoA: number,
     resultadoB: number
   ) {
-    await updateDoc(doc(db, "games", gameId), {
-      resultadoA,
-      resultadoB,
-    });
-
-    const game = games.find((g) => g.id === gameId);
-
-    if (!game) {
-      alert("Jogo não encontrado 😥");
+    console.log("🟡 salvarResultado iniciado", { gameId, resultadoA, resultadoB });
+  
+    if (!groupId) {
+      alert("Grupo não identificado. Tente recarregar a página 😥");
+      console.error("❌ groupId ausente");
       return;
     }
-
+  
+    console.log("✅ groupId:", groupId);
+  
+    await updateDoc(doc(db, "games", gameId), { resultadoA, resultadoB });
+    console.log("✅ game atualizado");
+  
+    const game = games.find((g) => g.id === gameId);
+    if (!game) {
+      alert("Jogo não encontrado 😥");
+      console.error("❌ game não encontrado no estado");
+      return;
+    }
+  
     const match = `${game.teamA} x ${game.teamB}`;
-
+    console.log("✅ match:", match);
+  
     const betsQuery = query(
       collection(db, "bets"),
-      where("match", "==", match)
+      where("match", "==", match),
+      where("groupId", "==", groupId)
     );
-
+  
     const betsSnapshot = await getDocs(betsQuery);
-
+    console.log("✅ bets encontradas:", betsSnapshot.size);
+  
     for (const betDoc of betsSnapshot.docs) {
       const bet = betDoc.data();
-
       const points = calculatePoints({
         apostaA: Number(bet.golsA),
         apostaB: Number(bet.golsB),
         resultadoA,
         resultadoB,
       });
-
       await updateDoc(doc(db, "bets", betDoc.id), { points });
     }
-
-    await buildMatchAnalytics(
-      match,
-      resultadoA,
-      resultadoB
-    );
-
-
+  
+    console.log("✅ pontos atualizados, chamando buildMatchAnalytics...");
+  
+    await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
+  
+    console.log("✅ buildMatchAnalytics concluído");
+  
     alert("Resultado salvo e apostas atualizadas 😎");
     carregarJogos();
+
+
+
+
+
+   
+
   }
 
   return (
@@ -152,6 +233,24 @@ export default function AdminResultsPage() {
         <h1 className="text-2xl font-black mb-4">
           🏆 Resultados Oficiais
         </h1>
+
+    
+
+        {/* BOTÃO REPROCESSAR */}
+        <button
+          onClick={reprocessarTodos}
+          disabled={!groupId}
+          className="mb-6 w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition text-white font-black rounded-xl px-4 py-3 text-sm"
+        >
+          🔄 Reprocessar todos os resultados
+        </  button>
+
+        {/* AVISO SE groupId NAO CARREGOU */}
+        {!groupId && (
+          <p className="text-yellow-400 text-sm mb-4 font-bold">
+            ⚠️ Carregando grupo do administrador...
+          </p>
+        )}
 
         {/* SELETOR DE GRUPO */}
         <div className="mb-4">
