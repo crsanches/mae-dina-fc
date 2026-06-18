@@ -814,7 +814,7 @@ function renderCard(card: InsightCard) {
               <p className="text-xs text-zinc-400">gols reais</p>
             </div>
           </div>
-          <p className="text-4xl font-black text-teal-400 mt-2">
+          <p className="text-2xl font-black text-teal-400 mt-2">
             Diferença de só {card.diff.toFixed(1)} gol{card.diff !== 1 ? "s" : ""} — o grupo sentiu o jogo
           </p>
         </CardShell>
@@ -968,9 +968,7 @@ export default function MatchInsightCards() {
           q,
           (snapshot) => {
   
-            console.log(
-              "🔄 Analytics atualizados"
-            );
+           
   
             const analyticsData =
             snapshot.docs
@@ -981,10 +979,7 @@ export default function MatchInsightCards() {
                   d.data() as MatchAnalytics
               );
 
-              console.log(
-                "TOTAL ANALYTICS DO GRUPO:",
-                analyticsData.length
-              );
+             
   
             setInsights(
               buildInsights(
