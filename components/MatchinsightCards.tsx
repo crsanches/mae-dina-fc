@@ -4,6 +4,9 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import { collection, doc, getDoc, getDocs, query, where } from "firebase/firestore";
+import {
+  onSnapshot
+} from "firebase/firestore";
 
 // ────────────────────────────────────────────────────────────
 // Tipos de dados (espelham os documentos de analytics_matches)
@@ -902,25 +905,82 @@ export default function MatchInsightCards() {
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
+
+    let unsubscribe:
+      (() => void) | undefined;
+  
     async function carregar() {
-      const currentUser = auth.currentUser;
+  
+      const currentUser =
+        auth.currentUser;
+  
       if (!currentUser) return;
-
-      const userRef = doc(db, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
+  
+      const userRef =
+        doc(
+          db,
+          "users",
+          currentUser.uid
+        );
+  
+      const userSnap =
+        await getDoc(userRef);
+  
       if (!userSnap.exists()) return;
-
-      const currentGroupId = userSnap.data().activeGroupId;
-
-      const analyticsSnapshot = await getDocs(
-        query(collection(db, "analytics_matches"), where("groupId", "==", currentGroupId))
+  
+      const currentGroupId =
+        userSnap.data().activeGroupId;
+  
+      const q = query(
+        collection(
+          db,
+          "analytics_matches"
+        ),
+        where(
+          "groupId",
+          "==",
+          currentGroupId
+        )
       );
-
-      const analyticsData = analyticsSnapshot.docs.map((d) => d.data() as MatchAnalytics);
-      setInsights(buildInsights(analyticsData));
+  
+      unsubscribe =
+        onSnapshot(
+          q,
+          (snapshot) => {
+  
+            console.log(
+              "🔄 Analytics atualizados"
+            );
+  
+            const analyticsData =
+              snapshot.docs.map(
+                (d) =>
+                  d.data() as MatchAnalytics
+              );
+  
+            setInsights(
+              buildInsights(
+                analyticsData
+              )
+            );
+  
+          }
+        );
+  
     }
-
+  
     carregar();
+  
+    return () => {
+  
+      if (unsubscribe) {
+  
+        unsubscribe();
+  
+      }
+  
+    };
+  
   }, []);
 
   useEffect(() => {
