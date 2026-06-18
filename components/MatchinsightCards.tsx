@@ -665,7 +665,7 @@ function renderCard(card: InsightCard) {
           <p className="font-black text-lg mt-1 text-center">
             Resultado: {card.match.resultadoA} x {card.match.resultadoB}
           </p>
-          <p className="text-4xl font-black text-red-400 mt-3">{card.match.surpriseIndex}% dos palpiteiros erraram o <span className="text-red-400 font-black">vencedor </span></p>
+          <p className="text-2xl font-black text-red-400 mt-3">{card.match.surpriseIndex}% dos palpiteiros erraram o <span className="text-red-400 font-black">vencedor </span></p>
          
           <div className="flex gap-2 mt-3 text-xs text-zinc-400">
             <span>🏠 {card.match.homePercent}%</span>
@@ -682,7 +682,7 @@ function renderCard(card: InsightCard) {
           <p className="font-black text-lg mt-1 text-center">
             Resultado: {card.match.resultadoA} x {card.match.resultadoB}
           </p>
-          <p className="text-4xl font-black text-green-400 mt-3">{100 - card.match.surpriseIndex}% dos palpiteiros acertaram o <span className="text-green-400 font-black">vencedor</span> (não o
+          <p className="text-2xl font-black text-green-400 mt-3">{100 - card.match.surpriseIndex}% dos palpiteiros acertaram o <span className="text-green-400 font-black">vencedor</span> (não o
             placar exato)</p>
          
           <div className="flex gap-2 mt-3 text-xs text-zinc-400">
@@ -700,7 +700,7 @@ function renderCard(card: InsightCard) {
           <p className="font-black text-lg mt-1 text-center">
             Resultado: {card.match.resultadoA} x {card.match.resultadoB}
           </p>
-          <p className="text-4xl font-black text-yellow-400 mt-3">
+          <p className="text-2xl font-black text-yellow-400 mt-3">
             {card.match.exactScoreHits === 0 ? "Ninguém" : card.match.exactScoreHits} {card.match.exactScoreHits === 0
               ? "acertou o placar exato 😤"
               : `acertou${card.match.exactScoreHits === 1 ? "" : "m"} o placar exato`}
@@ -791,7 +791,7 @@ function renderCard(card: InsightCard) {
           <p className="font-black text-lg mt-1 text-center">
             Resultado: {card.match.resultadoA} x {card.match.resultadoB}
           </p>
-          <p className="text-4xl font-black text-amber-400 mt-3">{card.majority.percent}% apostou em <span className="text-amber-400 font-black">{resultLabel(card.majority.category)}</span> —
+          <p className="text-2xl font-black text-amber-400 mt-3">{card.majority.percent}% apostou em <span className="text-amber-400 font-black">{resultLabel(card.majority.category)}</span> —
             e errou o vencedor</p>
           
         </CardShell>
@@ -814,7 +814,7 @@ function renderCard(card: InsightCard) {
               <p className="text-xs text-zinc-400">gols reais</p>
             </div>
           </div>
-          <p className="text-2xl font-black text-teal-400 mt-2">
+          <p className="text-1xl font-black text-teal-400 mt-2">
             Diferença de só {card.diff.toFixed(1)} gol{card.diff !== 1 ? "s" : ""} — o grupo sentiu o jogo
           </p>
         </CardShell>
@@ -823,7 +823,7 @@ function renderCard(card: InsightCard) {
     case "manadaErrada":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
-          <p className="text-4xl font-black text-fuchsia-400 mt-1">{card.rate}% dos jogos analisados ({card.wrongCount} de {card.total}), a opção mais votada do grupo não foi quem
+          <p className="text-1xl font-black text-fuchsia-400 mt-1">{card.rate}% dos jogos analisados ({card.wrongCount} de {card.total}), a opção mais votada do grupo não foi quem
             venceu</p>
           
         </CardShell>
@@ -855,7 +855,7 @@ function renderCard(card: InsightCard) {
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
           <p className="text-2xl font-black text-cyan-300">{card.user.username}</p>
-          <p className="text-4xl font-black text-cyan-400 mt-2">{Math.round(card.rate * 100)}% de placares exatos em {card.user.games} jogo{card.user.games !== 1 ? "s" : ""} avaliados</p>
+          <p className="text-3xl font-black text-cyan-400 mt-2">{Math.round(card.rate * 100)}% de placares exatos em {card.user.games} jogo{card.user.games !== 1 ? "s" : ""} avaliados</p>
          
         </CardShell>
       );
@@ -865,7 +865,7 @@ function renderCard(card: InsightCard) {
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
           <p className="text-2xl font-black text-white">{card.streak.username} </p>
-          <p className={`text-4xl font-black mt-2 ${ACCENTS[card.accent].textBright}`}>{card.streak.length} {card.type === "peQuente" ? "placares exatos seguidos" : "jogos seguidos sem acertar o placar exato"}</p>
+          <p className={`text-3xl font-black mt-2 ${ACCENTS[card.accent].textBright}`}>{card.streak.length} {card.type === "peQuente" ? "placares exatos seguidos" : "jogos seguidos sem acertar o placar exato"}</p>
           
         </CardShell>
       );
@@ -874,7 +874,7 @@ function renderCard(card: InsightCard) {
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
           <p className="text-2xl font-black text-white">{card.team}</p>
-          <p className="text-4xl font-black text-teal-400 mt-2">{card.avgBacking}% era a fé média do grupo nas {card.wins} vez{card.wins !== 1 ? "es" : ""} em que esse time venceu</p>
+          <p className="text-2xl font-black text-teal-400 mt-2">{card.avgBacking}% era a fé média do grupo nas {card.wins} vez{card.wins !== 1 ? "es" : ""} em que esse time venceu</p>
          
         </CardShell>
       );
@@ -883,7 +883,7 @@ function renderCard(card: InsightCard) {
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
           <p className="text-2xl font-black text-white">{card.team}</p>
-          <p className="text-4xl font-black text-pink-400 mt-2">{card.avgBacking}%  era a fé média do grupo nas {card.losses} vez{card.losses !== 1 ? "es" : ""} em que esse time perdeu</p>
+          <p className="text-2xl font-black text-pink-400 mt-2">{card.avgBacking}%  era a fé média do grupo nas {card.losses} vez{card.losses !== 1 ? "es" : ""} em que esse time perdeu</p>
         
         </CardShell>
       );
@@ -895,7 +895,7 @@ function renderCard(card: InsightCard) {
           <p className="font-black text-lg mt-1 text-center">
             Resultado: {card.match.resultadoA} x {card.match.resultadoB} 
           </p>
-          <p className="text-4xl font-black text-lime-400 mt-3">{card.match.totalBets} palpites registrados — o jogo que mais mobilizou o grupo</p>
+          <p className="text-2xl font-black text-lime-400 mt-3">{card.match.totalBets} palpites registrados — o jogo que mais mobilizou o grupo</p>
          
         </CardShell>
       );
