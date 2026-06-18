@@ -126,10 +126,8 @@ export default function AdminResultsPage() {
         await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
   
         sucesso++;
-        console.log(`✅ ${match} reprocessado (${sucesso}/${jogosComResultado.length})`);
       } catch (err) {
         falha++;
-        console.error(`❌ Erro em ${game.teamA} x ${game.teamB}:`, err);
       }
     }
   
@@ -138,10 +136,11 @@ export default function AdminResultsPage() {
   }
 
   useEffect(() => {
-    carregarGroupId();
-    const timeout = setTimeout(() => {
-      carregarJogos();
+    const timeout = setTimeout(async () => {
+      await carregarGroupId();
+      await carregarJogos();
     }, 0);
+  
     return () => clearTimeout(timeout);
   }, []);
 
@@ -150,7 +149,6 @@ export default function AdminResultsPage() {
     resultadoA: number,
     resultadoB: number
   ) {
-    console.log("🟡 salvarResultado iniciado", { gameId, resultadoA, resultadoB });
   
     if (!groupId) {
       alert("Grupo não identificado. Tente recarregar a página 😥");
@@ -158,7 +156,6 @@ export default function AdminResultsPage() {
       return;
     }
   
-    console.log("✅ groupId:", groupId);
   
     await updateDoc(doc(db, "games", gameId), { resultadoA, resultadoB });
     console.log("✅ game atualizado");
@@ -171,7 +168,6 @@ export default function AdminResultsPage() {
     }
   
     const match = `${game.teamA} x ${game.teamB}`;
-    console.log("✅ match:", match);
   
     const betsQuery = query(
       collection(db, "bets"),
@@ -180,7 +176,6 @@ export default function AdminResultsPage() {
     );
   
     const betsSnapshot = await getDocs(betsQuery);
-    console.log("✅ bets encontradas:", betsSnapshot.size);
   
     for (const betDoc of betsSnapshot.docs) {
       const bet = betDoc.data();
@@ -193,11 +188,9 @@ export default function AdminResultsPage() {
       await updateDoc(doc(db, "bets", betDoc.id), { points });
     }
   
-    console.log("✅ pontos atualizados, chamando buildMatchAnalytics...");
   
     await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
   
-    console.log("✅ buildMatchAnalytics concluído");
   
     alert("Resultado salvo e apostas atualizadas 😎");
     carregarJogos();
