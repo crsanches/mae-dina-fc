@@ -446,9 +446,9 @@ function buildRankingGeralCard(matches: MatchAnalytics[]): RankingGeralCard | nu
   return {
     type: "rankingGeral",
     accent: "indigo",
-    emoji: "🏆",
-    title: "Tabela do Bolão",
-    subtitle: "Quem está na frente somando todos os jogos do grupo",
+    emoji: "🎯🎯🎯",
+    title: "Mestres do Placar",
+    subtitle: "Quem mais acertou placares exatos",
     ranking,
   };
 }
