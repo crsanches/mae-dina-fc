@@ -283,17 +283,19 @@ export default function Home() {
               grafico animado do rakig
            ====================================== */}
 
-        <Link href="/historia">
-          <div className="bg-gradient-to-r from-yellow-600 to-yellow-800 rounded-3xl p-5">
-            <h3 className="font-bold text-xl">
-              🏆 História da Liga
-            </h3>
+            {ligaId === "S45ZeKwxkKSeYTqq2p45" && (
+              <Link href="/historia">
+                <div className="bg-gradient-to-r from-yellow-600 to-yellow-800 rounded-3xl p-5">
+                  <h3 className="font-bold text-xl">
+                    🏆 História da Liga
+                  </h3>
 
-            <p className="text-sm opacity-80">
-              Veja a evolução do ranking jogo a jogo
-            </p>
-          </div>
-        </Link>
+                  <p className="text-sm opacity-80">
+                    Veja a evolução do ranking jogo a jogo
+                  </p>
+                </div>
+              </Link>
+            )}
 
         {/* ======================================
             ORDEM DOS COMPONENTES:
