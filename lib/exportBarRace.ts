@@ -4,6 +4,8 @@ import {
     query,
     where,
   } from "firebase/firestore";
+
+  import type { FaseCopa } from "./copas";
   
   import { db } from "./firebase";
   import { calculatePoints } from "./calculatePoints";
@@ -16,7 +18,7 @@ import {
     emojiA?: string;
     emojiB?: string;
     matchDate: string;
-    fase?: string;
+    fase?: FaseCopa;
     finished?: boolean;
     resultadoA?: number;
     resultadoB?: number;
@@ -220,11 +222,10 @@ import {
   
           });
   
-        const peso =
-          obterPesoDaFase(
-            (game.fase ||
-              "Grupos") as any
-          );
+          const peso =
+  obterPesoDaFase(
+    game.fase || "Grupos"
+  );
   
         acumulado[user] +=
           pontos * peso;
