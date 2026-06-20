@@ -106,7 +106,7 @@ export default function LeagueRace({
           text-yellow-400
           uppercase
           font-bold
-          text-sm
+          text-[10px]
         "
       >
 
