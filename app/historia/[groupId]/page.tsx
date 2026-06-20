@@ -206,7 +206,7 @@ export default function HistoriaPage({
               items-center
               gap-2
               mb-6
-              mt-40
+              mt-20
               px-5  
               py-3
               rounded-2xl

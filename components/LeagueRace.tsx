@@ -160,7 +160,7 @@ export default function LeagueRace({
                   flex
                   items-center
                   gap-3
-                  py-2
+                  py-1
                   border-b
                   border-white/5
                   md:flex-row
@@ -170,25 +170,25 @@ export default function LeagueRace({
 
                 {/* POSIÇÃO */}
 
-                <div className="flex justify-between items-center w-full md:w-auto">
+                <div className="flex justify-between items-center w-full">
 
-  <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
 
-    <span className="font-bold text-yellow-400">
-      #{player.position}
-    </span>
+                <span className="font-bold text-yellow-400 text-[10px]">
+                #{player.position}
+              </span>
 
-    <span className="text-white truncate">
-      {player.username}
-    </span>
+              <span className="text-white truncate text-[10px]">
+                {player.username}
+              </span>
 
-  </div>
+              </div>
 
-  <span className="font-bold text-white">
-    {player.points}
-  </span>
+              <span className="font-bold text-white text-[10px]">
+                {player.points}
+              </span>
 
-</div>
+            </div>
 <div className="w-full md:flex-1">
                 {/* BARRA */}
 
@@ -197,7 +197,7 @@ export default function LeagueRace({
                   <div
                     className="
                       w-full
-                      h-9
+                      h-4
                       rounded-xl
                       bg-white/10
                       overflow-hidden
