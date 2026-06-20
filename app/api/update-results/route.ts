@@ -5,6 +5,10 @@ import {
 }
 from "@/lib/buildMatchAnalyticsAdmin";
 
+import {
+  buildLeagueHistory
+} from "@/lib/buildLeagueHistory";
+
 type ApiGame = {
   strStatus: string;
   strHomeTeam: string;
@@ -245,7 +249,18 @@ export async function GET() {
       }
 
     }
-
+      const groupsSnapshot =
+      await adminDb
+        .collection("groups")
+        .get();
+    
+    for (const groupDoc of groupsSnapshot.docs) {
+    
+      await buildLeagueHistory(
+        groupDoc.id
+      );
+    
+    }
     return NextResponse.json({
       success: true,
       semCobertura: jogosSemCobertura.map((g) => g.data().match),
