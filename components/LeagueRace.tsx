@@ -163,44 +163,33 @@ export default function LeagueRace({
                   py-2
                   border-b
                   border-white/5
+                  md:flex-row
+                  md:items-center
                 "
               >
 
                 {/* POSIÇÃO */}
 
-                <div
-                  className={`
-                    w-10
-                    text-center
-                    font-bold
-                    text-lg
-                    ${
-                      player.position === 1
-                        ? "text-yellow-300"
-                        : player.position === 2
-                        ? "text-zinc-300"
-                        : player.position === 3
-                        ? "text-amber-500"
-                        : "text-zinc-500"
-                    }
-                  `}
-                >
-                  {player.position}
-                </div>
+                <div className="flex justify-between items-center w-full md:w-auto">
 
-                {/* NOME */}
+  <div className="flex items-center gap-2">
 
-                <div
-                  className="
-                    w-56
-                    truncate
-                    text-white
-                    font-medium
-                  "
-                >
-                  {player.username}
-                </div>
+    <span className="font-bold text-yellow-400">
+      #{player.position}
+    </span>
 
+    <span className="text-white truncate">
+      {player.username}
+    </span>
+
+  </div>
+
+  <span className="font-bold text-white">
+    {player.points}
+  </span>
+
+</div>
+<div className="w-full md:flex-1">
                 {/* BARRA */}
 
                 <div className="flex-1">
@@ -238,20 +227,11 @@ export default function LeagueRace({
                   </div>
 
                 </div>
+                </div>
 
                 {/* PONTOS */}
 
-                <div
-                  className="
-                    w-16
-                    text-right
-                    text-white
-                    font-bold
-                    text-lg
-                  "
-                >
-                  {player.points}
-                </div>
+                
 
               </div>
 
