@@ -118,7 +118,7 @@ export default function LeagueRace({
           Apostador
         </div>
 
-        <div className="flex-1" />
+        <div className="w-24" />
 
         <div className="w-16 text-right">
           Pontos
