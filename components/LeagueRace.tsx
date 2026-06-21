@@ -60,11 +60,11 @@ export default function LeagueRace({
   }}
 >
 
-  <h2 className="text-3xl font-bold text-yellow-400">
+  <h2 className="text-xl font-bold text-yellow-400">
     Jogo {frame.step} de {totalFrames}
   </h2>
 
-  <p className="text-zinc-300 mt-1 text-lg">
+  <p className="text-zinc-300 mt-1 text-sm">
     {frame.match}
   </p>
 
