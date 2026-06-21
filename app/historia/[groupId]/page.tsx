@@ -45,7 +45,7 @@ export default function HistoriaPage({
     useState(true);
 
   const [speed, setSpeed] =
-    useState(1200);
+    useState(3000);
 
   const [loading, setLoading] =
     useState(true);
@@ -118,7 +118,7 @@ export default function HistoriaPage({
   
               setPlaying(true);
   
-            }, 3000);
+            }, 6000);
   
             return prev;
   
@@ -313,7 +313,7 @@ export default function HistoriaPage({
 
           <button
             onClick={() =>
-              setSpeed(1500)
+              setSpeed(3500)
             }
             className="
               px-4 py-2
@@ -327,7 +327,7 @@ export default function HistoriaPage({
 
           <button
             onClick={() =>
-              setSpeed(1500)
+              setSpeed(2500)
             }
             className="
               px-4 py-2

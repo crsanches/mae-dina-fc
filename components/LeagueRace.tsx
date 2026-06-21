@@ -56,7 +56,7 @@ export default function LeagueRace({
     opacity: 0,
   }}
   transition={{
-    duration: 0.4,
+    duration: 1,
   }}
 >
 
@@ -92,7 +92,7 @@ export default function LeagueRace({
                 }%`,
               }}
               transition={{
-                duration: 0.35,
+                duration: 1.6,
                 ease: "linear",
               }}
             />
@@ -165,10 +165,10 @@ export default function LeagueRace({
               layout
               transition={{
                 layout: {
-                  duration: 0.55,
+                  duration: 1.8,
                   type: "spring",
-                  damping: 25,
-                  stiffness: 120,
+                  damping: 30,
+                  stiffness: 70,
                 },
               }}
             >
@@ -225,7 +225,7 @@ export default function LeagueRace({
           width: `${width}%`,
         }}
         transition={{
-          duration: 0.55,
+          duration: 1.6,
           ease: "linear",
         }}
         className={`
