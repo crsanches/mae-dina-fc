@@ -207,16 +207,16 @@ export default function HistoriaPage({
               items-center
               gap-1
               mb-6
-              mt-5
-              px-4  
-              py-2
+              mt-4
+              px-2  
+              py-1
               rounded-2xl
               bg-gradient-to-r  
               from-yellow-600/60
               to-yellow-700/60
               text-black
               font-bold
-              text-sm
+              text-xs
             "
           >
             🏆 Voltar ao Mãe Diná FC
