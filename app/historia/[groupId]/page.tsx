@@ -183,7 +183,7 @@ export default function HistoriaPage({
       "url('/badges/fundo paragrafico bolao.png')",
     backgroundSize: "65%",
     backgroundPosition: "top center",
-    opacity: 0.35,
+    opacity: 0.85,
   }}
 />
 
@@ -204,17 +204,18 @@ export default function HistoriaPage({
             className="
               inline-flex
               items-center
-              gap-2
+              gap-1
               mb-6
               mt-5
-              px-5  
-              py-3
+              px-4  
+              py-2
               rounded-2xl
               bg-gradient-to-r
               from-yellow-600
               to-yellow-700
               text-black
               font-bold
+              text-sm
             "
           >
             🏆 Voltar ao Mãe Diná FC
