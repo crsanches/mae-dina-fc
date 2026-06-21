@@ -198,6 +198,7 @@ export default function HistoriaPage({
 
   <div className="relative z-10">
         <div className="max-w-7xl mx-auto px-4  py-8">
+        <div className="flex justify-end">
 
           <Link
             href="/"
@@ -210,7 +211,7 @@ export default function HistoriaPage({
               px-4  
               py-2
               rounded-2xl
-              bg-gradient-to-r
+              bg-gradient-to-r  
               from-yellow-600/60
               to-yellow-700/60
               text-black
@@ -220,7 +221,7 @@ export default function HistoriaPage({
           >
             🏆 Voltar ao Mãe Diná FC
           </Link>
-
+          </div>
         <div className="text-center mb-8">
 
         
