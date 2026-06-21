@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence, } from "framer-motion";
 
 type RankingItem = {
   username: string;
@@ -42,13 +42,35 @@ export default function LeagueRace({
 
         <div className="text-center">
 
-          <h2 className="text-3xl font-bold text-yellow-400">
-            Jogo {frame.step} de {totalFrames}
-          </h2>
+        <AnimatePresence mode="wait">
 
-          <p className="text-zinc-300 mt-1 text-lg">
-            {frame.match}
-          </p>
+<motion.div
+  key={frame.step}
+  initial={{
+    opacity: 0,
+  }}
+  animate={{
+    opacity: 1,
+  }}
+  exit={{
+    opacity: 0,
+  }}
+  transition={{
+    duration: 0.4,
+  }}
+>
+
+  <h2 className="text-3xl font-bold text-yellow-400">
+    Jogo {frame.step} de {totalFrames}
+  </h2>
+
+  <p className="text-zinc-300 mt-1 text-lg">
+    {frame.match}
+  </p>
+
+</motion.div>
+
+</AnimatePresence>
 
         </div>
 
@@ -70,7 +92,7 @@ export default function LeagueRace({
                 }%`,
               }}
               transition={{
-                duration: 0.45,
+                duration: 0.35,
                 ease: "linear",
               }}
             />
