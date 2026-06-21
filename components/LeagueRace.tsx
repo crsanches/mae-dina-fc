@@ -94,37 +94,33 @@ export default function LeagueRace({
           CABEÇALHO DAS COLUNAS
       ====================================== */}
 
-      <div
-        className="
-          flex
-          items-center
-          gap-3
-          mb-4
-          pb-3
-          border-b
-          border-yellow-700/30
-          text-yellow-400
-          uppercase
-          font-bold
-          text-[10px]
-        "
-      >
+<div
+  className="
+    flex
+    items-center
+    gap-2
+    mb-2
+    pb-2
+    border-b
+    border-yellow-700/30
+    text-yellow-400
+    uppercase
+    font-bold
+    text-[9px]
+  "
+>
 
-        <div className="w-10 text-center">
-          Pos.
-        </div>
+  <div className="w-30">
+    Apostador
+  </div>
 
-        <div className="w-56">
-          Apostador
-        </div>
+  <div className="flex-1" />
 
-        <div className="w-24" />
+  <div className="w-8 text-right">
+    Pontos
+  </div>
 
-        <div className="w-16 text-right">
-          Pontos
-        </div>
-
-      </div>
+</div>
 
       {/* ======================================
           RANKING
@@ -155,85 +151,86 @@ export default function LeagueRace({
               }}
             >
 
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-3
-                  py-1
-                  border-b
-                  border-white/5
-                  md:flex-row
-                  md:items-center
-                "
-              >
+<div
+  className="
+    flex
+    items-center
+    gap-2
+    py-1
+    border-b
+    border-white/5
+  "
+>
 
-                {/* POSIÇÃO */}
+  {/* POSIÇÃO */}
 
-                <div className="flex justify-between items-center w-full">
+  <div className="w-6 text-center">
 
-                <div className="flex items-center gap-1">
+    <span className="font-bold text-yellow-400 text-[10px]">
+      {player.position}
+    </span>
 
-                <span className="font-bold text-yellow-400 text-[10px]">
-                #{player.position}
-              </span>
+  </div>
 
-              <span className="text-white truncate text-[10px]">
-                {player.username}
-              </span>
+  {/* NOME */}
 
-              </div>
+  <div className="w-24 truncate">
 
-              <span className="font-bold text-white text-[10px]">
-                {player.points}
-              </span>
+    <span className="text-white text-[10px]">
+      {player.username}
+    </span>
 
-            </div>
-<div className="w-full md:flex-1">
-                {/* BARRA */}
+  </div>
 
-                <div className="flex-1">
+  {/* BARRA */}
 
-                  <div
-                    className="
-                      w-full
-                      h-4
-                      rounded-xl
-                      bg-white/10
-                      overflow-hidden
-                      border
-                      border-white/5
-                    "
-                  >
+  <div className="flex-1">
 
-                    <motion.div
-                      animate={{
-                        width: `${width}%`,
-                      }}
-                      transition={{
-                        duration: 0.55,
-                        ease: "linear",
-                      }}
-                      className={`
-                        h-full
-                        ${
-                          isLeader
-                          ? "bg-gradient-to-r from-yellow-300/25 to-yellow-500/45"
-                          : "bg-gradient-to-r from-yellow-500/18 to-yellow-700/28"
-                        }
-                      `}
-                    />
+    <div
+      className="
+        w-full
+        h-4
+        rounded-xl
+        bg-white/10
+        overflow-hidden
+        border
+        border-white/5
+      "
+    >
 
-                  </div>
+      <motion.div
+        animate={{
+          width: `${width}%`,
+        }}
+        transition={{
+          duration: 0.55,
+          ease: "linear",
+        }}
+        className={`
+          h-full
+          ${
+            isLeader
+              ? "bg-gradient-to-r from-yellow-300/25 to-yellow-500/45"
+              : "bg-gradient-to-r from-yellow-500/18 to-yellow-700/28"
+          }
+        `}
+      />
 
-                </div>
-                </div>
+    </div>
 
-                {/* PONTOS */}
+  </div>
 
-                
+  {/* PONTOS */}
 
-              </div>
+  <div className="w-8 text-right">
+
+    <span className="font-bold text-white text-[10px]">
+      {player.points}
+    </span>
+
+  </div>
+
+</div>
 
             </motion.div>
 
