@@ -211,8 +211,8 @@ export default function HistoriaPage({
               py-2
               rounded-2xl
               bg-gradient-to-r
-              from-yellow-600
-              to-yellow-700
+              from-yellow-600/60
+              to-yellow-700/60
               text-black
               font-bold
               text-sm
