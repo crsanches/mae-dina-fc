@@ -1,10 +1,14 @@
 import { adminDb } from "@/lib/firebaseAdmin";
+import { calculatePoints } from "@/lib/calculatePoints";
 
 export async function buildMatchAnalyticsAdmin(
   matchName: string,
   resultadoA: number,
   resultadoB: number,
-  groupId: string
+  groupId: string,
+  matchDate?: string,
+  fase?: string,
+  grupo?: string
 ) {
 
   const betsSnapshot = await adminDb
@@ -25,6 +29,9 @@ export async function buildMatchAnalyticsAdmin(
     username: string;
     distance: number;
     palpite: string;
+    points: number;
+    drawHit: boolean;
+    winnerHit: boolean;
   }[] = [];
 
   betsSnapshot.forEach((doc) => {
@@ -46,13 +53,29 @@ export async function buildMatchAnalyticsAdmin(
       Math.abs(apostaA - resultadoA) +
       Math.abs(apostaB - resultadoB);
 
-    distances.push({
-      username: bet.username || bet.userName || bet.nome || "Anônimo",
-      distance,
-      palpite: `${apostaA}x${apostaB}`,
-    });
-  });
+      const points = calculatePoints({
+        apostaA,
+        apostaB,
+        resultadoA,
+        resultadoB,
+      });
+      
+      const drawHit =
+        apostaA === apostaB &&
+        resultadoA === resultadoB;
+      
+      const winnerHit =
+        points === 3;
 
+      distances.push({
+        username: bet.username || bet.userName || bet.nome || "Anônimo",
+        distance,
+        palpite: `${apostaA}x${apostaB}`,
+        points,
+        drawHit,
+        winnerHit,
+      });
+    });
   if (totalBets === 0) return;
 
   let correctPredictionCount = 0;
@@ -76,8 +99,17 @@ export async function buildMatchAnalyticsAdmin(
 
   // Todos os usuários com flag de acerto exato (para o Profeta)
   const allUserDistances = distances.map((d) => ({
-    ...d,
+    username: d.username,
+    palpite: d.palpite,
+    distance: d.distance,
+  
     exactHit: d.distance === 0 ? 1 : 0,
+  
+    points: d.points,
+  
+    drawHit: d.drawHit ? 1 : 0,
+  
+    winnerHit: d.winnerHit ? 1 : 0,
   }));
 
   // Visionários (acertaram o vencedor quando menos de 20% acertou)
@@ -121,5 +153,8 @@ export async function buildMatchAnalyticsAdmin(
     allUserDistances,
     visionaryUsers,
     updatedAt: new Date(),
+    matchDate: matchDate || null,
+    fase: fase || null,
+    grupo: grupo || null, 
   });
 }

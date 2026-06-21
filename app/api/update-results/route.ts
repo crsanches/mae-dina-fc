@@ -143,6 +143,9 @@ export async function GET() {
 
     // Busca todos os jogos do Firebase
     const gamesSnapshot = await adminDb.collection("games").get();
+    const groupsSnapshot = await adminDb
+  .collection("groups")
+  .get();
 
     // Identifica jogos com idEventSportsDB e jogos sem resultado recentes
     const jogosComId = gamesSnapshot.docs.filter((g) => g.data().idEventSportsDB);
@@ -206,16 +209,21 @@ export async function GET() {
         finished: apiGame.strStatus === "FT",
         status: apiGame.strStatus,
       });
-      if (
-        apiGame.strStatus === "FT"
-      ) {
+      if (apiGame.strStatus === "FT") {
+
+        for (const groupDoc of groupsSnapshot.docs) {
       
-        await buildMatchAnalyticsAdmin(
-          `${localGame.data().teamA} x ${localGame.data().teamB}`,
-          Number(apiGame.intHomeScore),
-          Number(apiGame.intAwayScore),
-          localGame.data().groupId
-        );
+          await buildMatchAnalyticsAdmin(
+            `${localGame.data().teamA} x ${localGame.data().teamB}`,
+            Number(apiGame.intHomeScore),
+            Number(apiGame.intAwayScore),
+            groupDoc.id,
+            localGame.data().matchDate,
+            localGame.data().fase,
+            localGame.data().grupo
+          );
+      
+        }
       
       }
 
@@ -235,24 +243,26 @@ export async function GET() {
         finished: event.strStatus === "FT",
         status: event.strStatus,
       });
-      if (
-        event.strStatus === "FT"
-      ) {
+      if (event.strStatus === "FT") {
+
+        for (const groupDoc of groupsSnapshot.docs) {
       
-        await buildMatchAnalyticsAdmin(
-          `${localGame.data().teamA} x ${localGame.data().teamB}`,
-          Number(event.intHomeScore),
-          Number(event.intAwayScore),
-          localGame.data().groupId 
-        );
+          await buildMatchAnalyticsAdmin(
+            `${localGame.data().teamA} x ${localGame.data().teamB}`,
+            Number(event.intHomeScore),
+            Number(event.intAwayScore),
+            groupDoc.id,
+            localGame.data().matchDate,
+            localGame.data().fase,
+            localGame.data().grupo
+          );
+      
+        }
       
       }
 
     }
-      const groupsSnapshot =
-      await adminDb
-        .collection("groups")
-        .get();
+      
     
     for (const groupDoc of groupsSnapshot.docs) {
     

@@ -26,7 +26,10 @@ export async function GET() {
           game.match,
           Number(game.resultadoA),
           Number(game.resultadoB),
-          grupo.id
+          grupo.id,
+          game.matchDate,
+          game.fase,
+          game.grupo
         );
         totalProcessados++;
       }

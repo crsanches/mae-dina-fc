@@ -17,6 +17,9 @@ type UserDistance = {
   distance: number;
   exactHit: number;
   palpite: string;
+  points?: number;
+  drawHit?: number;
+  winnerHit?: number;
 };
 
 type VisionaryEntry = string | { username: string; palpite?: string };
@@ -38,6 +41,9 @@ type MatchAnalytics = {
   avgHomeGoals?: number;
   avgAwayGoals?: number;
   visionaryUsers?: VisionaryEntry[];
+  matchDate?: string;
+  fase?: string;
+  grupo?: string;
 };
 
 type AggUser = { username: string; exactHits: number; totalDistance: number; games: number };
@@ -120,6 +126,22 @@ type StreakCard = BaseCard & { type: "peQuente" | "peFrio"; streak: StreakInfo }
 type SubestimadoCard = BaseCard & { type: "subestimado"; team: string; avgBacking: number; wins: number };
 type SobrestimadoCard = BaseCard & { type: "sobrestimado"; team: string; avgBacking: number; losses: number };
 type MaisApostadoCard = BaseCard & { type: "maisApostado"; match: MatchAnalytics };
+type HotLast5Card = BaseCard & {
+  type: "hotLast5";
+  ranking: {
+    username: string;
+    points: number;
+    exacts: number;
+  }[];
+};
+type ColdLast5Card = BaseCard & {
+  type: "coldLast5";
+  ranking: {
+    username: string;
+    points: number;
+    exacts: number;
+  }[];
+};
 
 type InsightCard =
   | ZebraCard
@@ -136,7 +158,9 @@ type InsightCard =
   | StreakCard
   | SubestimadoCard
   | SobrestimadoCard
-  | MaisApostadoCard;
+  | MaisApostadoCard
+  | HotLast5Card
+  | ColdLast5Card;
 
 // ────────────────────────────────────────────────────────────
 // Helpers
@@ -556,6 +580,154 @@ function buildMaisApostadoCard(matches: MatchAnalytics[]): MaisApostadoCard | nu
   };
 }
 
+function buildHotLast5Card(
+  matches: MatchAnalytics[]
+): HotLast5Card | null {
+
+  const last5 = [...matches]
+  .filter(
+    (m): m is MatchAnalytics & { matchDate: string } =>
+      Boolean(m.matchDate)
+  )
+  .sort(
+    (a, b) =>
+      new Date(a.matchDate).getTime() -
+      new Date(b.matchDate).getTime()
+  )
+  .slice(-5);
+
+  const stats: Record<
+    string,
+    {
+      points: number;
+      exacts: number;
+    }
+  > = {};
+
+  last5.forEach((match) => {
+
+    (match.allUserDistances || []).forEach((user) => {
+
+      if (!stats[user.username]) {
+        stats[user.username] = {
+          points: 0,
+          exacts: 0,
+        };
+      }
+
+      stats[user.username].points +=
+        Number(user.points || 0);
+
+      stats[user.username].exacts +=
+        Number(user.exactHit || 0);
+
+    });
+
+  });
+
+  const ranking =
+    Object.entries(stats)
+      .map(([username, s]) => ({
+        username,
+        points: s.points,
+        exacts: s.exacts,
+      }))
+      .sort((a, b) => {
+
+        if (b.points !== a.points)
+          return b.points - a.points;
+
+        return b.exacts - a.exacts;
+
+      })
+      .slice(0, 3);
+
+  if (!ranking.length) return null;
+
+  return {
+    type: "hotLast5",
+    accent: "orange",
+    emoji: "🔥",
+    title: "Reis das Últimas 5 Rodadas",
+    subtitle: "Quem mais pontuou recentemente",
+    ranking,
+  };
+}
+
+function buildColdLast5Card(
+  matches: MatchAnalytics[]
+): ColdLast5Card | null {
+
+  const last5 = [...matches]
+  .filter(
+    (m): m is MatchAnalytics & { matchDate: string } =>
+      Boolean(m.matchDate)
+  )
+  .sort(
+    (a, b) =>
+      new Date(a.matchDate).getTime() -
+      new Date(b.matchDate).getTime()
+  )
+  .slice(-5);
+
+  const stats: Record<
+    string,
+    {
+      points: number;
+      exacts: number;
+    }
+  > = {};
+
+  last5.forEach((match) => {
+
+    (match.allUserDistances || []).forEach((user) => {
+
+      if (!stats[user.username]) {
+        stats[user.username] = {
+          points: 0,
+          exacts: 0,
+        };
+      }
+
+      stats[user.username].points +=
+        Number(user.points || 0);
+
+      stats[user.username].exacts +=
+        Number(user.exactHit || 0);
+
+    });
+
+  });
+
+  const ranking =
+    Object.entries(stats)
+      .map(([username, s]) => ({
+        username,
+        points: s.points,
+        exacts: s.exacts,
+      }))
+      .sort((a, b) => {
+
+        if (a.points !== b.points) {
+          return a.points - b.points;
+        }
+      
+        return a.exacts - b.exacts;
+      
+      })
+      .slice(0, 3);
+
+  if (!ranking.length) return null;
+
+  return {
+    type: "coldLast5",
+    accent: "blue",
+    emoji: "🥶",
+    title: "Congelados das Últimas 5 Rodadas",
+    subtitle: "Quem menos pontuou recentemente",
+    ranking,
+  };
+}
 // ────────────────────────────────────────────────────────────
 // Monta a lista final de cards a partir dos dados já carregados
 // ────────────────────────────────────────────────────────────
@@ -579,6 +751,8 @@ function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
     buildManadaErradaCard(matches),
     buildRankingGeralCard(matches),
     buildSniperCard(matches),
+    buildHotLast5Card(matches),
+    buildColdLast5Card(matches),
     hotStreaks[0]
       ? {
           type: "peQuente",
@@ -900,6 +1074,87 @@ function renderCard(card: InsightCard) {
         </CardShell>
       );
 
+
+      
+      case "hotLast5":
+        return (
+          <CardShell
+            accent={card.accent}
+            emoji={card.emoji}
+            title={card.title}
+            subtitle={card.subtitle}
+          >
+            <div className="space-y-2">
+
+              {card.ranking.map((item, index) => (
+
+                <div
+                  key={item.username}
+                  className="
+                    flex
+                    justify-between
+                    bg-orange-900/40
+                    rounded-2xl
+                    px-4
+                    py-2
+                  "
+                >
+                  <span className="font-black">
+                    {index + 1}º {item.username}
+                  </span>
+
+                  <span className="text-orange-300 font-bold">
+                    {item.points} pts ({item.exacts} exatos)
+                  </span>
+
+                </div>
+
+              ))}
+
+            </div>
+          </CardShell>
+    );
+
+    
+    case "coldLast5":
+      return (
+        <CardShell
+          accent={card.accent}
+          emoji={card.emoji}
+          title={card.title}
+          subtitle={card.subtitle}
+        >
+          <div className="space-y-2">
+
+            {card.ranking.map((item, index) => (
+
+              <div
+                key={item.username}
+                className="
+                  flex
+                  justify-between
+                  bg-orange-900/40
+                  rounded-2xl
+                  px-4
+                  py-2
+                "
+              >
+                <span className="font-black">
+                  {index + 1}º {item.username}
+                </span>
+
+                <span className="text-orange-300 font-bold">
+                  {item.points} pts ({item.exacts} exatos)
+                </span>
+
+              </div>
+
+            ))}
+
+          </div>
+        </CardShell>
+  );
+
     default:
       return null;
   }
@@ -972,8 +1227,8 @@ export default function MatchInsightCards() {
   
             const analyticsData =
             snapshot.docs
-            // Ignora analytics antigos gerados pelo buildMatchAnalyticsAdmin
-              .filter((d) => !d.id.includes("___"))
+            // Ignora analytics antigos gerados pelo buildMatchAnalyticsAdmin - removi as duplicidades e entao exclui o filtro abaixo 
+            //  .filter((d) => !d.id.includes("___"))
               .map(
                 (d) =>
                   d.data() as MatchAnalytics
