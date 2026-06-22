@@ -107,18 +107,8 @@ type BlindadoCard = BaseCard & { type: "blindado"; match: MatchAnalytics };
 type ProphetCard = BaseCard & { type: "prophet"; user: AggUser; last5: MatchAnalytics[] };
 type VisionariosCard = BaseCard & { type: "visionarios"; match: MatchAnalytics; names: string[] };
 type CoracaoPartidoCard = BaseCard & { type: "coracaoPartido"; match: MatchAnalytics; entry: UserDistance };
-type VotoDeCabraCard = BaseCard & {
-  type: "votoDeCabra";
-  match: MatchAnalytics;
-  majority: { category: string; percent: number };
-};
-type FaroDeGolCard = BaseCard & {
-  type: "faroDeGol";
-  match: MatchAnalytics;
-  predictedTotal: number;
-  actualTotal: number;
-  diff: number;
-};
+type VotoDeCabraCard = BaseCard & { type: "votoDeCabra"; match: MatchAnalytics;majority: { category: string; percent: number };};
+type FaroDeGolCard = BaseCard & {type: "faroDeGol"; match: MatchAnalytics; predictedTotal: number; actualTotal: number;diff: number;};
 type ManadaErradaCard = BaseCard & { type: "manadaErrada"; rate: number; wrongCount: number; total: number };
 type RankingGeralCard = BaseCard & { type: "rankingGeral"; ranking: AggUser[] };
 type SniperCard = BaseCard & { type: "sniper"; user: AggUser; rate: number };
@@ -126,22 +116,9 @@ type StreakCard = BaseCard & { type: "peQuente" | "peFrio"; streak: StreakInfo }
 type SubestimadoCard = BaseCard & { type: "subestimado"; team: string; avgBacking: number; wins: number };
 type SobrestimadoCard = BaseCard & { type: "sobrestimado"; team: string; avgBacking: number; losses: number };
 type MaisApostadoCard = BaseCard & { type: "maisApostado"; match: MatchAnalytics };
-type HotLast5Card = BaseCard & {
-  type: "hotLast5";
-  ranking: {
-    username: string;
-    points: number;
-    exacts: number;
-  }[];
-};
-type ColdLast5Card = BaseCard & {
-  type: "coldLast5";
-  ranking: {
-    username: string;
-    points: number;
-    exacts: number;
-  }[];
-};
+type HotLast5Card = BaseCard & {type: "hotLast5";ranking: {username: string;points: number;exacts: number}[]};
+type ColdLast5Card = BaseCard & { type: "coldLast5";ranking: { username: string;points: number; exacts: number;}[];};
+type TeamEntry = { team: string; backing: number; won: boolean };
 
 type InsightCard =
   | ZebraCard
@@ -217,7 +194,6 @@ function aggregateUsers(matches: MatchAnalytics[]): AggUser[] {
   return Object.values(map);
 }
 
-type TeamEntry = { team: string; backing: number; won: boolean };
 
 function buildTeamEntries(matches: MatchAnalytics[]): TeamEntry[] {
   const entries: TeamEntry[] = [];
@@ -740,19 +716,19 @@ function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
   const coldStreaks = streaks.filter((s) => !s.hot).sort((a, b) => b.length - a.length);
 
   const cards: (InsightCard | null)[] = [
-    buildZebraCard(matches),
-    buildPredictableCard(matches),
-    buildBlindadoCard(matches),
-    buildProphetCard(matches),
-    buildVisionariosCard(matches),
-    buildCoracaoPartidoCard(matches),
-    buildVotoDeCabraCard(matches),
-    buildFaroDeGolCard(matches),
-    buildManadaErradaCard(matches),
-    buildRankingGeralCard(matches),
-    buildSniperCard(matches),
-    buildHotLast5Card(matches),
-    buildColdLast5Card(matches),
+   // buildZebraCard(matches),        // comentado
+  // buildPredictableCard(matches),  // comentado
+  // buildBlindadoCard(matches),     // comentado
+  buildProphetCard(matches),
+  // buildVisionariosCard(matches),  // comentado
+  // buildCoracaoPartidoCard(matches), // comentado
+  // buildVotoDeCabraCard(matches),  // comentado
+  // buildFaroDeGolCard(matches),    // comentado
+  // buildManadaErradaCard(matches), // comentado
+  buildRankingGeralCard(matches),
+  buildSniperCard(matches),
+  buildHotLast5Card(matches),
+  buildColdLast5Card(matches),
     hotStreaks[0]
       ? {
           type: "peQuente",
@@ -773,9 +749,9 @@ function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
           streak: coldStreaks[0],
         }
       : null,
-    buildSubestimadoCard(matches),
-    buildSobrestimadoCard(matches),
-    buildMaisApostadoCard(matches),
+    // buildSubestimadoCard(matches),  // comentado
+  // buildSobrestimadoCard(matches), // comentado
+  // buildMaisApostadoCard(matches), // comentado
   ];
 
   return cards.filter((c): c is InsightCard => c !== null);
@@ -832,6 +808,8 @@ function CardShell({
 
 function renderCard(card: InsightCard) {
   switch (card.type) {
+
+    /*
     case "zebra":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
@@ -882,7 +860,7 @@ function renderCard(card: InsightCard) {
          
         </CardShell>
       );
-
+*/
     case "prophet":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
@@ -922,6 +900,7 @@ function renderCard(card: InsightCard) {
         </CardShell>
       );
 
+    /*
     case "visionarios":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
@@ -1002,7 +981,9 @@ function renderCard(card: InsightCard) {
           
         </CardShell>
       );
+*/
 
+    // esse aqui é o mestres do placar
     case "rankingGeral":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
@@ -1044,6 +1025,7 @@ function renderCard(card: InsightCard) {
         </CardShell>
       );
 
+    /*
     case "subestimado":
       return (
         <CardShell accent={card.accent} emoji={card.emoji} title={card.title} subtitle={card.subtitle}>
@@ -1074,7 +1056,7 @@ function renderCard(card: InsightCard) {
         </CardShell>
       );
 
-
+*/
       
       case "hotLast5":
         return (

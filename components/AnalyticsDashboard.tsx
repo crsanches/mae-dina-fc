@@ -647,12 +647,51 @@ export default function AnalyticsPage() {
   // ─────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white p-4">
+    <main className="min-h-screen bg-zinc-950 text-white px-4 pt-4 pb-0">
       <div className="max-w-4xl mx-auto">
 
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-black">📊 Estatísticas da Vergonha</h1>
         </div>
+
+                {/* Marquee fixo no topo */}
+                <div className="fixed top-0 left-0 right-0 z-50 px-2 drop-shadow-md">
+          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="px-5 pt-4 pb-2 border-b border-zinc-800 bg-zinc-900">
+              <div className="text-center mb-4">
+                <div className="flex items-center justify-center gap-3">
+                  <img src="/icon.png" alt="Mãe Diná FC" className="w-10 h-10 rounded-xl" />
+                  <h1 className="text-3xl font-black">⚽ Mãe Diná FC ⚽</h1>
+                </div>
+                <p className="text-zinc-400 text-sm mt-2">
+                  O único bolão onde errar feio também vira troféu.
+                </p>
+              </div>
+              <div className="border-t border-zinc-800 pt-4">
+                <h2 className="text-2xl font-black">🏅 Conquistas da Vergonha</h2>
+              </div>
+            </div>
+
+            <div className="flex gap-4 py-4 px-4 animate-marquee w-max">
+              {[...cards, ...cards].map((card, index) => (
+                <div
+                  key={`${card.title}-${index}`}
+                  className="min-w-[260px] bg-zinc-900 border border-zinc-700 rounded-3xl p-3 flex items-center gap-3 shadow-xl"
+                >
+                  <div className="text-5xl">{card.emoji}</div>
+                  <div>
+                    <h2 className="font-black text-lg text-white">{card.title}</h2>
+                    <p className="text-green-400 font-black text-xl">{card.user}</p>
+                    <p className="text-zinc-400 text-sm">{card.value}</p>
+                    <div className="mt-2 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-3 py-1 text-xs font-bold text-purple-200">
+                      {card.badge}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+                </div>
 
         {/* Totais */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -765,7 +804,7 @@ export default function AnalyticsPage() {
         </div> */}
 
         {/* Gráfico */}
-        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5 mb-6">
+        <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
           <h2 className="text-2xl font-black mb-5">🐢 Evolução dos Palpiteiros</h2>
           {mounted && chartData.length > 0 && (
             <div style={{ width: "100%" }}>
@@ -822,8 +861,8 @@ export default function AnalyticsPage() {
           )}
         </div>
 
-        {/* Relatório automático */}
-        <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
+        {/* Relatório automático de insanidade espostiva - bloqueeei temporariamente */}
+       {/*  <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
           <div className="flex items-center gap-3 mb-5">
             <div className="text-5xl">🤖</div>
             <div>
@@ -850,10 +889,10 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
-        {/* Achievements */}
-        <div className="mb-6">
+        {/* Achievements agentedo caos e diplomata do empate - bloqueei temporaiamente */}
+       {/*  <div className="mb-6">
           <div className="grid md:grid-cols-2 gap-4">
             {achievements.map((item, index) => (
               <div
@@ -867,46 +906,9 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
-        </div>
+        </div>*/}
 
-        {/* Marquee fixo no topo */}
-        <div className="fixed top-0 left-0 right-0 z-50 px-2 drop-shadow-md">
-          <div className="bg-zinc-950 border border-zinc-800 rounded-3xl overflow-hidden shadow-2xl">
-            <div className="px-5 pt-4 pb-2 border-b border-zinc-800 bg-zinc-900">
-              <div className="text-center mb-4">
-                <div className="flex items-center justify-center gap-3">
-                  <img src="/icon.png" alt="Mãe Diná FC" className="w-10 h-10 rounded-xl" />
-                  <h1 className="text-3xl font-black">⚽ Mãe Diná FC ⚽</h1>
-                </div>
-                <p className="text-zinc-400 text-sm mt-2">
-                  O único bolão onde errar feio também vira troféu.
-                </p>
-              </div>
-              <div className="border-t border-zinc-800 pt-4">
-                <h2 className="text-2xl font-black">🏅 Conquistas da Vergonha</h2>
-              </div>
-            </div>
 
-            <div className="flex gap-4 py-4 px-4 animate-marquee w-max">
-              {[...cards, ...cards].map((card, index) => (
-                <div
-                  key={`${card.title}-${index}`}
-                  className="min-w-[260px] bg-zinc-900 border border-zinc-700 rounded-3xl p-3 flex items-center gap-3 shadow-xl"
-                >
-                  <div className="text-5xl">{card.emoji}</div>
-                  <div>
-                    <h2 className="font-black text-lg text-white">{card.title}</h2>
-                    <p className="text-green-400 font-black text-xl">{card.user}</p>
-                    <p className="text-zinc-400 text-sm">{card.value}</p>
-                    <div className="mt-2 inline-flex items-center gap-2 bg-purple-900 border border-purple-700 rounded-full px-3 py-1 text-xs font-bold text-purple-200">
-                      {card.badge}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
       </div>
     </main>

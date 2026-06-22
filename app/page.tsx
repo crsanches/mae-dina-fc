@@ -319,14 +319,14 @@ export default function Home() {
         )}
 
         {/* MEMES */}
-        {automaticMeme && (
+        {/* {automaticMeme && (
           <div className="mb-5 bg-purple-900 border border-purple-700 rounded-2xl p-4 text-center overflow-hidden">
             {automaticMeme.image && (
               <img src={automaticMeme.image} alt="Meme" loading="lazy" className="rounded-2xl mb-4 w-full" />
             )}
             <p className="text-lg font-black">🤖 {automaticMeme.text}</p>
           </div>
-        )}
+        )}*/}
 
         {/* RESULTADOS */}
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
