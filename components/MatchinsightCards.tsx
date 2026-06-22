@@ -50,6 +50,14 @@ type AggUser = { username: string; exactHits: number; totalDistance: number; gam
 
 type StreakInfo = { username: string; length: number; hot: boolean };
 
+type RankingFrame = {
+  ranking: { username: string; position: number }[];
+};
+
+type LeagueHistory = {
+  frames: RankingFrame[];
+};
+
 // ────────────────────────────────────────────────────────────
 // Paleta de cores por tipo de card (classes completas e literais
 // para o Tailwind conseguir detectar tudo em build)
@@ -765,7 +773,7 @@ function buildDrawKingsCard(
 }
 
 function buildClimbersCard(
-  history: any
+  history: LeagueHistory
 ): ClimbersCard | null {
   
 
@@ -784,11 +792,10 @@ function buildClimbersCard(
     change: number;
   }[] = [];
 
-  currentFrame.ranking.forEach((current: any) => {
+  currentFrame.ranking.forEach((current: RankingFrame['ranking'][number])=> {
 
     const old =
-      oldFrame.ranking.find(
-        (r: any) =>
+      oldFrame.ranking.find((r: RankingFrame['ranking'][number]) =>
           r.username === current.username
       );
 
@@ -829,7 +836,7 @@ function buildClimbersCard(
 }
 
 function buildFallersCard(
-  history: any
+  history: LeagueHistory
 ): FallersCard | null {
 
   const frames = history?.frames || [];
@@ -847,11 +854,10 @@ function buildFallersCard(
     change: number;
   }[] = [];
 
-  currentFrame.ranking.forEach((current: any) => {
+  currentFrame.ranking.forEach((current: RankingFrame['ranking'][number]) => {
 
     const old =
-      oldFrame.ranking.find(
-        (r: any) =>
+      oldFrame.ranking.find((r: RankingFrame['ranking'][number]) =>
           r.username === current.username
       );
 
@@ -1468,89 +1474,52 @@ export default function MatchInsightCards() {
 
 
   const [insights, setInsights] = useState<InsightCard[]>([]);
-  const [leagueHistory, setLeagueHistory] = useState<any>(null);
+  const [leagueHistory, setLeagueHistory] = useState<LeagueHistory | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
   useEffect(() => {
 
-    let unsubscribe:
-      (() => void) | undefined;
+    let unsubscribe: (() => void) | undefined;
   
     async function carregar() {
   
-      const currentUser =
-        auth.currentUser;
+      const currentUser = auth.currentUser;
   
       if (!currentUser) return;
   
-      const userRef =
-        doc(
-          db,
-          "users",
-          currentUser.uid
-        );
+      const userRef = doc(db, "users", currentUser.uid);
   
-      const userSnap =
-        await getDoc(userRef);
+      const userSnap = await getDoc(userRef);
   
       if (!userSnap.exists()) return;
   
-      const currentGroupId =
-        userSnap.data().activeGroupId;
+      const currentGroupId = userSnap.data().activeGroupId;
   
       const q = query(
-        collection(
-          db,
-          "analytics_matches"
-        ),
-        where(
-          "groupId",
-          "==",
-          currentGroupId
-        )
+        collection(db, "analytics_matches"),
+        where("groupId", "==", currentGroupId)
       );
-      const historyRef = doc(
-        db,
-        "leagueHistory",
-        currentGroupId
-      );
-      
-      const historySnap =
-        await getDoc(historyRef);
-      
-        const historyData =
-        historySnap.exists()
-          ? historySnap.data()
-          : null;
-      
-      setLeagueHistory(
-        historyData
-      );
-     
   
-      unsubscribe =
-        onSnapshot(
-          q,
-          (snapshot) => {
+      const historyRef = doc(db, "leagueHistory", currentGroupId);
   
-            const analyticsData =
-            snapshot.docs
-            // Ignora analytics antigos gerados pelo buildMatchAnalyticsAdmin - removi as duplicidades e entao exclui o filtro abaixo 
-            //  .filter((d) => !d.id.includes("___"))
-              .map(
-                (d) =>
-                  d.data() as MatchAnalytics
-              );
-              setInsights(
-                buildInsights(
-                  analyticsData,
-                  historyData
-                )
-              );
-          }
+      const historySnap = await getDoc(historyRef);
+  
+      const historyData: LeagueHistory | null = historySnap.exists()
+        ? (historySnap.data() as LeagueHistory)
+        : null;
+  
+      unsubscribe = onSnapshot(q, (snapshot) => {
+  
+        const analyticsData = snapshot.docs.map(
+          (d) => d.data() as MatchAnalytics
         );
+  
+        setInsights(buildInsights(analyticsData, historyData));
+  
+      });
     }
+  
     carregar();
   
     return () => {
