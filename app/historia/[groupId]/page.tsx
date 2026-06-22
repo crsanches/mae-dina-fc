@@ -45,7 +45,7 @@ export default function HistoriaPage({
     useState(true);
 
   const [speed, setSpeed] =
-    useState(3000);
+    useState(1500);
 
   const [loading, setLoading] =
     useState(true);
@@ -305,52 +305,6 @@ export default function HistoriaPage({
             "
           >
             ⏮ Reiniciar
-          </button>
-
-        </div>
-
-        <div className="flex justify-center gap-2 mt-4">
-
-          <button
-            onClick={() =>
-              setSpeed(3500)
-            }
-            className="
-              px-4 py-2
-              rounded-lg
-              bg-zinc-800
-              text-white
-            "
-          >
-            🐢
-          </button>
-
-          <button
-            onClick={() =>
-              setSpeed(2500)
-            }
-            className="
-              px-4 py-2
-              rounded-lg
-              bg-zinc-800
-              text-white
-            "
-          >
-            🚶
-          </button>
-
-          <button
-            onClick={() =>
-              setSpeed(1500)
-            }
-            className="
-              px-4 py-2
-              rounded-lg
-              bg-zinc-800
-              text-white
-            "
-          >
-            🏃
           </button>
 
         </div>
