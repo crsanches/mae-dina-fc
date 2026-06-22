@@ -119,7 +119,9 @@ type MaisApostadoCard = BaseCard & { type: "maisApostado"; match: MatchAnalytics
 type HotLast5Card = BaseCard & {type: "hotLast5";ranking: {username: string;points: number;exacts: number}[]};
 type ColdLast5Card = BaseCard & { type: "coldLast5";ranking: { username: string;points: number; exacts: number;}[];};
 type TeamEntry = { team: string; backing: number; won: boolean };
-
+type DrawKingsCard = BaseCard & {type: "drawKings";ranking: {username: string;draws: number;}[];};
+type ClimbersCard = BaseCard & {type: "climbers";ranking: {username: string;change: number;}[];};
+type FallersCard = BaseCard & {type: "fallers";ranking: {username: string;change: number;}[];};
 type InsightCard =
   | ZebraCard
   | PredictableCard
@@ -137,7 +139,10 @@ type InsightCard =
   | SobrestimadoCard
   | MaisApostadoCard
   | HotLast5Card
-  | ColdLast5Card;
+  | ColdLast5Card
+  | DrawKingsCard
+  | ClimbersCard
+  | FallersCard;
 
 // ────────────────────────────────────────────────────────────
 // Helpers
@@ -704,11 +709,195 @@ function buildColdLast5Card(
     ranking,
   };
 }
+
+function buildDrawKingsCard(
+  matches: MatchAnalytics[]
+): DrawKingsCard | null {
+
+  const validMatches = matches.filter(
+    (m) => m.allUserDistances?.length
+  );
+
+  const stats: Record<
+    string,
+    {
+      points: number;
+      exacts: number;
+    }
+  > = {};
+
+  validMatches.forEach((match) => {
+
+    (match.allUserDistances || []).forEach((user) => {
+
+      if (!stats[user.username]) {
+        stats[user.username] = {
+          points: 0,
+          exacts: 0,
+        };
+      }
+      
+      stats[user.username].exacts +=
+        Number(user.drawHit || 0);
+    });
+
+  });
+
+  const ranking =
+  Object.entries(stats)
+    .map(([username, s]) => ({
+      username,
+      draws: s.exacts,
+    }))
+    .sort((a, b) => b.draws - a.draws)
+      .slice(0, 3);
+
+  if (!ranking.length) return null;
+
+  return {
+    type: "drawKings",
+    accent: "cyan",
+    emoji: "🤝",
+    title: "Reis dos Empates Exatos",
+    subtitle: "Quem mais acertou empates na mosca",
+    ranking,
+  };
+}
+
+function buildClimbersCard(
+  history: any
+): ClimbersCard | null {
+  
+
+  const frames = history?.frames || [];
+
+  if (frames.length < 6) return null;
+
+  const currentFrame =
+    frames[frames.length - 1];
+
+  const oldFrame =
+    frames[frames.length - 6];
+
+  const changes: {
+    username: string;
+    change: number;
+  }[] = [];
+
+  currentFrame.ranking.forEach((current: any) => {
+
+    const old =
+      oldFrame.ranking.find(
+        (r: any) =>
+          r.username === current.username
+      );
+
+    if (!old) return;
+
+    changes.push({
+      username: current.username,
+      change:
+        old.position -
+        current.position,
+    });
+
+  });
+
+  const ranking =
+    changes
+      .filter(
+        (c) => c.change > 0
+      )
+      .sort(
+        (a, b) =>
+          b.change - a.change
+      )
+      .slice(0, 3);
+
+  if (!ranking.length)
+    return null;
+
+  return {
+    type: "climbers",
+    accent: "lime",
+    emoji: "📈",
+    title: "Escaladores",
+    subtitle:
+      "Quem mais subiu nos últimos 5 jogos",
+    ranking,
+  };
+}
+
+function buildFallersCard(
+  history: any
+): FallersCard | null {
+
+  const frames = history?.frames || [];
+
+  if (frames.length < 6) return null;
+
+  const currentFrame =
+    frames[frames.length - 1];
+
+  const oldFrame =
+    frames[frames.length - 6];
+
+  const changes: {
+    username: string;
+    change: number;
+  }[] = [];
+
+  currentFrame.ranking.forEach((current: any) => {
+
+    const old =
+      oldFrame.ranking.find(
+        (r: any) =>
+          r.username === current.username
+      );
+
+    if (!old) return;
+
+    changes.push({
+      username: current.username,
+      change:
+        old.position -
+        current.position,
+    });
+
+  });
+
+  const ranking =
+    changes
+      .filter(
+        (c) => c.change < 0
+      )
+      .sort(
+        (a, b) =>
+          a.change - b.change
+      )
+      .slice(0, 3);
+
+  if (!ranking.length)
+    return null;
+
+  return {
+    type: "fallers",
+    accent: "rose",
+    emoji: "📉",
+    title: "Despencaram",
+    subtitle:
+      "Quem mais perdeu posições nos últimos 5 jogos",
+    ranking,
+  };
+}
 // ────────────────────────────────────────────────────────────
 // Monta a lista final de cards a partir dos dados já carregados
 // ────────────────────────────────────────────────────────────
 
-function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
+function buildInsights(
+  matches: MatchAnalytics[],
+  leagueHistory: any
+): InsightCard[]  {
   if (!matches.length) return [];
 
   const streaks = buildStreaks(matches);
@@ -729,6 +918,9 @@ function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
   buildSniperCard(matches),
   buildHotLast5Card(matches),
   buildColdLast5Card(matches),
+  buildDrawKingsCard(matches),
+  buildClimbersCard(leagueHistory),
+  buildFallersCard(leagueHistory),
     hotStreaks[0]
       ? {
           type: "peQuente",
@@ -752,6 +944,7 @@ function buildInsights(matches: MatchAnalytics[]): InsightCard[] {
     // buildSubestimadoCard(matches),  // comentado
   // buildSobrestimadoCard(matches), // comentado
   // buildMaisApostadoCard(matches), // comentado
+  
   ];
 
   return cards.filter((c): c is InsightCard => c !== null);
@@ -1137,7 +1330,124 @@ function renderCard(card: InsightCard) {
         </CardShell>
   );
 
-    default:
+  case "drawKings":
+    return (
+      <CardShell
+        accent={card.accent}
+        emoji={card.emoji}
+        title={card.title}
+        subtitle={card.subtitle}
+      >
+        <div className="space-y-2">
+
+          {card.ranking.map((item, index) => (
+
+            <div
+              key={item.username}
+              className="
+                flex
+                justify-between
+                bg-orange-900/40
+                rounded-2xl
+                px-4
+                py-2
+              "
+            >
+              <span className="font-black">
+                {index + 1}º {item.username}
+              </span>
+
+              <span className="text-orange-300 font-bold">
+              {item.draws} empates exatos
+              </span>
+
+            </div>
+
+          ))}
+
+        </div>
+      </CardShell>
+);
+
+case "climbers":
+  return (
+    <CardShell
+      accent={card.accent}
+      emoji={card.emoji}
+      title={card.title}
+      subtitle={card.subtitle}
+    >
+      <div className="space-y-2">
+
+        {card.ranking.map((item, index) => (
+
+          <div
+            key={item.username}
+            className="
+              flex
+              justify-between
+              bg-lime-900/40
+              rounded-2xl
+              px-4
+              py-2
+            "
+          >
+            <span className="font-black">
+              {index + 1}º {item.username}
+            </span>
+
+            <span className="text-lime-300 font-bold">
+              +{item.change} posições
+            </span>
+
+          </div>
+
+        ))}
+
+      </div>
+    </CardShell>
+  );
+  
+  case "fallers":
+    return (
+      <CardShell
+        accent={card.accent}
+        emoji={card.emoji}
+        title={card.title}
+        subtitle={card.subtitle}
+      >
+        <div className="space-y-2">
+  
+          {card.ranking.map((item, index) => (
+  
+            <div
+              key={item.username}
+              className="
+                flex
+                justify-between
+                bg-rose-900/40
+                rounded-2xl
+                px-4
+                py-2
+              "
+            >
+              <span className="font-black">
+                {index + 1}º {item.username}
+              </span>
+  
+              <span className="text-rose-300 font-bold">
+                {item.change} posições
+              </span>
+  
+            </div>
+  
+          ))}
+  
+        </div>
+      </CardShell>
+    );  
+  
+  default:
       return null;
   }
 }
@@ -1158,6 +1468,7 @@ export default function MatchInsightCards() {
 
 
   const [insights, setInsights] = useState<InsightCard[]>([]);
+  const [leagueHistory, setLeagueHistory] = useState<any>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -1199,13 +1510,29 @@ export default function MatchInsightCards() {
           currentGroupId
         )
       );
+      const historyRef = doc(
+        db,
+        "leagueHistory",
+        currentGroupId
+      );
+      
+      const historySnap =
+        await getDoc(historyRef);
+      
+        const historyData =
+        historySnap.exists()
+          ? historySnap.data()
+          : null;
+      
+      setLeagueHistory(
+        historyData
+      );
+     
   
       unsubscribe =
         onSnapshot(
           q,
           (snapshot) => {
-  
-           
   
             const analyticsData =
             snapshot.docs
@@ -1215,20 +1542,15 @@ export default function MatchInsightCards() {
                 (d) =>
                   d.data() as MatchAnalytics
               );
-
-             
-  
-            setInsights(
-              buildInsights(
-                analyticsData
-              )
-            );
-  
+              setInsights(
+                buildInsights(
+                  analyticsData,
+                  historyData
+                )
+              );
           }
         );
-  
     }
-  
     carregar();
   
     return () => {
