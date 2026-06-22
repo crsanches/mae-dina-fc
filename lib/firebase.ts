@@ -41,6 +41,8 @@ import {
 
 } from "firebase/auth";
 
+import { getAnalytics } from "firebase/analytics";
+
 const firebaseConfig = {
 
   apiKey:
@@ -79,3 +81,6 @@ export const auth =
 
 export const googleProvider =
   new GoogleAuthProvider();
+
+
+  export const analytics = typeof window !== "undefined" ? getAnalytics(app) : null; // adicione
