@@ -384,6 +384,42 @@ export default function AuditoriaPage() {
                   — Errou tudo
                 </p>
 
+                <h3 className="font-black text-lg mb-4 text-yellow-400">
+
+                🎯 Peso por fase
+
+              </h3>
+
+              <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase 1 - peso 1
+                  </span>
+                </p>
+                <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase 32 - peso 3
+                  </span>
+                </p>
+                <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase Oitavas de final - peso 5
+                  </span>
+                </p>
+                <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase Quartas de final - peso 8
+                  </span>
+                </p>
+                <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase Semi Final - peso 12
+                  </span>
+                </p>
+                <p>
+                  ✅ <span className="font-bold text-white">
+                    Fase Final - peso 18
+                  </span>
+                </p>
               </div>
 
             </div>
