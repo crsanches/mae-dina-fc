@@ -78,7 +78,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Grupos",
+    fase: "Fase32",
 
     grupo,
 
@@ -127,7 +127,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Grupos",
+    fase: "Fase32",
 
     grupo,
 
@@ -138,7 +138,8 @@ function createGame(
 
 
   
-  const games = [
+ /*
+ const games = [
 
    // =====================
 // GRUPO A
@@ -692,92 +693,137 @@ createGame(
 ),
   
   ];
+*/
 
+const games = [
+  // criando jogos da fase 32
+
+
+createGame(
+  "África do Sul",
+  "Canadá",
+  "Fase32",
+  "2026-06-28T16:00"
+),
+
+createGame(
+  "Brasil",
+  "Japão",
+  "Fase32",
+  "2026-06-29T14:00"
+),
+
+createGame(
+  "Alemanha",
+  "Paraguai",
+  "Fase32",
+  "2026-06-29T17:30"
+),
+
+
+createGame(
+  "Holanda",
+  "Marrocos",
+  "Fase32",
+  "2026-06-29T22:00"
+),
+
+
+createGame(
+  "Costa do Marfim",
+  "Noruega",
+  "Fase32",
+  "2026-06-30T14:00"
+),
+
+createGame(
+  "França",
+  "Suécia",
+  "Fase32",
+  "2026-06-30T18:00"
+),
 
 /*
-const games = [
-  {
-    teamA: "EC Vitória",
-    emojiA: "/logos/vitoria.png",
-    teamB: "Internacional",
-    emojiB: "/logos/internacional.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-23T17:00"
-  },
-  {
-    teamA: "São Paulo",
-    emojiA: "/logos/sao-paulo.png",
-    teamB: "Botafogo",
-    emojiB: "/logos/botafogo.png",
-    faase: "Brasileirão",
-    matchDate: "2026-05-23T17:00"
-  },
-  {
-    teamA: "Grêmio",
-    emojiA: "/logos/gremio.png",
-    teamB: "Santos",
-    emojiB: "/logos/santos.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-23T19:00"
-  },
-  {
-    teamA: "Mirassol",
-    emojiA: "/logos/mirassol.png",
-    teamB: "Fluminense",
-    emojiB: "/logos/fluminense.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-23T19:00"
-  },
-  {
-    teamA: "Flamengo",
-    emojiA: "/logos/flamengo.png",
-    teamB: "Palmeiras",
-    emojiB: "/logos/palmeiras.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-23T21:00"
-  },
-  {
-    teamA: "Remo",
-    emojiA: "/logos/remo.png",
-    teamB: "Athletico-PR",
-    emojiB: "/logos/athletico-pr.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-24T16:00"
-  },
-  {
-    teamA: "Cruzeiro",
-    emojiA: "/logos/cruzeiro.png",
-    teamB: "Chapecoense",
-    emojiB: "/logos/chapecoense.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-24T16:00"
-  },
-  {
-    teamA: "Corinthians",
-    emojiA: "/logos/corinthians.png",
-    teamB: "Atlético-MG",
-    emojiB: "/logos/atletico-mg.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-24T18:30"
-  },
-  {
-    teamA: "Vasco da Gama",
-    emojiA: "/logos/vasco.png",
-    teamB: "Bragantino",
-    emojiB: "/logos/bragantino.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-24T20:30"
-  },
-  {
-    teamA: "Coritiba",
-    emojiA: "/logos/coritiba.png",
-    teamB: "Bahia",
-    emojiB: "/logos/bahia.png",
-    fase: "Brasileirão",
-    matchDate: "2026-05-25T20:00"
-  }
-];
+createGame(
+  "México",
+  "A definir",
+  "Fase32",
+  "2026-06-30T22:00"
+),
+
+createGame(
+  "VencedorL",
+  "A definir",
+  "Fase32",
+  "2026-07-01T13:00"
+),
+
+createGame(
+  "Bélgica",
+  "A definir",
+  "Fase32",
+  "2026-07-01T17:00"
+),  
 */
+
+createGame(
+  "Estados Unidos",
+  "Bósnia e Herzegovina",
+  "Fase32",
+  "2026-07-02T21:00"
+),
+/*
+createGame(
+  "Espanha",
+  "A definir",
+  "Fase32",
+  "2026-07-02T16:00"
+),
+
+createGame(
+  "Segundo K",
+  "Segundo L",
+  "Fase32",
+  "2026-07-02T20:00"
+),
+
+
+createGame(
+  "Suíça",
+  "A definir",
+  "Fase32",
+  "2026-07-03T00:00"
+),
+*/
+createGame(
+  "Austrália",
+  "Egito",
+  "Fase32",
+  "2026-07-03T15:00"
+),
+
+
+createGame(
+  "Argentina",
+  "Cabo Verde",
+  "Fase32",
+  "2026-07-03T19:00"
+),
+
+/*
+
+createGame(
+  "VencedorK",
+  "A definir",
+  "Fase32",
+  "2026-07-03T22:30"
+),
+*/
+
+];
+
+
+  
 
 async function importGames() {
 
