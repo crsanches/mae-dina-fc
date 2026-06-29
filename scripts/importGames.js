@@ -699,90 +699,43 @@ const games = [
   // criando jogos da fase 32
 
 
-createGame(
-  "África do Sul",
-  "Canadá",
-  "Fase32",
-  "2026-06-28T16:00"
-),
-
-createGame(
-  "Brasil",
-  "Japão",
-  "Fase32",
-  "2026-06-29T14:00"
-),
-
-createGame(
-  "Alemanha",
-  "Paraguai",
-  "Fase32",
-  "2026-06-29T17:30"
-),
 
 
-createGame(
-  "Holanda",
-  "Marrocos",
-  "Fase32",
-  "2026-06-29T22:00"
-),
 
-
-createGame(
-  "Costa do Marfim",
-  "Noruega",
-  "Fase32",
-  "2026-06-30T14:00"
-),
-
-createGame(
-  "França",
-  "Suécia",
-  "Fase32",
-  "2026-06-30T18:00"
-),
-
-/*
 createGame(
   "México",
-  "A definir",
+  "Equador",
   "Fase32",
   "2026-06-30T22:00"
 ),
 
 createGame(
-  "VencedorL",
-  "A definir",
+  "Inglaterra",
+  "RD Congo",
   "Fase32",
   "2026-07-01T13:00"
 ),
 
 createGame(
   "Bélgica",
-  "A definir",
+  "Senegal",
   "Fase32",
   "2026-07-01T17:00"
 ),  
-*/
+
+
+
 
 createGame(
-  "Estados Unidos",
-  "Bósnia e Herzegovina",
-  "Fase32",
-  "2026-07-02T21:00"
-),
-/*
-createGame(
   "Espanha",
-  "A definir",
+  "Áustria",
   "Fase32",
   "2026-07-02T16:00"
 ),
 
 createGame(
-  "Segundo K",
-  "Segundo L",
+  "Portugal",
+  "Croácia",
   "Fase32",
   "2026-07-02T20:00"
 ),
@@ -790,35 +743,22 @@ createGame(
 
 createGame(
   "Suíça",
-  "A definir",
+  "Argélia",
   "Fase32",
   "2026-07-03T00:00"
 ),
-*/
-createGame(
-  "Austrália",
-  "Egito",
-  "Fase32",
-  "2026-07-03T15:00"
-),
+
+
+
 
 
 createGame(
-  "Argentina",
-  "Cabo Verde",
-  "Fase32",
-  "2026-07-03T19:00"
-),
-
-/*
-
-createGame(
-  "VencedorK",
-  "A definir",
+  "Colômbia",
+  "Gana",
   "Fase32",
   "2026-07-03T22:30"
 ),
-*/
+
 
 ];
 
