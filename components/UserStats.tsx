@@ -640,7 +640,7 @@ if (
     <div className="bg-zinc-900 rounded-3xl border border-zinc-800 p-5">
 
       <h2 className="text-xl font-black mb-4">
-        💀 Sua Situação
+        💀 Sua Situação no Ranking Geral
       </h2>
 
       <div className="grid grid-cols-2 gap-4">

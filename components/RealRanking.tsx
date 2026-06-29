@@ -46,7 +46,7 @@ export default function RealRanking() {
       | "Quartas"
       | "Semi"
       | "Final"
-    >("Geral");
+    >("Fase32");
 
   const [expandido, setExpandido] =
     useState(false);
@@ -115,7 +115,7 @@ export default function RealRanking() {
   function getTituloRanking() {
     switch (faseSelecionada) {
       case "Grupos": return "🌎 Ranking da Fase de Grupos";
-      case "Fase32": return "⚔️ 🚪 Ranking da Segunda";
+      case "Fase32": return "⚔️ 🚪 Ranking da Fase 32";
       case "Oitavas": return "⚔️ Ranking das Oitavas";
       case "Quartas": return "🏟️ Ranking das Quartas";
       case "Semi": return "🔥 Ranking da Semifinal";
@@ -176,7 +176,7 @@ export default function RealRanking() {
         {[
           ["Geral", "🏆 Geral"],
           ["Grupos", "🌎 Grupos"],
-          ["Fase32", "⚔️ 🚪 Segunda"],
+          ["Fase32", "⚔️ 🚪 Fase32"],
           ["Oitavas", "⚔️ Oitavas"],
           ["Quartas", "🏟️ Quartas"],
           ["Semi", "🔥 Semi"],
