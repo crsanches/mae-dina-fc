@@ -11,7 +11,7 @@ type SportsDbEvent = {
   strTimestamp: string;
 };
 
-function normalize(text?: string): string {
+function normalize(text?: string) {
   if (!text) return "";
 
   const value = text
@@ -24,33 +24,26 @@ function normalize(text?: string): string {
     .trim();
 
   const aliases: Record<string, string> = {
-    "mexico": "mexico",
     "south africa": "africa do sul",
     "south korea": "coreia do sul",
     "czech republic": "tchequia",
-    "canada": "canada",
     "bosnia herzegovina": "bosnia e herzegovina",
     "bosnia-herzegovina": "bosnia e herzegovina",
     "qatar": "catar",
     "switzerland": "suica",
     "brazil": "brasil",
     "morocco": "marrocos",
-    "haiti": "haiti",
     "scotland": "escocia",
     "usa": "estados unidos",
     "united states": "estados unidos",
     "paraguay": "paraguai",
-    "australia": "australia",
     "turkey": "turquia",
     "germany": "alemanha",
-    "curacao": "curacao",
-    "curaçao": "curacao",
     "ivory coast": "costa do marfim",
     "ecuador": "equador",
     "netherlands": "holanda",
     "japan": "japao",
     "sweden": "suecia",
-    "tunisia": "tunisia",
     "belgium": "belgica",
     "egypt": "egito",
     "iran": "ira",
@@ -63,152 +56,158 @@ function normalize(text?: string): string {
     "senegal": "senegal",
     "iraq": "iraque",
     "norway": "noruega",
-    "argentina": "argentina",
     "algeria": "argelia",
-    "austria": "austria",
     "jordan": "jordania",
-    "portugal": "portugal",
     "dr congo": "rd congo",
     "uzbekistan": "uzbequistao",
-    "colombia": "colombia",
     "england": "inglaterra",
     "croatia": "croacia",
     "ghana": "gana",
-    "panama": "panama",
   };
 
   return aliases[value] || value;
 }
 
-const ptToEn: Record<string, string> = {
-  "australia": "Australia",
-  "turquia": "Turkey",
-  "holanda": "Netherlands",
-  "japao": "Japan",
-  "suecia": "Sweden",
-  "tunisia": "Tunisia",
-  "portugal": "Portugal",
-  "rd congo": "DR Congo",
-  "gana": "Ghana",
-  "panama": "Panama",
-  "colombia": "Colombia",
-  "uzbequistao": "Uzbekistan",
-  "croacia": "Croatia",
-  "bosnia e herzegovina": "Bosnia-Herzegovina",
-  "catar": "Qatar",
-  "uruguai": "Uruguay",
-  "espanha": "Spain",
-  "arabia saudita": "Saudi Arabia",
-  "cabo verde": "Cape Verde",
-  "suica": "Switzerland",
-  "tchequia": "Czech Republic",
-  "mexico": "Mexico",
-  "inglaterra": "England",
-  "senegal": "Senegal",
-  "iraque": "Iraq",
-};
-
-function toEnglish(name: string): string {
-  const norm = normalize(name);
-  return ptToEn[norm] || name;
-}
-
-async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
-  try {
-    const res = await fetch(url);
-    const text = await res.text();
-    if (!text.startsWith("{") && !text.startsWith("[")) return null;
-    return JSON.parse(text) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-function datasProximas(date1: string, date2: string): boolean {
+function datasProximas(date1: string, date2: string) {
   const d1 = new Date(date1).getTime();
   const d2 = new Date(date2).getTime();
-  const diff = Math.abs(d1 - d2);
-  return diff < 6 * 60 * 60 * 1000;
+
+  return Math.abs(d1 - d2) < 6 * 60 * 60 * 1000;
 }
 
 export async function GET() {
   try {
-    const gamesSnapshot = await adminDb.collection("games").get();
-    const jogosSemId = gamesSnapshot.docs.filter((g) => !g.data().idEventSportsDB);
 
-    console.log(`Jogos sem ID: ${jogosSemId.length}`);
+    const response = await fetch(
+      "https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4429&s=2026"
+    );
+
+    const season = await response.json();
+
+    const eventos: SportsDbEvent[] = season.events || [];
+
+    //console.log(`Eventos da temporada: ${eventos.length}`);
+    console.log(
+      eventos.map(e => ({
+        id: e.idEvent,
+        home: e.strHomeTeam,
+        away: e.strAwayTeam,
+        date: e.strTimestamp,
+      }))
+    );
+
+    const gamesSnapshot = await adminDb.collection("games").get();
+
+    const jogosSemId = gamesSnapshot.docs.filter(
+      doc => !doc.data().idEventSportsDB
+    );
+
+    console.log(`Jogos sem id: ${jogosSemId.length}`);
 
     const encontrados: string[] = [];
     const naoEncontrados: string[] = [];
 
-    for (const gameDoc of jogosSemId) {
-      const game = gameDoc.data();
+    for (const doc of jogosSemId) {
 
-      const teamAEn = toEnglish(game.teamA);
-      const teamBEn = toEnglish(game.teamB);
+      const game = doc.data();
 
-      const query = `${teamAEn} vs ${teamBEn}`.replace(/ /g, "+");
-      const url = `https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${query}&s=2026`;
+      const firebaseA = normalize(game.teamA);
+      const firebaseB = normalize(game.teamB);
 
-      console.log(`Buscando: ${query}`);
+      const encontrado = eventos.find(event => {
 
-      const data = await fetchJson(url);
-      await new Promise((r) => setTimeout(r, 400));
+        const apiHome = normalize(event.strHomeTeam);
+        const apiAway = normalize(event.strAwayTeam);
 
-      const eventos = (
-        (data?.event as SportsDbEvent[]) ||
-        (data?.events as SportsDbEvent[]) ||
-        []
-      );
+        const mesmosTimes =
+          (firebaseA === apiHome && firebaseB === apiAway) ||
+          (firebaseA === apiAway && firebaseB === apiHome);
 
-      const encontrado = eventos.find((e) =>
-        e.idLeague === "4429" && datasProximas(game.matchDate, e.strTimestamp)
-      );
+        return (
+          mesmosTimes &&
+          event.idLeague === "4429" &&
+          datasProximas(game.matchDate, event.strTimestamp)
+        );
+      });
 
       if (encontrado) {
-        await adminDb.collection("games").doc(gameDoc.id).update({
+
+        await adminDb.collection("games").doc(doc.id).update({
           idEventSportsDB: encontrado.idEvent,
         });
-        encontrados.push(`✅ ${game.match} → idEvent: ${encontrado.idEvent}`);
-        console.log(`✅ ${game.match} → ${encontrado.idEvent}`);
+
+        encontrados.push(
+          `✅ ${game.match} -> ${encontrado.idEvent}`
+        );
+
+        console.log(
+          `✅ ${game.match} -> ${encontrado.idEvent}`
+        );
+
       } else {
-        const queryInv = `${teamBEn} vs ${teamAEn}`.replace(/ /g, "+");
-        const urlInv = `https://www.thesportsdb.com/api/v1/json/3/searchevents.php?e=${queryInv}&s=2026`;
 
-        const dataInv = await fetchJson(urlInv);
-        await new Promise((r) => setTimeout(r, 400));
-
-        const eventosInv = (
-          (dataInv?.event as SportsDbEvent[]) ||
-          (dataInv?.events as SportsDbEvent[]) ||
-          []
-        );
-
-        const encontradoInv = eventosInv.find((e) =>
-          e.idLeague === "4429" && datasProximas(game.matchDate, e.strTimestamp)
-        );
-
-        if (encontradoInv) {
-          await adminDb.collection("games").doc(gameDoc.id).update({
-            idEventSportsDB: encontradoInv.idEvent,
-          });
-          encontrados.push(`✅ ${game.match} → idEvent: ${encontradoInv.idEvent} (invertido)`);
-          console.log(`✅ ${game.match} → ${encontradoInv.idEvent} (invertido)`);
+        naoEncontrados.push(`❌ ${game.match}`);
+      
+        console.log("\n========================================");
+        console.log(`❌ NÃO ENCONTRADO: ${game.match}`);
+        console.log(`Firebase: ${game.teamA} x ${game.teamB}`);
+        console.log(`Data Firebase: ${game.matchDate}`);
+      
+        const relacionados = eventos.filter(event => {
+      
+          const home = normalize(event.strHomeTeam);
+          const away = normalize(event.strAwayTeam);
+      
+          return (
+            home === firebaseA ||
+            away === firebaseA ||
+            home === firebaseB ||
+            away === firebaseB
+          );
+      
+        });
+      
+        if (relacionados.length === 0) {
+      
+          console.log("Nenhum evento da temporada contém esses times.");
+      
         } else {
-          naoEncontrados.push(`❌ ${game.match} (${game.matchDate})`);
-          console.log(`❌ ${game.match} — não encontrado`);
+      
+          console.log("Eventos semelhantes encontrados:");
+      
+          relacionados.forEach(event => {
+      
+            console.log({
+              idEvent: event.idEvent,
+              home: event.strHomeTeam,
+              away: event.strAwayTeam,
+              timestamp: event.strTimestamp,
+            });
+      
+          });
+      
         }
+      
+        console.log("========================================\n");
+      
       }
     }
 
-    console.log("\n=== RELATÓRIO FINAL ===");
-    console.log("Encontrados:", encontrados);
-    console.log("Não encontrados:", naoEncontrados);
+    return NextResponse.json({
+      success: true,
+      encontrados,
+      naoEncontrados,
+      totalEventos: eventos.length,
+    });
 
-    return NextResponse.json({ success: true, encontrados, naoEncontrados });
+  } catch (err) {
 
-  } catch (error) {
-    console.error("ERRO:", error);
-    return NextResponse.json({ success: false, error: String(error) });
+    console.error(err);
+
+    return NextResponse.json({
+      success: false,
+      error: String(err),
+    });
+
   }
 }

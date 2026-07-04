@@ -51,6 +51,7 @@ type Game = {
   matchDate: string;
   resultadoA?: number;
   resultadoB?: number;
+  apiStatus?: string;
 };
 
 type UsuarioLiga = {
@@ -186,6 +187,7 @@ export default function Home() {
           matchDate: data.matchDate,
           resultadoA: data.resultadoA,
           resultadoB: data.resultadoB,
+          apiStatus: data.apiStatus,
         });
       });
       setJogos(games);
@@ -198,16 +200,40 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  function getStatusJogo(matchDate: string, agora: number) {
-    const inicioJogo = new Date(matchDate).getTime();
+  function getStatusJogo(jogo: Game, agora: number) {
+    const inicioJogo = new Date(jogo.matchDate).getTime();
     const fechamentoApostas = inicioJogo - 60 * 60 * 1000;
-    const encerramentoJogo = inicioJogo + 125 * 60 * 1000;
+  
     if (agora < fechamentoApostas) return "🟢 Apostas abertas";
     if (agora < inicioJogo) return "🔒 Apostas encerradas";
-    if (agora < encerramentoJogo) return "⚽ Jogo em andamento";
+  
+    // Status vindo do TheSportsDB (fonte da verdade)
+    if (jogo.apiStatus) {
+      if (["FT", "AET", "AP", "Match Finished"].includes(jogo.apiStatus))
+      return "✅ Jogo encerrado";
+      if (["ET", "BT"].includes(jogo.apiStatus))
+        return "⏱️ Prorrogação";
+      if (jogo.apiStatus === "P")
+        return "🥅 Pênaltis";
+      if (["1H", "HT", "2H"].includes(jogo.apiStatus))
+        return "⚽ Jogo em andamento";
+     
+    }
+  
+    // Fallback por tempo (se o sync ainda não gravou status)
+    const fimTempoNormal = inicioJogo + 125 * 60 * 1000;
+    const fimProrrogacao = inicioJogo + 163 * 60 * 1000;
+    const empatado =
+      jogo.resultadoA != null &&
+      jogo.resultadoB != null &&
+      jogo.resultadoA === jogo.resultadoB;
+  
+    if (agora < fimTempoNormal) return "⚽ Jogo em andamento";
+    if (!jogo.grupo && empatado && agora < fimProrrogacao)
+      return "⏱️ Prorrogação";
+  
     return "✅ Jogo encerrado";
   }
-
   const jogosEncerrados = jogos.filter((jogo) => {
     const difference = new Date(jogo.matchDate).getTime() - new Date().getTime();
     return difference <= 1000 * 60 * 60;
@@ -372,16 +398,18 @@ export default function Home() {
                         {new Date(jogo.matchDate).toLocaleString("pt-BR")}
                       </p>
                       <p className="text-zinc-400 text-xs">
-                        {getStatusJogo(jogo.matchDate, agora)}
-                      </p>
+                      {getStatusJogo(jogo, agora)}
+                    </p>
                     </div>
                     <p className="font-black text-lg">
                       {jogo.resultadoA != null && jogo.resultadoB != null ? (
                         <>
                           {jogo.resultadoA} x {jogo.resultadoB}
-                          {getStatusJogo(jogo.matchDate, agora) === "⚽ Jogo em andamento" && (
-                            <span className="text-xs text-green-400 ml-2 animate-pulse">● AO VIVO</span>
-                          )}
+                          {["⚽ Jogo em andamento", "⏱️ Prorrogação"].includes(
+                          getStatusJogo(jogo, agora)
+                        ) && (
+                          <span className="text-xs text-green-400 ml-2 animate-pulse">● AO VIVO</span>
+                        )}
                         </>
                       ) : "⏳"}
                     </p>

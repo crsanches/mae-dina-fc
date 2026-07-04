@@ -19,6 +19,11 @@ type ApiGame = {
   strEvent?: string;
 };
 
+// Status que indicam jogo encerrado de vez:
+// FT = tempo normal | AET = após prorrogação | AP = após pênaltis
+// "Match Finished" = formato por extenso do endpoint gratuito
+const STATUS_FINAIS = ["FT", "AET", "AP", "Match Finished"];
+
 function normalize(text?: string) {
   if (!text) return "";
 
@@ -141,11 +146,24 @@ export async function GET() {
       return true;
     });
 
+// teste para ver o que está sendo buscado
+    console.log("===== EVENTOS RECEBIDOS DO THESPORTSDB =====");
+    for (const e of allEvents) {
+      console.log({
+        home: e.strHomeTeam,
+        away: e.strAwayTeam,
+        status: e.strStatus,
+        score: `${e.intHomeScore} x ${e.intAwayScore}`,
+        timestamp: e.strTimestamp,
+      });
+    }
+//fim do teste. remover
+
     // Busca todos os jogos do Firebase
     const gamesSnapshot = await adminDb.collection("games").get();
     const groupsSnapshot = await adminDb
-  .collection("groups")
-  .get();
+      .collection("groups")
+      .get();
 
     // Identifica jogos com idEventSportsDB e jogos sem resultado recentes
     const jogosComId = gamesSnapshot.docs.filter((g) => g.data().idEventSportsDB);
@@ -179,7 +197,6 @@ export async function GET() {
       )
     );
 
-    // Busca via lookupevent para jogos sem cobertura (tenta pelo nome do time)
     console.log("Jogos sem cobertura:", jogosSemCobertura.map((g) => g.data().match));
 
     // Monta lista final de atualizações
@@ -200,19 +217,42 @@ export async function GET() {
                (firebaseA === apiAway && firebaseB === apiHome);
       });
 
-      if (!localGame) continue;
-      if (localGame.data().finished === true && apiGame.strStatus === "FT") continue;
+// apagar daqui
+      if (!localGame) {
+        console.log("==================================");
+        console.log("Não encontrei jogo no Firebase");
+        console.log(apiGame.strHomeTeam, "x", apiGame.strAwayTeam);
+        console.log("Status:", apiGame.strStatus);
+        console.log("==================================");
+        continue;
+      }
+// ate aqui
+
+      const jogoEncerrado = STATUS_FINAIS.includes(apiGame.strStatus);
+
+      if (localGame.data().finished === true && jogoEncerrado) continue;
+
+      console.log("ATUALIZANDO");
+//apagar esse console log
+      console.log({
+        firebase: localGame.data().match,
+        api: `${apiGame.strHomeTeam} x ${apiGame.strAwayTeam}`,
+        placar: `${apiGame.intHomeScore} x ${apiGame.intAwayScore}`,
+        status: apiGame.strStatus,
+      });
+//ate aqui
 
       await adminDb.collection("games").doc(localGame.id).update({
         resultadoA: Number(apiGame.intHomeScore),
         resultadoB: Number(apiGame.intAwayScore),
-        finished: apiGame.strStatus === "FT",
+        finished: jogoEncerrado,
         status: apiGame.strStatus,
       });
-      if (apiGame.strStatus === "FT") {
+
+      if (jogoEncerrado) {
 
         for (const groupDoc of groupsSnapshot.docs) {
-      
+
           await buildMatchAnalyticsAdmin(
             `${localGame.data().teamA} x ${localGame.data().teamB}`,
             Number(apiGame.intHomeScore),
@@ -222,9 +262,9 @@ export async function GET() {
             localGame.data().fase,
             localGame.data().grupo
           );
-      
+
         }
-      
+
       }
 
     }
@@ -235,18 +275,22 @@ export async function GET() {
 
       const localGame = gamesSnapshot.docs.find((g) => g.id === firebaseId);
       if (!localGame) continue;
-      if (localGame.data().finished === true && event.strStatus === "FT") continue;
+
+      const jogoEncerrado = STATUS_FINAIS.includes(event.strStatus);
+
+      if (localGame.data().finished === true && jogoEncerrado) continue;
 
       await adminDb.collection("games").doc(firebaseId).update({
         resultadoA: Number(event.intHomeScore),
         resultadoB: Number(event.intAwayScore),
-        finished: event.strStatus === "FT",
+        finished: jogoEncerrado,
         status: event.strStatus,
       });
-      if (event.strStatus === "FT") {
+
+      if (jogoEncerrado) {
 
         for (const groupDoc of groupsSnapshot.docs) {
-      
+
           await buildMatchAnalyticsAdmin(
             `${localGame.data().teamA} x ${localGame.data().teamB}`,
             Number(event.intHomeScore),
@@ -256,21 +300,21 @@ export async function GET() {
             localGame.data().fase,
             localGame.data().grupo
           );
-      
+
         }
-      
+
       }
 
     }
-      
-    
+
     for (const groupDoc of groupsSnapshot.docs) {
-    
+
       await buildLeagueHistory(
         groupDoc.id
       );
-    
+
     }
+
     return NextResponse.json({
       success: true,
       semCobertura: jogosSemCobertura.map((g) => g.data().match),
