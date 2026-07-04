@@ -78,7 +78,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Fase32",
+    fase: "Oitavas",
 
     grupo,
 
@@ -127,7 +127,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Fase32",
+    fase: "Oitavas",
 
     grupo,
 
@@ -694,12 +694,9 @@ createGame(
   
   ];
 */
-
+/*
 const games = [
   // criando jogos da fase 32
-
-
-
 
 
 createGame(
@@ -761,10 +758,72 @@ createGame(
 
 
 ];
+*/
+
+/*
+const games = [
+  // criando jogos das oitavas
 
 
-  
+createGame(
+  "Canadá",
+  "Marrocos",
+  "Oitavas",
+  "2026-07-04T14:00"
+),
 
+createGame(
+  "Paraguai",
+  "França",
+  "Oitavas",
+  "2026-07-04T18:00"
+),
+
+createGame(
+  "Brasil",
+  "Noruega",
+  "Oitavas",
+  "2026-07-05T17:00"
+),
+
+createGame(
+  "México",
+  "Inglaterra",
+  "Oitavas",
+  "2026-07-05T21:00"
+),
+createGame(
+  "Espanha",
+  "Portugal",
+  "Oitavas",
+  "2026-07-06T16:00"
+),
+createGame(
+  "Estados Unidos",
+  "Bélgica",
+  "Oitavas",
+  "2026-07-06T21:00"
+),
+
+];
+ */
+
+const games = [
+  createGame(
+    "Argentina",
+    "Egito",
+    "Oitavas",
+    "2026-07-07T13:00"
+  ),
+
+  createGame(
+    "Suíça",
+    "Colômbia",
+    "Oitavas",
+    "2026-07-07T17:00"
+  ),
+
+];
 async function importGames() {
 
   for (const game of games) {
