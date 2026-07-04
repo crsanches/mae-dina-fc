@@ -7,7 +7,7 @@ import admin from "firebase-admin";
 import { readFileSync, writeFileSync } from "fs";
 
 const serviceAccount = JSON.parse(
-  readFileSync("./serviceAccountKey.json", "utf8")
+  readFileSync("../serviceAccount.json", "utf8")
 );
 
 admin.initializeApp({

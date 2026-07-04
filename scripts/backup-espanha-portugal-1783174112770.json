@@ -1,0 +1,535 @@
+{
+  "exportadoEm": "2026-07-04T14:08:32.770Z",
+  "game": {
+    "id": "sW5sbSbkxIAIdiTgxrkr",
+    "match": "Espanha x Portugal",
+    "teamA": "Espanha",
+    "emojiA": "🇪🇸",
+    "teamB": "Portugal",
+    "emojiB": "🇵🇹",
+    "fase": "Oitavas",
+    "grupo": "Oitavas",
+    "matchDate": "2026-07-06T16:00",
+    "finished": false,
+    "resultadoA": null,
+    "resultadoB": null,
+    "createdAt": {
+      "_seconds": 1783077866,
+      "_nanoseconds": 218000000
+    }
+  },
+  "bets": [
+    {
+      "id": "B4zMfRM4zqC7Dg919qSU-Mauricio Yukio Hiroshi-Espanha-Portugal",
+      "uid": "WEOHnjkG1iUmcADIGiy7CEwa2Js2",
+      "username": "Hiroshi o Vidente",
+      "nome": "Mauricio Yukio Hiroshi",
+      "userName": "Mauricio Yukio Hiroshi",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "B4zMfRM4zqC7Dg919qSU",
+      "createdAt": {
+        "_seconds": 1783106743,
+        "_nanoseconds": 877000000
+      }
+    },
+    {
+      "id": "B4zMfRM4zqC7Dg919qSU-Nilson Sanchez-Espanha-Portugal",
+      "uid": "WG01VDptK9Vn12i8g5BMq3BgvKd2",
+      "username": "Nilson Sanchez",
+      "nome": "Nilson Sanchez",
+      "userName": "Nilson Sanchez",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "B4zMfRM4zqC7Dg919qSU",
+      "createdAt": {
+        "_seconds": 1783104339,
+        "_nanoseconds": 932000000
+      }
+    },
+    {
+      "id": "B4zMfRM4zqC7Dg919qSU-Wilson Cardoso-Espanha-Portugal",
+      "uid": "blkZAyzDkDUGVrz3JFqAEpHOhk93",
+      "username": "Wilson",
+      "nome": "Wilson Cardoso",
+      "userName": "Wilson Cardoso",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "B4zMfRM4zqC7Dg919qSU",
+      "createdAt": {
+        "_seconds": 1783079232,
+        "_nanoseconds": 492000000
+      }
+    },
+    {
+      "id": "B4zMfRM4zqC7Dg919qSU-alfredo onoda-Espanha-Portugal",
+      "uid": "XWDSn9kAqkYo16by3soMcNCOt993",
+      "username": "Alfredo",
+      "nome": "alfredo onoda",
+      "userName": "alfredo onoda",
+      "match": "Espanha x Portugal",
+      "golsA": "1",
+      "golsB": "3",
+      "points": 0,
+      "groupId": "B4zMfRM4zqC7Dg919qSU",
+      "createdAt": {
+        "_seconds": 1783131273,
+        "_nanoseconds": 465000000
+      }
+    },
+    {
+      "id": "RzWW2wCiVlhOPeedwwZo-Celso LJ-Espanha-Portugal",
+      "uid": "dkUz6NiLiBdM0X90kfizkq8NzLe2",
+      "username": "Alligator",
+      "nome": "Celso LJ",
+      "userName": "Celso LJ",
+      "match": "Espanha x Portugal",
+      "golsA": "1",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "RzWW2wCiVlhOPeedwwZo",
+      "createdAt": {
+        "_seconds": 1783132762,
+        "_nanoseconds": 260000000
+      }
+    },
+    {
+      "id": "RzWW2wCiVlhOPeedwwZo-Wilson Cardoso-Espanha-Portugal",
+      "uid": "blkZAyzDkDUGVrz3JFqAEpHOhk93",
+      "username": "Wilson",
+      "nome": "Wilson Cardoso",
+      "userName": "Wilson Cardoso",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "RzWW2wCiVlhOPeedwwZo",
+      "createdAt": {
+        "_seconds": 1783079181,
+        "_nanoseconds": 523000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-AS Allan-Espanha-Portugal",
+      "uid": "M3UDzQhSEvUr2vGBBr6TzAAXRnZ2",
+      "username": "Yuri Alberto",
+      "nome": "AS Allan",
+      "userName": "AS Allan",
+      "match": "Espanha x Portugal",
+      "golsA": "3",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783084715,
+        "_nanoseconds": 4000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Arnaldo Bruno-Espanha-Portugal",
+      "uid": "PdoLME7aSpQKRbSAmM6IPDLkWFu2",
+      "username": "Fartura FC",
+      "nome": "Arnaldo Bruno",
+      "userName": "Arnaldo Bruno",
+      "match": "Espanha x Portugal",
+      "golsA": "1",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783100224,
+        "_nanoseconds": 503000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Arvid Samuel Hammarstrom-Espanha-Portugal",
+      "uid": "9lzvgonJg8OrSSuemvAZTUKLb4z1",
+      "username": "Arvid",
+      "nome": "Arvid Samuel Hammarstrom",
+      "userName": "Arvid Samuel Hammarstrom",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783163907,
+        "_nanoseconds": 118000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Edson Costa-Espanha-Portugal",
+      "uid": "8vqmw9LfksYpD37fvPxgAcAs3G73",
+      "username": "Edinho",
+      "nome": "Edson Costa",
+      "userName": "Edson Costa",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783080204,
+        "_nanoseconds": 481000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Edson Procopio-Espanha-Portugal",
+      "uid": "g19dogpfa0SsHg4ZovdqFnmbmCz1",
+      "username": "Depay e Demãe",
+      "nome": "Edson Procopio",
+      "userName": "Edson Procopio",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783134017,
+        "_nanoseconds": 196000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Eduardo Ianello-Espanha-Portugal",
+      "uid": "cQ0Y2ht9BuN2VPakchYeVFrHAaf1",
+      "username": "Menino Ney (Ianello)",
+      "nome": "Eduardo Ianello",
+      "userName": "Eduardo Ianello",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783156268,
+        "_nanoseconds": 353000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-José Belini-Espanha-Portugal",
+      "uid": "4OTTi2bSuEhJN0N982s6cowB8bt1",
+      "username": "Zé Bê",
+      "nome": "José Belini",
+      "userName": "José Belini",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "2",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783111866,
+        "_nanoseconds": 183000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Levi Machado-Espanha-Portugal",
+      "uid": "nlYITa3qjQT4Fdj4m5DutckzNoY2",
+      "username": "Levi Machado",
+      "nome": "Levi Machado",
+      "userName": "Levi Machado",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783095514,
+        "_nanoseconds": 196000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Marcio Takeda-Espanha-Portugal",
+      "uid": "F50ddDwafJWpaBYxGDnv7aasGhh1",
+      "username": "🍙🍱 Saquê com Guaraná",
+      "nome": "Marcio Takeda",
+      "userName": "Marcio Takeda",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "2",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783113118,
+        "_nanoseconds": 517000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Pedro Bergamasco-Espanha-Portugal",
+      "uid": "Ha5MDDpxzharcrsLtBM0rjC9Ztk1",
+      "username": "Pedro FC",
+      "nome": "Pedro Bergamasco",
+      "userName": "Pedro Bergamasco",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783136172,
+        "_nanoseconds": 244000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Rodrigo de Campos Queiroz-Espanha-Portugal",
+      "uid": "oAb06GWv47fNroclu2sYFXhIz3J2",
+      "username": "Rodrigo Q",
+      "nome": "Rodrigo de Campos Queiroz",
+      "userName": "Rodrigo de Campos Queiroz",
+      "match": "Espanha x Portugal",
+      "golsA": "1",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783079301,
+        "_nanoseconds": 624000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Ronaldo C-Espanha-Portugal",
+      "uid": "7Ffs8WGcmaWGailJk9Mb4WKV1xq2",
+      "username": "Líder da porra toda!!!",
+      "nome": "Ronaldo C",
+      "userName": "Ronaldo C",
+      "match": "Espanha x Portugal",
+      "golsA": "0",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783096051,
+        "_nanoseconds": 690000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-Wilson Cardoso-Espanha-Portugal",
+      "uid": "blkZAyzDkDUGVrz3JFqAEpHOhk93",
+      "username": "Wilson",
+      "nome": "Wilson Cardoso",
+      "userName": "Wilson Cardoso",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783079340,
+        "_nanoseconds": 960000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-claudio sanches-Espanha-Portugal",
+      "uid": "s45fFE4vSrOmnpQIcjuWnWU0pKB3",
+      "username": "Cláudio Sanches",
+      "nome": "claudio sanches",
+      "userName": "claudio sanches",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783170626,
+        "_nanoseconds": 483000000
+      }
+    },
+    {
+      "id": "S45ZeKwxkKSeYTqq2p45-glaucio zanettin fernandes-Espanha-Portugal",
+      "uid": "am5RDBQ3fVZ8Xhfk4FQPRZ4NpT83",
+      "username": "Glaucio",
+      "nome": "glaucio zanettin fernandes",
+      "userName": "glaucio zanettin fernandes",
+      "match": "Espanha x Portugal",
+      "golsA": "3",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "S45ZeKwxkKSeYTqq2p45",
+      "createdAt": {
+        "_seconds": 1783162580,
+        "_nanoseconds": 875000000
+      }
+    },
+    {
+      "id": "b6SdaXZ1GHKVSbhtJxrt-Franco Alessandro Mantelli-Espanha-Portugal",
+      "uid": "9kFF2YTrkNMjMbAlPrOaZvSL3SC3",
+      "username": "Ainda Ativo FC",
+      "nome": "Franco Alessandro Mantelli",
+      "userName": "Franco Alessandro Mantelli",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "2",
+      "points": 0,
+      "groupId": "b6SdaXZ1GHKVSbhtJxrt",
+      "createdAt": {
+        "_seconds": 1783100496,
+        "_nanoseconds": 567000000
+      }
+    },
+    {
+      "id": "b6SdaXZ1GHKVSbhtJxrt-Jose Aurelio Prado Silva-Espanha-Portugal",
+      "uid": "hXzCJa6MWlcYZqCbOKxfaPmIYpO2",
+      "username": "Vai Brasil",
+      "nome": "Jose Aurelio Prado Silva",
+      "userName": "Jose Aurelio Prado Silva",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "0",
+      "points": 0,
+      "groupId": "b6SdaXZ1GHKVSbhtJxrt",
+      "createdAt": {
+        "_seconds": 1783090772,
+        "_nanoseconds": 986000000
+      }
+    },
+    {
+      "id": "b6SdaXZ1GHKVSbhtJxrt-Nelson Rodrigues-Espanha-Portugal",
+      "uid": "L5QN4gBPO0dth7EBpQXqB3QAMwS2",
+      "username": "Zeus",
+      "nome": "Nelson Rodrigues",
+      "userName": "Nelson Rodrigues",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "b6SdaXZ1GHKVSbhtJxrt",
+      "createdAt": {
+        "_seconds": 1783128038,
+        "_nanoseconds": 768000000
+      }
+    },
+    {
+      "id": "b6SdaXZ1GHKVSbhtJxrt-Rodrigo de Campos Queiroz-Espanha-Portugal",
+      "uid": "oAb06GWv47fNroclu2sYFXhIz3J2",
+      "username": "Rodrigo Q",
+      "nome": "Rodrigo de Campos Queiroz",
+      "userName": "Rodrigo de Campos Queiroz",
+      "match": "Espanha x Portugal",
+      "golsA": "1",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "b6SdaXZ1GHKVSbhtJxrt",
+      "createdAt": {
+        "_seconds": 1783079349,
+        "_nanoseconds": 265000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-Erivaldo A. Couto-Espanha-Portugal",
+      "uid": "vZianqAyZaZnPvw6FjYVy93Pu8J2",
+      "username": "Eri",
+      "nome": "Erivaldo A. Couto",
+      "userName": "Erivaldo A. Couto",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783126330,
+        "_nanoseconds": 108000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-Felipe M.C-Espanha-Portugal",
+      "uid": "1Nqbc29vcnTW9asN6FdpdA2m45w2",
+      "username": "Fefuncio O Sábio",
+      "nome": "Felipe M.C",
+      "userName": "Felipe M.C",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783163462,
+        "_nanoseconds": 378000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-Leonardo Guerra-Espanha-Portugal",
+      "uid": "CDIXr9Lc9mTXg7cbnARHLE23k3t1",
+      "username": "leleo guerra",
+      "nome": "Leonardo Guerra",
+      "userName": "Leonardo Guerra",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "3",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783106273,
+        "_nanoseconds": 796000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-Manoela Martos-Espanha-Portugal",
+      "uid": "QjXPm2KtPDaZapKH6H89b2QiwYl2",
+      "username": "Manøelać Hadžiahmetović",
+      "nome": "Manoela Martos",
+      "userName": "Manoela Martos",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783090883,
+        "_nanoseconds": 398000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-Marcia toledo martos-Espanha-Portugal",
+      "uid": "X2pGHywZVRSdr1bzfWnXbXJDDLy1",
+      "username": "Tô rica",
+      "nome": "Marcia toledo martos",
+      "userName": "Marcia toledo martos",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783163849,
+        "_nanoseconds": 586000000
+      }
+    },
+    {
+      "id": "nsou2vU7aXu8atsfWaPH-angélica-Espanha-Portugal",
+      "uid": "dS0kNbDpUSeUVLYrlQx0aF5Rhe42",
+      "username": "Angel",
+      "nome": "angélica",
+      "userName": "angélica",
+      "match": "Espanha x Portugal",
+      "golsA": "2",
+      "golsB": "1",
+      "points": 0,
+      "groupId": "nsou2vU7aXu8atsfWaPH",
+      "createdAt": {
+        "_seconds": 1783089791,
+        "_nanoseconds": 50000000
+      }
+    },
+    {
+      "id": "rrc85eaUjV3R2ZmFHMTP-Thiago Bispo-Espanha-Portugal",
+      "uid": "vBoxdmj4vSMFQaZXP1EFWMwAdwq2",
+      "username": "Thiago",
+      "nome": "Thiago Bispo",
+      "userName": "Thiago Bispo",
+      "match": "Espanha x Portugal",
+      "golsA": "3",
+      "golsB": "3",
+      "points": 0,
+      "groupId": "rrc85eaUjV3R2ZmFHMTP",
+      "createdAt": {
+        "_seconds": 1783110785,
+        "_nanoseconds": 138000000
+      }
+    }
+  ]
+}
