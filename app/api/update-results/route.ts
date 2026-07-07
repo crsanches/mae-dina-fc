@@ -228,9 +228,14 @@ export async function GET() {
       }
 // ate aqui
 
-      const jogoEncerrado = STATUS_FINAIS.includes(apiGame.strStatus);
+const dbGame = localGame.data();
+const jogoEncerrado = STATUS_FINAIS.includes(apiGame.strStatus);
 
-      if (localGame.data().finished === true && jogoEncerrado) continue;
+const placarMudou =
+  dbGame.resultadoA !== Number(apiGame.intHomeScore) ||
+  dbGame.resultadoB !== Number(apiGame.intAwayScore);
+
+if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
       console.log("ATUALIZANDO");
 //apagar esse console log
@@ -276,9 +281,12 @@ export async function GET() {
       const localGame = gamesSnapshot.docs.find((g) => g.id === firebaseId);
       if (!localGame) continue;
 
+      const dbGame = localGame.data();
       const jogoEncerrado = STATUS_FINAIS.includes(event.strStatus);
 
-      if (localGame.data().finished === true && jogoEncerrado) continue;
+      const placarMudou =
+        dbGame.resultadoA !== Number(event.intHomeScore) ||
+        dbGame.resultadoB !== Number(event.intAwayScore);
 
       await adminDb.collection("games").doc(firebaseId).update({
         resultadoA: Number(event.intHomeScore),

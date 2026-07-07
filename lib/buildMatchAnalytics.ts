@@ -96,7 +96,7 @@ export async function buildMatchAnalytics(
   const awayPercent = Math.round((awayWins / totalBets) * 100);
 
   // ID único por grupo + jogo
-  const docId = `${groupId}_${matchName}`;
+  const docId = `${matchName}___${groupId}`;
 
   await setDoc(doc(db, "analytics_matches", docId), {
     match: matchName,
