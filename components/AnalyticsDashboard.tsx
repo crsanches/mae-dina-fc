@@ -33,6 +33,8 @@ import {
   calculatePoints
 } from "../lib/calculatePoints";
 
+import { buildRanking } from "../lib/buildRanking";
+
 type UserDistance = {
   username: string;
   distance: number;
@@ -128,6 +130,11 @@ export default function AnalyticsPage() {
   useEffect(() => {
 
     async function carregarAnalytics() {
+
+      const rankingOficial = await buildRanking(currentGroupId);
+
+      const oficialLeader = rankingOficial[0];
+      const oficialLastPlace = rankingOficial[rankingOficial.length - 1];
 
       // ── Verifica auth PRIMEIRO ──
       const currentUser = auth.currentUser;
@@ -463,8 +470,8 @@ export default function AnalyticsPage() {
       setStats({
         coldStreak: { user: coldStreakEntry?.[0] || "-", value: coldStreakEntry?.[1] || 0 },
         biggestClimb: { user: biggestClimbEntry?.[0] || "-", value: biggestClimbEntry?.[1] || 0 },
-        leader: { user: leaderEntry?.[0] || "-", value: leaderEntry?.[1] || 0 },
-        lastPlace: { user: lastPlaceEntry?.[0] || "-", value: lastPlaceEntry?.[1] || 0 },
+        leader: { user: oficialLeader?.username || "-", value: Math.round(oficialLeader?.points || 0), },
+        lastPlace: { user: oficialLastPlace?.username || "-", value: Math.round(oficialLastPlace?.points || 0), },
         drawKing: { user: drawKingEntry?.[0] || "-", value: drawKingEntry?.[1] || 0 },
         totalBets,
         totalGames: gamesSnapshot.size,
@@ -839,6 +846,7 @@ export default function AnalyticsPage() {
         </div> */}
 
         {/* Gráfico */}
+        {/* 
         <div className="bg-zinc-900 border border-zinc-800 rounded-3xl p-5">
           <h2 className="text-2xl font-black mb-5">🐢 Evolução dos Palpiteiros</h2>
           {mounted && chartData.length > 0 && (
@@ -895,7 +903,9 @@ export default function AnalyticsPage() {
             </div>
           )}
         </div>
+        */}
 
+        
         {/* Relatório automático de insanidade espostiva - bloqueeei temporariamente */}
        {/*  <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
           <div className="flex items-center gap-3 mb-5">
@@ -948,4 +958,4 @@ export default function AnalyticsPage() {
       </div>
     </main>
   );
-}
+} 

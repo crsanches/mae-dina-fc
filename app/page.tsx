@@ -187,7 +187,7 @@ export default function Home() {
           matchDate: data.matchDate,
           resultadoA: data.resultadoA,
           resultadoB: data.resultadoB,
-          apiStatus: data.apiStatus,
+          apiStatus: data.status || data.apiStatus,
         });
       });
       setJogos(games);
