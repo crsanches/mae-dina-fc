@@ -105,6 +105,33 @@ export async function GET() {
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
 
+    const agora = Date.now();
+    const limite48h = 48 * 60 * 60 * 1000;
+    const limite24h = 24 * 60 * 60 * 1000;
+
+    // =========================================================
+    // GUARDA: sem jogo em aberto nas últimas 24h? Encerra cedo.
+    // Economiza chamadas à API, lookups e buildLeagueHistory
+    // nas execuções do cron em que não há nada a processar.
+    // =========================================================
+    const gamesSnapshot = await adminDb.collection("games").get();
+
+    const temJogoEmAberto = gamesSnapshot.docs.some((g) => {
+      const data = g.data();
+      const ts = new Date(data.matchDate).getTime();
+      return agora > ts && agora - ts < limite24h && data.finished !== true;
+    });
+
+    if (!temJogoEmAberto) {
+      return NextResponse.json({
+        success: true,
+        skipped: "nenhum jogo em aberto nas últimas 24h",
+      });
+    }
+
+    // =========================================================
+    // BUSCA EVENTOS NA API
+    // =========================================================
     const [res1, res2, res3, resSeason] = await Promise.all([
       fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${today}&l=4429`),
       fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${yesterday}&l=4429`),
@@ -120,9 +147,6 @@ export async function GET() {
     ]);
 
     // Filtra jogos da temporada com placar e recentes (últimas 48h)
-    const agora = Date.now();
-    const limite48h = 48 * 60 * 60 * 1000;
-
     const seasonGames = (dataSeason.events || []).filter((g: ApiGame) => {
       const timestamp = g.strTimestamp ? new Date(g.strTimestamp).getTime() : 0;
       const temPlacar = g.intHomeScore !== null && g.intAwayScore !== null;
@@ -130,7 +154,7 @@ export async function GET() {
       return temPlacar && recente;
     });
 
-    // Junta eventos do dia + season (sem extras ainda)
+    // Junta eventos do dia + season
     const allRaw = [
       ...(data1.events || []),
       ...(data2.events || []),
@@ -159,11 +183,7 @@ export async function GET() {
     }
 //fim do teste. remover
 
-    // Busca todos os jogos do Firebase
-    const gamesSnapshot = await adminDb.collection("games").get();
-    const groupsSnapshot = await adminDb
-      .collection("groups")
-      .get();
+    const groupsSnapshot = await adminDb.collection("groups").get();
 
     // Identifica jogos com idEventSportsDB e jogos sem resultado recentes
     const jogosComId = gamesSnapshot.docs.filter((g) => g.data().idEventSportsDB);
@@ -199,8 +219,13 @@ export async function GET() {
 
     console.log("Jogos sem cobertura:", jogosSemCobertura.map((g) => g.data().match));
 
-    // Monta lista final de atualizações
+    // Flag: só reconstruir o leagueHistory se algum jogo
+    // finalizou (ou teve placar corrigido) nesta execução
+    let algumJogoFinalizou = false;
+
+    // =========================================================
     // 1. Jogos encontrados via allEvents (método antigo)
+    // =========================================================
     for (const apiGame of allEvents) {
       if (apiGame.intHomeScore === null || apiGame.intAwayScore === null) continue;
 
@@ -228,19 +253,19 @@ export async function GET() {
       }
 // ate aqui
 
-const dbGame = localGame.data();
-const jogoEncerrado = STATUS_FINAIS.includes(apiGame.strStatus);
+      const dbGame = localGame.data();
+      const jogoEncerrado = STATUS_FINAIS.includes(apiGame.strStatus);
 
-const placarMudou =
-  dbGame.resultadoA !== Number(apiGame.intHomeScore) ||
-  dbGame.resultadoB !== Number(apiGame.intAwayScore);
+      const placarMudou =
+        dbGame.resultadoA !== Number(apiGame.intHomeScore) ||
+        dbGame.resultadoB !== Number(apiGame.intAwayScore);
 
-if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
+      if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
       console.log("ATUALIZANDO");
 //apagar esse console log
       console.log({
-        firebase: localGame.data().match,
+        firebase: dbGame.match,
         api: `${apiGame.strHomeTeam} x ${apiGame.strAwayTeam}`,
         placar: `${apiGame.intHomeScore} x ${apiGame.intAwayScore}`,
         status: apiGame.strStatus,
@@ -256,16 +281,18 @@ if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
       if (jogoEncerrado) {
 
+        algumJogoFinalizou = true;
+
         for (const groupDoc of groupsSnapshot.docs) {
 
           await buildMatchAnalyticsAdmin(
-            `${localGame.data().teamA} x ${localGame.data().teamB}`,
+            `${dbGame.teamA} x ${dbGame.teamB}`,
             Number(apiGame.intHomeScore),
             Number(apiGame.intAwayScore),
             groupDoc.id,
-            localGame.data().matchDate,
-            localGame.data().fase,
-            localGame.data().grupo
+            dbGame.matchDate,
+            dbGame.fase,
+            dbGame.grupo
           );
 
         }
@@ -274,7 +301,9 @@ if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
     }
 
+    // =========================================================
     // 2. Jogos com idEventSportsDB — lookup direto
+    // =========================================================
     for (const { firebaseId, event } of resComId) {
       if (!event || event.intHomeScore === null || event.intAwayScore === null) continue;
 
@@ -288,6 +317,8 @@ if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
         dbGame.resultadoA !== Number(event.intHomeScore) ||
         dbGame.resultadoB !== Number(event.intAwayScore);
 
+      if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
+
       await adminDb.collection("games").doc(firebaseId).update({
         resultadoA: Number(event.intHomeScore),
         resultadoB: Number(event.intAwayScore),
@@ -297,16 +328,18 @@ if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
       if (jogoEncerrado) {
 
+        algumJogoFinalizou = true;
+
         for (const groupDoc of groupsSnapshot.docs) {
 
           await buildMatchAnalyticsAdmin(
-            `${localGame.data().teamA} x ${localGame.data().teamB}`,
+            `${dbGame.teamA} x ${dbGame.teamB}`,
             Number(event.intHomeScore),
             Number(event.intAwayScore),
             groupDoc.id,
-            localGame.data().matchDate,
-            localGame.data().fase,
-            localGame.data().grupo
+            dbGame.matchDate,
+            dbGame.fase,
+            dbGame.grupo
           );
 
         }
@@ -315,16 +348,20 @@ if (dbGame.finished === true && jogoEncerrado && !placarMudou) continue;
 
     }
 
-    for (const groupDoc of groupsSnapshot.docs) {
-
-      await buildLeagueHistory(
-        groupDoc.id
-      );
-
+    // =========================================================
+    // HISTÓRICO DA LIGA — só quando algum jogo finalizou
+    // (o history só muda quando um jogo termina; rodá-lo a cada
+    // execução do cron era o maior custo de leituras do sync)
+    // =========================================================
+    if (algumJogoFinalizou) {
+      for (const groupDoc of groupsSnapshot.docs) {
+        await buildLeagueHistory(groupDoc.id);
+      }
     }
 
     return NextResponse.json({
       success: true,
+      historyAtualizado: algumJogoFinalizou,
       semCobertura: jogosSemCobertura.map((g) => g.data().match),
     });
 

@@ -38,7 +38,7 @@ const FundamentalistaIA = dynamic(() => import("../components/FundamentalistaIA"
 const AnalyticsDashboard = dynamic(() => import("../components/AnalyticsDashboard"), { ssr: false });
 const MatchInsightCards = dynamic(() => import("../components/MatchinsightCards"), { ssr: false });
 const CentralCorneta = dynamic(() => import("../components/CentralCorneta"), { ssr: false });
-const BetTable = dynamic(() => import("../components/BetTable"), { ssr: false });
+
 
 type Game = {
   id: string;
@@ -340,7 +340,7 @@ export default function Home() {
             <RealRanking />
             <CentralCorneta ligaId={ligaId} usuarios={usuariosLiga} />
             <AnalyticsDashboard />
-            <BetTable />
+           
           </>
         )}
 
