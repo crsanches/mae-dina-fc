@@ -131,11 +131,6 @@ export default function AnalyticsPage() {
 
     async function carregarAnalytics() {
 
-      const rankingOficial = await buildRanking(currentGroupId);
-
-      const oficialLeader = rankingOficial[0];
-      const oficialLastPlace = rankingOficial[rankingOficial.length - 1];
-
       // ── Verifica auth PRIMEIRO ──
       const currentUser = auth.currentUser;
       if (!currentUser) return;
@@ -145,6 +140,11 @@ export default function AnalyticsPage() {
       if (!userSnap.exists()) return;
 
       const currentGroupId = userSnap.data().activeGroupId;
+
+      const rankingOficial = await buildRanking(currentGroupId);
+
+      const oficialLeader = rankingOficial[0];
+      const oficialLastPlace = rankingOficial[rankingOficial.length - 1];
 
       // ── Carrega todas as coleções ──
       const [analyticsSnapshot, betsSnapshot, gamesSnapshot, usersSnapshot] =
@@ -905,7 +905,7 @@ export default function AnalyticsPage() {
         </div>
         */}
 
-        
+
         {/* Relatório automático de insanidade espostiva - bloqueeei temporariamente */}
        {/*  <div className="mb-6 bg-gradient-to-br from-green-950 to-zinc-900 border border-green-700 rounded-3xl p-6">
           <div className="flex items-center gap-3 mb-5">
