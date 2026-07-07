@@ -5,15 +5,6 @@ import {
   db
 } from "../lib/firebase";
 
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
 
 import {
   useEffect,
@@ -672,8 +663,8 @@ export default function AnalyticsPage() {
   // ─────────────────────────────────────────
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-white px-4 pt-4 pb-0">
-      <div className="max-w-4xl mx-auto">
+    <div className="bg-zinc-950 text-white">
+       <div className="max-w-4xl mx-auto">
 
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-black">😩 Estatísticas que envergonham...</h1>
@@ -956,6 +947,6 @@ export default function AnalyticsPage() {
 
 
       </div>
-    </main>
+    </div>
   );
 } 
