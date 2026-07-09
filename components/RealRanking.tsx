@@ -46,7 +46,7 @@ export default function RealRanking() {
       | "Quartas"
       | "Semi"
       | "Final"
-    >("Oitavas");
+    >("Quartas");
 
   const [expandido, setExpandido] =
     useState(false);

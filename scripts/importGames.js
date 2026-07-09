@@ -78,7 +78,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Oitavas",
+    fase: "Quartas",
 
     grupo,
 
@@ -127,7 +127,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Oitavas",
+    fase: "Quartas",
 
     grupo,
 
@@ -810,17 +810,31 @@ createGame(
 
 const games = [
   createGame(
-    "Argentina",
-    "Egito",
-    "Oitavas",
-    "2026-07-07T13:00"
+    "França",
+    "Marrocos",
+    "Quartas",
+    "2026-07-09T17:00"
   ),
 
   createGame(
+    "Espanha",
+    "Bélgica",
+    "Quartas",
+    "2026-07-10T16:00"
+  ),
+
+  createGame(
+    "Noruega",
+    "Inglaterra",
+    "Quartas",
+    "2026-07-11T18:00"
+  ),
+
+  createGame(
+    "Argentina",
     "Suíça",
-    "Colômbia",
-    "Oitavas",
-    "2026-07-07T17:00"
+    "Quartas",
+    "2026-07-11T22:00"
   ),
 
 ];
