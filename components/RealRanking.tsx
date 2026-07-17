@@ -45,8 +45,9 @@ export default function RealRanking() {
       | "Oitavas"
       | "Quartas"
       | "Semi"
+      | "Terceiro"
       | "Final"
-    >("Quartas");
+    >("Final");
 
   const [expandido, setExpandido] =
     useState(false);
@@ -119,6 +120,7 @@ export default function RealRanking() {
       case "Oitavas": return "⚔️ Ranking das Oitavas";
       case "Quartas": return "🏟️ Ranking das Quartas";
       case "Semi": return "🔥 Ranking da Semifinal";
+      case "Terceiro": return "🔥 Ranking terceiro lugar";
       case "Final": return "👑 Ranking da Final";
       default: return "🏆 Ranking Geral";
     }
@@ -180,6 +182,7 @@ export default function RealRanking() {
           ["Oitavas", "⚔️ Oitavas"],
           ["Quartas", "🏟️ Quartas"],
           ["Semi", "🔥 Semi"],
+          ["Terceiro", "🔥 Terceiro"],
           ["Final", "👑 Final"],
         ].map(([id, label]) => (
           <button

@@ -531,6 +531,7 @@ if (
     "Oitavas",
     "Quartas",
     "Semi",
+    "Terceiro",
     "Final"
   ];
 
@@ -578,6 +579,7 @@ if (
         "Oitavas",
         "Quartas",
         "Semi",
+        "Terceiro",
         "Final"
       ].includes(
         bet.fase || ""
