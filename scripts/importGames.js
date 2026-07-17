@@ -78,7 +78,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Semi",
+    fase: "Terceiro",
 
     grupo,
 
@@ -127,7 +127,7 @@ function createGame(
     emojiB:
       WORLD_CUP_TEAMS[teamB],
 
-    fase: "Semi",
+    fase: "Terceiro",
 
     grupo,
 
@@ -844,17 +844,12 @@ const games = [
 const games = [
   createGame(
     "França",
-    "Espanha",
-    "Semi",
-    "2026-07-14T16:00"
+    "Inglaterra",
+    "Terceiro",
+    "2026-07-18T18:00"
   ),
 
-  createGame(
-    "Inglaterra",
-    "Argentina",
-    "Semi",
-    "2026-07-15T16:00"
-  ),
+ 
 ];
 async function importGames() {
 
