@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../lib/firebase";
 import { collection, doc, getDoc, query, where } from "firebase/firestore";
 import { onSnapshot } from "firebase/firestore";
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
 
 // ────────────────────────────────────────────────────────────
 // Tipos de dados (espelham os documentos de analytics_matches)
@@ -821,13 +822,15 @@ export default function MatchInsightCards() {
       if (!userSnap.exists()) return;
 
       const currentGroupId = userSnap.data().activeGroupId;
+      const torneioId = await getTorneioAtivo();
 
       const q = query(
         collection(db, "analytics_matches"),
-        where("groupId", "==", currentGroupId)
+        where("groupId", "==", currentGroupId),
+        where("torneioId", "==", torneioId)
       );
 
-      const historyRef = doc(db, "leagueHistory", currentGroupId);
+      const historyRef = doc(db, "leagueHistory", `${currentGroupId}_${torneioId}`);
       const historySnap = await getDoc(historyRef);
 
       const historyData: LeagueHistory | null = historySnap.exists()

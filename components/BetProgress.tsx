@@ -23,6 +23,9 @@ import {
   getDocs
 } from "firebase/firestore";
 
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+import { getConfigTorneio } from "../lib/torneios";
+
 type Props = {
   totalJogos: number;
 };
@@ -57,149 +60,173 @@ export default function BetProgress({
     setGames
   ] = useState<Game[]>([]);
 
+  const [
+    torneioId,
+    setTorneioId
+  ] = useState<string | null>(null);
+
+  const configTorneio = getConfigTorneio(torneioId);
+
   const carregar = useCallback(
     async () => {
 
     const user =
       auth.currentUser;
-  
+
     if (!user) {
       return;
     }
-  
+
     const userRef =
       doc(
         db,
         "users",
         user.uid
       );
-  
+
     const userSnap =
       await getDoc(userRef);
-  
+
     if (!userSnap.exists()) {
       return;
     }
-  
+
     const userData =
       userSnap.data();
-  
+
     const currentGroupId =
       userData.activeGroupId;
-  
+
     const possibleNames = [
-  
+
       userData.nome,
-  
+
       userData.username,
-  
+
       userData.apelido,
-  
+
       user.displayName
-  
+
     ].filter(Boolean);
-  
+
+    const idTorneioAtivo =
+      await getTorneioAtivo();
+
+    setTorneioId(idTorneioAtivo);
+
     const betsSnapshot =
       await getDocs(
-  
+
         query(
-  
+
           collection(
             db,
             "bets"
           ),
-  
+
           where(
             "groupId",
             "==",
             currentGroupId
+          ),
+
+          where(
+            "torneioId",
+            "==",
+            idTorneioAtivo
           )
-  
+
         )
-  
+
       );
-  
+
     let total = 0;
-  
+
     const apostas: Bet[] = [];
-  
+
     betsSnapshot.forEach(
       (betDoc) => {
-    
+
         const bet =
           betDoc.data();
-    
+
         const isOwner =
           bet.uid === user.uid ||
           possibleNames.includes(bet.userName) ||
           possibleNames.includes(bet.nome);
-    
+
         if (isOwner) {
-    
+
           total++;
-    
+
           apostas.push({
             match:
               bet.match
           });
-    
+
         }
-    
+
       }
     );
-  
+
     setTotalApostados(
       total
     );
-  
+
     setApostasUsuario(
       apostas
     );
-  
+
     const gamesSnapshot =
       await getDocs(
-        collection(
-          db,
-          "games"
+        query(
+          collection(
+            db,
+            "games"
+          ),
+          where(
+            "torneioId",
+            "==",
+            idTorneioAtivo
+          )
         )
       );
-  
+
     const loadedGames:
       Game[] = [];
-  
+
     gamesSnapshot.forEach(
       (gameDoc) => {
-  
+
         const game =
           gameDoc.data();
-  
+
         loadedGames.push({
-  
+
           teamA:
             game.teamA,
-  
+
           teamB:
             game.teamB,
-  
+
           grupo:
             game.grupo,
-  
+
           fase:
             game.fase
-  
+
         });
-  
+
       }
     );
-  
+
     setGames(
       loadedGames
     );
-  
+
   },
   []
   );
-  
 
 
 
@@ -228,6 +255,7 @@ export default function BetProgress({
     "G","H","I","J","K","L"
   ];
 
+  // Só faz sentido calcular isso quando o torneio ativo tem fase de grupos
   const resumoGrupos =
     grupos.map((grupo) => {
 
@@ -283,35 +311,78 @@ export default function BetProgress({
 
     });
 
+  // Usado quando o torneio ativo NÃO tem fase de grupos (ex: Copa do Brasil) —
+  // mostra pendências por fase do mata-mata em vez de por grupo.
+  const resumoFases =
+    configTorneio.fasesMataMata.map((fase) => {
+
+      const totalJogosFase =
+        games.filter(
+          (g) => g.fase === fase.id
+        ).length;
+
+      const apostasFase =
+        apostasUsuario.filter(
+          (bet) => {
+
+            const game =
+              games.find(
+                (g) =>
+                  `${g.teamA} x ${g.teamB}` ===
+                  bet.match
+              );
+
+            return game?.fase === fase.id;
+
+          }
+        ).length;
+
+      return {
+
+        id: fase.id,
+        label: fase.label,
+
+        feitos: apostasFase,
+        total: totalJogosFase,
+
+        faltam: Math.max(
+          0,
+          totalJogosFase - apostasFase
+        ),
+
+      };
+
+    });
+
     useEffect(() => {
 
       const atualizar = () => {
-    
+
         carregar();
-    
+
       };
-    
+
       const timer = setTimeout(
         atualizar,
         0
       );
-    
+
       window.addEventListener(
         "betSaved",
         atualizar
       );
-    
+
       return () => {
-    
+
         clearTimeout(timer);
-    
+
         window.removeEventListener(
           "betSaved",
           atualizar
         );
-    
+
       };
-    
+
     }, [carregar]);
 
   return (
@@ -368,35 +439,67 @@ export default function BetProgress({
 
       </div>
 
+      {/* PENDÊNCIAS — por grupo (torneios com fase de grupos) ou por fase (mata-mata puro, ex: Copa do Brasil) */}
+
       <div className="mt-4">
 
         <p className="text-zinc-400 text-sm mb-2">
-          📋 Pendências por grupo
+          {configTorneio.temGrupos
+            ? "📋 Pendências por grupo"
+            : "📋 Pendências por fase"}
         </p>
 
         <div className="flex flex-wrap gap-2">
 
-          {resumoGrupos.map(
-            (g) => (
+          {configTorneio.temGrupos
 
-              <div
-                key={g.grupo}
-                className="bg-zinc-800 rounded-xl px-3 py-2 text-sm"
-              >
+            ? resumoGrupos.map(
+                (g) => (
 
-                Grupo {g.grupo}
-                {" "}
+                  <div
+                    key={g.grupo}
+                    className="bg-zinc-800 rounded-xl px-3 py-2 text-sm"
+                  >
 
-                {g.faltam === 0
+                    Grupo {g.grupo}
+                    {" "}
 
-                  ? "✅"
+                    {g.faltam === 0
 
-                  : `(${g.faltam})`}
+                      ? "✅"
 
-              </div>
+                      : `(${g.faltam})`}
 
-            )
-          )}
+                  </div>
+
+                )
+              )
+
+            : resumoFases.map(
+                (f) => (
+
+                  <div
+                    key={f.id}
+                    className="bg-zinc-800 rounded-xl px-3 py-2 text-sm"
+                  >
+
+                    {f.label}
+                    {" "}
+
+                    {f.total === 0
+
+                      ? "—"
+
+                      : f.faltam === 0
+
+                        ? "✅"
+
+                        : `(${f.faltam})`}
+
+                  </div>
+
+                )
+              )}
 
         </div>
 

@@ -8,12 +8,16 @@ import { useEffect, useState } from "react";
 
 import { db } from "../../lib/firebase";
 
+import { getTorneioAtivo } from "../../lib/getTorneioAtivo";
+
 import {
   addDoc,
   collection,
   deleteDoc,
   doc,
   getDocs,
+  query,
+  where,
   serverTimestamp,
   updateDoc
 } from "firebase/firestore";
@@ -101,42 +105,36 @@ export default function AdminPage() {
   
     );
 
-  async function carregarJogos() {
+    async function carregarJogos() {
 
-    const snapshot =
-      await getDocs(
-        collection(db, "games")
-      );
-
-    const loadedGames: Game[] = [];
-
-    snapshot.forEach((docItem) => {
-
-      const data = docItem.data();
-
-      loadedGames.push({
-
-        id: docItem.id,
-
-        teamA: data.teamA,
-        teamB: data.teamB,
-
-        emojiA: data.emojiA,
-        emojiB: data.emojiB,
-
-        fase: data.fase || data.phase,
-
-        grupo: data.grupo,
-
-        matchDate: data.matchDate
-
+      const torneioId = await getTorneioAtivo();
+    
+      const snapshot =
+        await getDocs(
+          query(
+            collection(db, "games"),
+            where("torneioId", "==", torneioId)
+          )
+        );
+    
+      const loadedGames: Game[] = [];
+    
+      snapshot.forEach((docItem) => {
+        const data = docItem.data();
+        loadedGames.push({
+          id: docItem.id,
+          teamA: data.teamA,
+          teamB: data.teamB,
+          emojiA: data.emojiA,
+          emojiB: data.emojiB,
+          fase: data.fase || data.phase,
+          grupo: data.grupo,
+          matchDate: data.matchDate
+        });
       });
-
-    });
-
-    setGames(loadedGames);
-
-  }
+    
+      setGames(loadedGames);
+    }
 
   useEffect(() => {
 
@@ -152,59 +150,37 @@ export default function AdminPage() {
 
   async function criarJogo() {
 
-    if (
-      !teamA ||
-      !teamB ||
-      !matchDate
-    ) {
-
+    if (!teamA || !teamB || !matchDate) {
       alert("Preencha tudo 😄");
-
       return;
-
     }
-
+  
+    const torneioId = await getTorneioAtivo();
+  
     await addDoc(
       collection(db, "games"),
       {
-
-        match:
-          `${teamA} x ${teamB}`,
-
+        match: `${teamA} x ${teamB}`,
         teamA,
         teamB,
-
         emojiA,
         emojiB,
-
-        phase,
-
+        fase: phase,
+        torneioId,
         matchDate,
-
-        createdAt:
-          serverTimestamp()
-
+        createdAt: serverTimestamp()
       }
     );
-
+  
     setSuccess(true);
-
     setTeamA("");
     setTeamB("");
-
     setEmojiA("");
     setEmojiB("");
-
     setMatchDate("");
-
     carregarJogos();
-
-    setTimeout(() => {
-
-      setSuccess(false);
-
-    }, 2000);
-
+  
+    setTimeout(() => { setSuccess(false); }, 2000);
   }
 
   async function atualizarData(

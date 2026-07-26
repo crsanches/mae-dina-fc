@@ -6,6 +6,7 @@ export async function buildMatchAnalyticsAdmin(
   resultadoA: number,
   resultadoB: number,
   groupId: string,
+  torneioId: string,        // ← novo parâmetro, obrigatório
   matchDate?: string,
   fase?: string,
   grupo?: string
@@ -15,6 +16,7 @@ export async function buildMatchAnalyticsAdmin(
     .collection("bets")
     .where("match", "==", matchName)
     .where("groupId", "==", groupId)
+    .where("torneioId", "==", torneioId)
     .get();
 
   let totalBets = 0;
@@ -59,11 +61,11 @@ export async function buildMatchAnalyticsAdmin(
         resultadoA,
         resultadoB,
       });
-      
+
       const drawHit =
         apostaA === apostaB &&
         resultadoA === resultadoB;
-      
+
       const winnerHit =
         points === 3;
 
@@ -102,13 +104,13 @@ export async function buildMatchAnalyticsAdmin(
     username: d.username,
     palpite: d.palpite,
     distance: d.distance,
-  
+
     exactHit: d.distance === 0 ? 1 : 0,
-  
+
     points: d.points,
-  
+
     drawHit: d.drawHit ? 1 : 0,
-  
+
     winnerHit: d.winnerHit ? 1 : 0,
   }));
 
@@ -131,12 +133,13 @@ export async function buildMatchAnalyticsAdmin(
     });
   }
 
-  // Chave única por jogo + grupo
-  const docId = `${matchName}___${groupId}`;
+  // Chave única por jogo + grupo + torneio
+  const docId = `${matchName}___${groupId}___${torneioId}`;
 
   await adminDb.collection("analytics_matches").doc(docId).set({
     match: matchName,
     groupId,
+    torneioId,
     totalBets,
     resultadoA,
     resultadoB,
@@ -155,6 +158,6 @@ export async function buildMatchAnalyticsAdmin(
     updatedAt: new Date(),
     matchDate: matchDate || null,
     fase: fase || null,
-    grupo: grupo || null, 
+    grupo: grupo || null,
   });
 }

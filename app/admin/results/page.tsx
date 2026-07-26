@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../../lib/firebase";
 import Link from "next/link";
 import { buildMatchAnalytics } from "../../../lib/buildMatchAnalytics";
+import { getTorneioAtivo } from "../../../lib/getTorneioAtivo";
 import {
   collection,
   getDocs,
@@ -53,9 +54,19 @@ export default function AdminResultsPage() {
   }
 
   async function carregarJogos() {
-    const snapshot = await getDocs(collection(db, "games"));
-    const loadedGames: Game[] = [];
 
+    const torneioId = await getTorneioAtivo();
+  
+    const snapshot =
+      await getDocs(
+        query(
+          collection(db, "games"),
+          where("torneioId", "==", torneioId)
+        )
+      );
+  
+    const loadedGames: Game[] = [];
+  
     snapshot.forEach((docItem) => {
       const data = docItem.data();
       loadedGames.push({
@@ -65,15 +76,14 @@ export default function AdminResultsPage() {
         emojiA: data.emojiA,
         emojiB: data.emojiB,
         fase: data.fase || data.phase,
-        matchDate: data.matchDate,
         grupo: data.grupo,
-        resultadoA: data.resultadoA,
-        resultadoB: data.resultadoB,
+        matchDate: data.matchDate
       });
     });
-
+  
     setGames(loadedGames);
   }
+
   async function reprocessarTodos() {
     if (!groupId) {
       alert("Grupo não identificado. Tente recarregar a página 😥");
@@ -97,7 +107,9 @@ export default function AdminResultsPage() {
   
     let sucesso = 0;
     let falha = 0;
-  
+
+    const torneioId = await getTorneioAtivo();
+
     for (const game of jogosComResultado) {
       try {
         const match = `${game.teamA} x ${game.teamB}`;
@@ -123,7 +135,8 @@ export default function AdminResultsPage() {
           await updateDoc(doc(db, "bets", betDoc.id), { points });
         }
   
-        await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
+       
+        await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioId);
   
         sucesso++;
       } catch (err) {
@@ -189,7 +202,8 @@ export default function AdminResultsPage() {
     }
   
   
-    await buildMatchAnalytics(match, resultadoA, resultadoB, groupId);
+   const torneioId = await getTorneioAtivo();
+    await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioId);
   
   
     alert("Resultado salvo e apostas atualizadas 😎");

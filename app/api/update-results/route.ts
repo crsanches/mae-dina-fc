@@ -9,6 +9,9 @@ import {
   buildLeagueHistory
 } from "@/lib/buildLeagueHistory";
 
+import { getTorneioAtivoAdmin } from "@/lib/getTorneioAtivoAdmin";
+import { SYNC_CONFIG } from "@/lib/syncConfig";
+
 type ApiGame = {
   strStatus: string;
   strHomeTeam: string;
@@ -101,6 +104,22 @@ function normalize(text?: string) {
 
 export async function GET() {
   try {
+    // =========================================================
+    // TORNEIO ATIVO — decide qual liga/temporada buscar no TheSportsDB
+    // =========================================================
+    const torneioId = await getTorneioAtivoAdmin();
+    const syncConfig = SYNC_CONFIG[torneioId];
+
+    if (!syncConfig) {
+      console.error(`Sem SYNC_CONFIG para o torneio "${torneioId}" — adicione uma entrada em lib/syncConfig.ts`);
+      return NextResponse.json({
+        success: false,
+        error: `Sem configuração de sync para o torneio "${torneioId}"`,
+      });
+    }
+
+    const { leagueId, season } = syncConfig;
+
     const today = new Date().toISOString().split("T")[0];
     const yesterday = new Date(Date.now() - 86400000).toISOString().split("T")[0];
     const tomorrow = new Date(Date.now() + 86400000).toISOString().split("T")[0];
@@ -113,8 +132,12 @@ export async function GET() {
     // GUARDA: sem jogo em aberto nas últimas 24h? Encerra cedo.
     // Economiza chamadas à API, lookups e buildLeagueHistory
     // nas execuções do cron em que não há nada a processar.
+    // Só considera jogos do torneio ativo.
     // =========================================================
-    const gamesSnapshot = await adminDb.collection("games").get();
+    const gamesSnapshot = await adminDb
+      .collection("games")
+      .where("torneioId", "==", torneioId)
+      .get();
 
     const temJogoEmAberto = gamesSnapshot.docs.some((g) => {
       const data = g.data();
@@ -125,18 +148,19 @@ export async function GET() {
     if (!temJogoEmAberto) {
       return NextResponse.json({
         success: true,
+        torneioId,
         skipped: "nenhum jogo em aberto nas últimas 24h",
       });
     }
 
     // =========================================================
-    // BUSCA EVENTOS NA API
+    // BUSCA EVENTOS NA API (liga/temporada do torneio ativo)
     // =========================================================
     const [res1, res2, res3, resSeason] = await Promise.all([
-      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${today}&l=4429`),
-      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${yesterday}&l=4429`),
-      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsday.php?d=${tomorrow}&l=4429`),
-      fetch(`https://www.thesportsdb.com/api/v1/json/3/eventsseason.php?id=4429&s=2026`),
+      fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${today}&l=${leagueId}`),
+      fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${yesterday}&l=${leagueId}`),
+      fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsday.php?d=${tomorrow}&l=${leagueId}`),
+      fetch(`https://www.thesportsdb.com/api/v1/json/123/eventsseason.php?id=${leagueId}&s=${season}`),
     ]);
 
     const [data1, data2, data3, dataSeason] = await Promise.all([
@@ -171,7 +195,7 @@ export async function GET() {
     });
 
 // teste para ver o que está sendo buscado
-    console.log("===== EVENTOS RECEBIDOS DO THESPORTSDB =====");
+    console.log(`===== EVENTOS RECEBIDOS DO THESPORTSDB (torneio: ${torneioId}, liga: ${leagueId}) =====`);
     for (const e of allEvents) {
       console.log({
         home: e.strHomeTeam,
@@ -210,7 +234,7 @@ export async function GET() {
     // Busca via lookupevent para jogos com idEventSportsDB
     const resComId = await Promise.all(
       jogosComId.map((g) =>
-        fetch(`https://www.thesportsdb.com/api/v1/json/3/lookupevent.php?id=${g.data().idEventSportsDB}`)
+        fetch(`https://www.thesportsdb.com/api/v1/json/123/lookupevent.php?id=${g.data().idEventSportsDB}`)
           .then((r) => r.json())
           .then((data) => ({ firebaseId: g.id, event: (data.events || [])[0] || null }))
           .catch(() => ({ firebaseId: g.id, event: null }))
@@ -290,6 +314,7 @@ export async function GET() {
             Number(apiGame.intHomeScore),
             Number(apiGame.intAwayScore),
             groupDoc.id,
+            torneioId,
             dbGame.matchDate,
             dbGame.fase,
             dbGame.grupo
@@ -337,6 +362,7 @@ export async function GET() {
             Number(event.intHomeScore),
             Number(event.intAwayScore),
             groupDoc.id,
+            torneioId,
             dbGame.matchDate,
             dbGame.fase,
             dbGame.grupo
@@ -352,6 +378,7 @@ export async function GET() {
     // HISTÓRICO DA LIGA — só quando algum jogo finalizou
     // (o history só muda quando um jogo termina; rodá-lo a cada
     // execução do cron era o maior custo de leituras do sync)
+    // buildLeagueHistory já lê o torneio ativo internamente.
     // =========================================================
     if (algumJogoFinalizou) {
       for (const groupDoc of groupsSnapshot.docs) {
@@ -361,6 +388,7 @@ export async function GET() {
 
     return NextResponse.json({
       success: true,
+      torneioId,
       historyAtualizado: algumJogoFinalizou,
       semCobertura: jogosSemCobertura.map((g) => g.data().match),
     });

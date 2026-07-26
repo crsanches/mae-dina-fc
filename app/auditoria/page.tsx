@@ -22,6 +22,8 @@ import {
   type RankingUser
 } from "../../lib/buildRanking";
 
+import { getTorneioAtivo } from "../../lib/getTorneioAtivo";
+
 /* =========================
    PAGE
 ========================= */
@@ -77,13 +79,16 @@ export default function AuditoriaPage() {
         }
 
         const currentGroupId =
-          userSnap.data().activeGroupId;
+        userSnap.data().activeGroupId;
 
-        const rankingData =
-          await buildRanking(
-            currentGroupId
-          );
+      const torneioId =
+        await getTorneioAtivo();
 
+      const rankingData =
+        await buildRanking(
+          currentGroupId,
+          torneioId
+        );
         setRanking(rankingData);
 
       } catch (error) {

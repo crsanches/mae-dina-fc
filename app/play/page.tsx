@@ -11,6 +11,8 @@ FaseCopa,
 obterPesoDaFase
 } from "../../lib/copas";
 
+import { getTorneioAtivo } from "../../lib/getTorneioAtivo";
+
 import {
 useEffect,
 useState
@@ -22,7 +24,8 @@ import {
 collection,
 onSnapshot,
 orderBy,
-query
+query,
+where
 } from "firebase/firestore";
 
 type Game = {
@@ -46,14 +49,27 @@ fase?: FaseCopa;
 pesoFase?: number;
 };
 
+// =========================
+// FASES POR TORNEIO
+// Cada torneio ativo pode ter uma estrutura de fases diferente.
+// Copa do Brasil não tem fase de grupos nem "Segunda Fase"/"3º Lugar" —
+// entra direto nas oitavas. Se um dia a Copa 2026 voltar a ficar ativa,
+// ela usa a entrada correspondente abaixo.
+// =========================
+
+import { getConfigTorneio } from "../../lib/torneios";
+
 export default function PlayPage() {
 
 const [games, setGames] =
 useState<Game[]>([]);
 
+const [torneioId, setTorneioId] =
+useState<string | null>(null);
+
 const [tipoVisualizacao, setTipoVisualizacao] =
 useState<"grupos" | "matamata">(
-"grupos"
+"matamata"
 );
 
 const [grupoSelecionado, setGrupoSelecionado] =
@@ -62,18 +78,35 @@ useState("A");
 const [
 faseMataMataSelecionada,
 setFaseMataMataSelecionada
-] = useState<FaseCopa>("Fase32");
+] = useState<FaseCopa>("Oitavas");
+
+const configTorneio = getConfigTorneio(torneioId);
 
 useEffect(() => {
 
+let unsubscribe: (() => void) | undefined;
 
-const q = query(
-  collection(db, "games"),
-  orderBy("matchDate", "asc")
-);
+getTorneioAtivo().then((id) => {
 
-const unsubscribe =
-  onSnapshot(q, (snapshot) => {
+  setTorneioId(id);
+
+  // Se o torneio ativo não tem fase de grupos, força a visão mata-mata
+  // e garante que a fase selecionada exista na lista desse torneio.
+  const config = getConfigTorneio(id);
+  if (!config.temGrupos) {
+    setTipoVisualizacao("matamata");
+  }
+  if (!config.fasesMataMata.some((f) => f.id === faseMataMataSelecionada)) {
+    setFaseMataMataSelecionada(config.fasesMataMata[0]?.id || "Oitavas");
+  }
+
+  const q = query(
+    collection(db, "games"),
+    where("torneioId", "==", id),
+    orderBy("matchDate", "asc")
+  );
+
+  unsubscribe = onSnapshot(q, (snapshot) => {
 
     const loadedGames: Game[] = [];
 
@@ -128,9 +161,12 @@ const unsubscribe =
 
   });
 
-return () => unsubscribe();
+});
+
+return () => { if (unsubscribe) unsubscribe(); };
 
 
+// eslint-disable-next-line react-hooks/exhaustive-deps
 }, []);
 
 const grupos = [
@@ -203,49 +239,51 @@ return (
 
 
 
-    {/* MENU PRINCIPAL */}
+    {/* MENU PRINCIPAL — só mostra o toggle Grupos/Mata-mata se o torneio tiver fase de grupos */}
 
-    <div className="flex gap-2 mb-6">
+    {configTorneio.temGrupos && (
+      <div className="flex gap-2 mb-6">
 
-      <button
-        onClick={() =>
-          setTipoVisualizacao(
-            "grupos"
-          )
-        }
-        className={
-          tipoVisualizacao === "grupos"
+        <button
+          onClick={() =>
+            setTipoVisualizacao(
+              "grupos"
+            )
+          }
+          className={
+            tipoVisualizacao === "grupos"
 
-            ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
+              ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
 
-            : "bg-zinc-800 px-4 py-2 rounded-xl"
-        }
-      >
-        🌎 Grupos
-      </button>
+              : "bg-zinc-800 px-4 py-2 rounded-xl"
+          }
+        >
+          🌎 Grupos
+        </button>
 
-      <button
-        onClick={() =>
-          setTipoVisualizacao(
-            "matamata"
-          )
-        }
-        className={
-          tipoVisualizacao === "matamata"
+        <button
+          onClick={() =>
+            setTipoVisualizacao(
+              "matamata"
+            )
+          }
+          className={
+            tipoVisualizacao === "matamata"
 
-            ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
+              ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
 
-            : "bg-zinc-800 px-4 py-2 rounded-xl"
-        }
-      >
-        ⚔️ Mata-mata
-      </button>
+              : "bg-zinc-800 px-4 py-2 rounded-xl"
+          }
+        >
+          ⚔️ Mata-mata
+        </button>
 
-    </div>
+      </div>
+    )}
 
     {/* SUBMENU GRUPOS */}
 
-    {tipoVisualizacao === "grupos" && (
+    {configTorneio.temGrupos && tipoVisualizacao === "grupos" && (
 
       <div className="flex flex-wrap gap-2 mb-6">
 
@@ -275,44 +313,19 @@ return (
 
     )}
 
-    {/* SUBMENU MATA-MATA */}
+    {/* SUBMENU MATA-MATA — só as fases que existem no torneio ativo */}
 
-    {tipoVisualizacao === "matamata" && (
+    {(!configTorneio.temGrupos || tipoVisualizacao === "matamata") && (
 
       <div className="flex flex-wrap gap-2 mb-6">
 
-        {[
-          {
-            id: "Fase32",
-            label: "🚪 Segunda Fase"
-          },
-          {
-            id: "Oitavas",
-            label: "⚔️ Oitavas"
-          },
-          {
-            id: "Quartas",
-            label: "🏟️ Quartas"
-          },
-          {
-            id: "Semi",
-            label: "🔥 Semi"
-          },
-          {
-            id: "Terceiro",
-            label: "🥉 3º Lugar"
-          },
-          {
-            id: "Final",
-            label: "🏆 Final"
-          }
-        ].map((fase) => (
+        {configTorneio.fasesMataMata.map((fase) => (
 
           <button
             key={fase.id}
             onClick={() =>
               setFaseMataMataSelecionada(
-                fase.id as FaseCopa
+                fase.id
               )
             }
             className={

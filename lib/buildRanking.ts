@@ -130,44 +130,46 @@ interface UserData {
 
 /* =========================
    BUILD RANKING
+   ATENÇÃO: agora recebe torneioId — todo chamador precisa passar
+   o torneio ativo (ver lib/getTorneioAtivo.ts).
 ========================= */
 
 export async function buildRanking(
-  groupId: string
+  groupId: string,
+  torneioId: string
 ) {
-
- 
 
   const betsQuery =
     query(
       collection(db, "bets"),
-      where(
-        "groupId",
-        "==",
-        groupId
-      )
+      where("groupId", "==", groupId),
+      where("torneioId", "==", torneioId)
     );
 
   const betsSnapshot =
     await getDocs(betsQuery);
 
-  const gamesSnapshot =
-    await getDocs(
-      collection(db, "games")
+  const gamesQuery =
+    query(
+      collection(db, "games"),
+      where("torneioId", "==", torneioId)
     );
-  
+
+  const gamesSnapshot =
+    await getDocs(gamesQuery);
+
     const gamesMap:
     Record<string, Game> = {};
-  
+
     gamesSnapshot.forEach((gameDoc) => {
-    
+
       const game =
         gameDoc.data() as Game;
-    
+
       gamesMap[
         `${game.teamA} x ${game.teamB}`
       ] = game;
-    
+
     });
 
     const usersSnapshot =
@@ -393,17 +395,17 @@ bet.uid ||
       Grupos: 0,
 
       Fase32: 0,
-    
+
       Oitavas: 0,
-    
+
       Quartas: 0,
-    
+
       Semi: 0,
 
       Terceiro: 0,
-    
+
       Final: 0,
-    
+
     },
 
   exatos: 0,

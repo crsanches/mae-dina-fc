@@ -32,28 +32,36 @@ import type {
   RankingUser
 } from "../lib/buildRanking";
 
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+import { getConfigTorneio } from "../lib/torneios";
+
 export default function RealRanking() {
 
   const [ranking, setRanking] =
     useState<RankingUser[]>([]);
 
+  const [torneioId, setTorneioId] =
+    useState<string | null>(null);
+
+  // "Geral" e "Grupos" não fazem parte do tipo FaseCopa — usamos string
+  // aqui porque as opções disponíveis agora dependem do torneio ativo.
   const [faseSelecionada, setFaseSelecionada] =
-    useState<
-      | "Geral"
-      | "Grupos"
-      | "Fase32"
-      | "Oitavas"
-      | "Quartas"
-      | "Semi"
-      | "Terceiro"
-      | "Final"
-    >("Final");
+    useState<string>("Geral");
 
   const [expandido, setExpandido] =
     useState(false);
 
   // Ref para o container do ranking — usado para voltar ao topo ao recolher
   const rankingRef = useRef<HTMLDivElement>(null);
+
+  const configTorneio = getConfigTorneio(torneioId);
+
+  // Lista de abas exibidas: Geral + (Grupos, se o torneio tiver) + fases de mata-mata do torneio ativo
+  const fasesDisponiveis: { id: string; label: string }[] = [
+    { id: "Geral", label: "🏆 Geral" },
+    ...(configTorneio.temGrupos ? [{ id: "Grupos", label: "🌎 Grupos" }] : []),
+    ...configTorneio.fasesMataMata,
+  ];
 
   // =========================
   // CARREGA RANKING
@@ -71,7 +79,10 @@ export default function RealRanking() {
       const currentGroupId = userSnap.data().activeGroupId;
       if (!currentGroupId) return;
 
-      const rankingArray = await buildRanking(currentGroupId);
+      const idTorneioAtivo = await getTorneioAtivo();
+      setTorneioId(idTorneioAtivo);
+
+      const rankingArray = await buildRanking(currentGroupId, idTorneioAtivo);
       setRanking(rankingArray);
     } catch (error) {
       console.error("Erro ao carregar ranking:", error);
@@ -95,10 +106,17 @@ export default function RealRanking() {
       const currentGroupId = userSnap.data().activeGroupId;
       if (!currentGroupId) return;
 
+      const idTorneioAtivo = await getTorneioAtivo();
+      setTorneioId(idTorneioAtivo);
+
       carregarRanking();
 
       unsubscribeBets = onSnapshot(
-        query(collection(db, "bets"), where("groupId", "==", currentGroupId)),
+        query(
+          collection(db, "bets"),
+          where("groupId", "==", currentGroupId),
+          where("torneioId", "==", idTorneioAtivo)
+        ),
         () => {}
       );
     });
@@ -109,21 +127,25 @@ export default function RealRanking() {
     };
   }, []);
 
+  // Se a fase selecionada não existir mais no torneio ativo (ex: trocou
+  // de torneio e "Fase32" não existe na Copa do Brasil), volta pro Geral.
+  useEffect(() => {
+    if (faseSelecionada === "Geral") return;
+    if (faseSelecionada === "Grupos" && configTorneio.temGrupos) return;
+    if (configTorneio.fasesMataMata.some((f) => f.id === faseSelecionada)) return;
+    setFaseSelecionada("Geral");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [torneioId]);
+
   // =========================
   // TÍTULO
   // =========================
 
   function getTituloRanking() {
-    switch (faseSelecionada) {
-      case "Grupos": return "🌎 Ranking da Fase de Grupos";
-      case "Fase32": return "⚔️ 🚪 Ranking da Fase 32";
-      case "Oitavas": return "⚔️ Ranking das Oitavas";
-      case "Quartas": return "🏟️ Ranking das Quartas";
-      case "Semi": return "🔥 Ranking da Semifinal";
-      case "Terceiro": return "🔥 Ranking terceiro lugar";
-      case "Final": return "👑 Ranking da Final";
-      default: return "🏆 Ranking Geral";
-    }
+    if (faseSelecionada === "Geral") return "🏆 Ranking Geral";
+    if (faseSelecionada === "Grupos") return "🌎 Ranking da Fase de Grupos";
+    const fase = configTorneio.fasesMataMata.find((f) => f.id === faseSelecionada);
+    return fase ? `${fase.label} Ranking` : "🏆 Ranking Geral";
   }
 
   // =========================
@@ -133,7 +155,7 @@ export default function RealRanking() {
   const rankingExibido = ranking
     .map((user) => {
       if (faseSelecionada === "Geral") return user;
-      return { ...user, points: user.porFase?.[faseSelecionada] || 0 };
+      return { ...user, points: user.porFase?.[faseSelecionada as keyof typeof user.porFase] || 0 };
     })
     .sort((a, b) => b.points - a.points);
 
@@ -175,20 +197,11 @@ export default function RealRanking() {
 
       {/* FILTROS */}
       <div className="flex flex-wrap gap-2 mb-5">
-        {[
-          ["Geral", "🏆 Geral"],
-          ["Grupos", "🌎 Grupos"],
-          ["Fase32", "⚔️ 🚪 Fase32"],
-          ["Oitavas", "⚔️ Oitavas"],
-          ["Quartas", "🏟️ Quartas"],
-          ["Semi", "🔥 Semi"],
-          ["Terceiro", "🔥 Terceiro"],
-          ["Final", "👑 Final"],
-        ].map(([id, label]) => (
+        {fasesDisponiveis.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => {
-              setFaseSelecionada(id as typeof faseSelecionada);
+              setFaseSelecionada(id);
               setExpandido(false); // recolhe ao trocar de fase
             }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition ${

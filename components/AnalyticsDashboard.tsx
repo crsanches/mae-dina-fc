@@ -25,6 +25,7 @@ import {
 } from "../lib/calculatePoints";
 
 import { buildRanking } from "../lib/buildRanking";
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
 
 type UserDistance = {
   username: string;
@@ -132,19 +133,31 @@ export default function AnalyticsPage() {
 
       const currentGroupId = userSnap.data().activeGroupId;
 
-      const rankingOficial = await buildRanking(currentGroupId);
+        const torneioId = await getTorneioAtivo();
 
-      const oficialLeader = rankingOficial[0];
-      const oficialLastPlace = rankingOficial[rankingOficial.length - 1];
+        const rankingOficial = await buildRanking(currentGroupId, torneioId);
 
-      // ── Carrega todas as coleções ──
-      const [analyticsSnapshot, betsSnapshot, gamesSnapshot, usersSnapshot] =
-        await Promise.all([
-          getDocs(query(collection(db, "analytics_matches"), where("groupId", "==", currentGroupId))),
-          getDocs(collection(db, "bets")),
-          getDocs(collection(db, "games")),
-          getDocs(collection(db, "users")),
-        ]);
+        const oficialLeader = rankingOficial[0];
+        const oficialLastPlace = rankingOficial[rankingOficial.length - 1];
+
+        // ── Carrega todas as coleções ──
+        const [analyticsSnapshot, betsSnapshot, gamesSnapshot, usersSnapshot] =
+          await Promise.all([
+            getDocs(query(
+              collection(db, "analytics_matches"),
+              where("groupId", "==", currentGroupId),
+              where("torneioId", "==", torneioId)
+            )),
+            getDocs(query(
+              collection(db, "bets"),
+              where("torneioId", "==", torneioId)
+            )),
+            getDocs(query(
+              collection(db, "games"),
+              where("torneioId", "==", torneioId)
+            )),
+            getDocs(collection(db, "users")),
+          ]);
 
       const analyticsData = analyticsSnapshot.docs.map((doc) => doc.data() as MatchAnalytics);
       setMatchAnalytics(analyticsData);

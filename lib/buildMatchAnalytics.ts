@@ -14,13 +14,15 @@ export async function buildMatchAnalytics(
   matchName: string,
   resultadoA: number,
   resultadoB: number,
-  groupId: string          // ← novo parâmetro
+  groupId: string,
+  torneioId: string        // ← novo parâmetro, obrigatório
 ) {
 
   const betsQuery = query(
     collection(db, "bets"),
     where("match", "==", matchName),
-    where("groupId", "==", groupId)  // ← filtrar por grupo
+    where("groupId", "==", groupId),
+    where("torneioId", "==", torneioId)
   );
 
   const betsSnapshot = await getDocs(betsQuery);
@@ -95,16 +97,17 @@ export async function buildMatchAnalytics(
   const drawPercent = Math.round((draws / totalBets) * 100);
   const awayPercent = Math.round((awayWins / totalBets) * 100);
 
-  // ID único por grupo + jogo
-  const docId = `${matchName}___${groupId}`;
+  // ID único por grupo + jogo + torneio
+  const docId = `${matchName}___${groupId}___${torneioId}`;
 
   await setDoc(doc(db, "analytics_matches", docId), {
     match: matchName,
-    groupId,                          // ← salvar groupId
+    groupId,
+    torneioId,
     totalBets,
-    resultadoA,                       // ← salvar resultado real
+    resultadoA,
     resultadoB,
-    realWinner,                       // ← salvar vencedor real
+    realWinner,
     homePercent,
     drawPercent,
     awayPercent,
@@ -112,8 +115,8 @@ export async function buildMatchAnalytics(
     avgAwayGoals: totalAwayGoals / totalBets,
     exactScoreHits,
     surpriseIndex,
-    allUserDistances,                 // ← salvar distâncias por usuário
-    visionaryUsers,                   // ← salvar visionários
-    updatedAt: serverTimestamp(),     // ← updatedAt em vez de createdAt
+    allUserDistances,
+    visionaryUsers,
+    updatedAt: serverTimestamp(),
   });
 }

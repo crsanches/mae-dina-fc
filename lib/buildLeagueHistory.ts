@@ -1,4 +1,5 @@
 import { adminDb } from "@/lib/firebaseAdmin";
+import { getTorneioAtivoAdmin } from "@/lib/getTorneioAtivoAdmin";
 import { calculatePoints } from "./calculatePoints";
 import { obterPesoDaFase } from "./copas";
 
@@ -31,12 +32,20 @@ export async function buildLeagueHistory(
 ) {
 
   // =========================
+  // TORNEIO ATIVO
+  // =========================
+
+  const torneioId =
+    await getTorneioAtivoAdmin();
+
+  // =========================
   // JOGOS ENCERRADOS
   // =========================
 
   const gamesSnapshot =
     await adminDb
       .collection("games")
+      .where("torneioId", "==", torneioId)
       .get();
 
   const games: Game[] = [];
@@ -72,6 +81,7 @@ export async function buildLeagueHistory(
     await adminDb
       .collection("bets")
       .where("groupId", "==", groupId)
+      .where("torneioId", "==", torneioId)
       .get();
 
   const latestBets:
@@ -225,12 +235,23 @@ export async function buildLeagueHistory(
 
   }
 
+  // =========================
+  // GRAVA NO DOC COMPOSTO
+  // groupId_torneioId — não usa mais só groupId,
+  // pra cada torneio ter seu próprio histórico.
+  // =========================
+
+  const leagueHistoryDocId =
+    `${groupId}_${torneioId}`;
+
   await adminDb
     .collection("leagueHistory")
-    .doc(groupId)
+    .doc(leagueHistoryDocId)
     .set({
 
       groupId,
+
+      torneioId,
 
       updatedAt:
         new Date(),

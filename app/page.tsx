@@ -32,6 +32,8 @@ import {
   getDoc,
 } from "firebase/firestore";
 
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+
 const UserStats = dynamic(() => import("../components/UserStats"), { ssr: false });
 const RealRanking = dynamic(() => import("../components/RealRanking"), { ssr: false });
 const FundamentalistaIA = dynamic(() => import("../components/FundamentalistaIA"), { ssr: false });
@@ -72,12 +74,22 @@ export default function Home() {
 
   const gerarMemeAutomatico = useCallback(async (currentUser: string, currentGroupId: string) => {
     try {
-      const betsQuery = query(collection(db, "bets"), where("groupId", "==", currentGroupId));
+      const torneioId = await getTorneioAtivo();
+  
+      const betsQuery = query(
+        collection(db, "bets"),
+        where("groupId", "==", currentGroupId),
+        where("torneioId", "==", torneioId)
+      );
+      const gamesQuery = query(
+        collection(db, "games"),
+        where("torneioId", "==", torneioId)
+      );
       const [betsSnapshot, gamesSnapshot] = await Promise.all([
         getDocs(betsQuery),
-        getDocs(collection(db, "games")),
+        getDocs(gamesQuery),
       ]);
-
+  
       const ranking: Record<string, number> = {};
       let exactScore = false;
       let crazyBet = false;
@@ -171,30 +183,38 @@ export default function Home() {
   }, [gerarMemeAutomatico]);
 
   useEffect(() => {
-    const q = query(collection(db, "games"), orderBy("createdAt", "asc"));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const games: Game[] = [];
-      snapshot.forEach((docItem) => {
-        const data = docItem.data();
-        games.push({
-          id: docItem.id,
-          teamA: data.teamA,
-          teamB: data.teamB,
-          emojiA: data.emojiA,
-          emojiB: data.emojiB,
-          fase: data.fase || data.phase,
-          grupo: data.grupo,
-          matchDate: data.matchDate,
-          resultadoA: data.resultadoA,
-          resultadoB: data.resultadoB,
-          apiStatus: data.status || data.apiStatus,
+    let unsubscribe: (() => void) | undefined;
+  
+    getTorneioAtivo().then((torneioId) => {
+      const q = query(
+        collection(db, "games"),
+        where("torneioId", "==", torneioId),
+        orderBy("createdAt", "asc")
+      );
+      unsubscribe = onSnapshot(q, (snapshot) => {
+        const games: Game[] = [];
+        snapshot.forEach((docItem) => {
+          const data = docItem.data();
+          games.push({
+            id: docItem.id,
+            teamA: data.teamA,
+            teamB: data.teamB,
+            emojiA: data.emojiA,
+            emojiB: data.emojiB,
+            fase: data.fase || data.phase,
+            grupo: data.grupo,
+            matchDate: data.matchDate,
+            resultadoA: data.resultadoA,
+            resultadoB: data.resultadoB,
+            apiStatus: data.status || data.apiStatus,
+          });
         });
+        setJogos(games);
       });
-      setJogos(games);
     });
-    return () => unsubscribe();
+  
+    return () => { if (unsubscribe) unsubscribe(); };
   }, []);
-
   useEffect(() => {
     const timer = setTimeout(() => setShowHeavyComponents(true), 1200);
     return () => clearTimeout(timer);

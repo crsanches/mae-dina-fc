@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 import { auth, db } from "../lib/firebase";
 
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+
 import {
   doc,
   getDoc
@@ -75,10 +77,14 @@ export default function FundamentalistaIA() {
 
         }
 
-        const ranking =
-          await buildRanking(
-            activeGroupId
-          );
+        const torneioId =
+      await getTorneioAtivo();
+
+    const ranking =
+      await buildRanking(
+        activeGroupId,
+        torneioId
+        );
 
         const resultado =
           gerarAnaliseIA(

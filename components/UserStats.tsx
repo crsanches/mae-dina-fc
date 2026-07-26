@@ -32,6 +32,9 @@ import {
   calculatePoints
 } from "../lib/calculatePoints";
 
+import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+import { getConfigTorneio } from "../lib/torneios";
+
 type UserData = {
 
   position: number;
@@ -78,24 +81,29 @@ export default function UserStats() {
 
     const [loading, setLoading] =
   useState(true);
-  
+
+  const [torneioId, setTorneioId] =
+    useState<string | null>(null);
+
+  const configTorneio = getConfigTorneio(torneioId);
+
   const [
     tipoVisualizacao,
     setTipoVisualizacao
   ] = useState<
     "grupos" | "matamata"
-  >("grupos");
-  
+  >("matamata");
+
   const [
     grupoSelecionado,
     setGrupoSelecionado
   ] = useState("A");
-  
+
   const [
     faseSelecionada,
     setFaseSelecionada
-  ] = useState("Fase32");
-    
+  ] = useState("Oitavas");
+
 
 
   // =========================
@@ -106,124 +114,119 @@ export default function UserStats() {
 
     const firebaseUser =
       auth.currentUser;
-  
+
     if (!firebaseUser) {
       return;
     }
-  
+
     const userRef =
       doc(
         db,
         "users",
         firebaseUser.uid
       );
-  
+
     const userSnap =
       await getDoc(userRef);
-  
+
     if (!userSnap.exists()) {
       return;
     }
-  
+
     const userData =
       userSnap.data();
-  
+
     const currentGroupId =
       userData.activeGroupId;
-  
-    const possibleNames = [
-  
-      userData.nome,
-  
-      userData.username,
-  
-      userData.apelido,
-  
-      firebaseUser.displayName
-  
-    ].filter(Boolean);
-  
+
+    const torneioAtivo =
+      await getTorneioAtivo();
+
     const betsSnapshot =
       await getDocs(
-  
+
         query(
           collection(db, "bets"),
           where("groupId","==",currentGroupId),
-          where("uid","==",firebaseUser.uid)
+          where("uid","==",firebaseUser.uid),
+          where("torneioId","==",torneioAtivo)
         )
-  
+
       );
-      
+
 
 betsSnapshot.forEach((betDoc) => {
 
 });
-  
+
     const gamesSnapshot =
       await getDocs(
-        collection(db, "games")
+        query(
+          collection(db, "games"),
+          where("torneioId", "==", torneioAtivo)
+        )
       );
-     
+
       type GameData = {
 
         teamA: string;
-      
+
         teamB: string;
-      
+
         resultadoA?: number;
-      
+
         resultadoB?: number;
-      
+
         fase?: string;
-      
+
         grupo?: string;
-      
+
         matchDate?: string;
-      
+
         emojiA?: string;
-      
+
         emojiB?: string;
-      
+
       };
 
    const gamesMap:
   Record<string, GameData> = {};
-  
+
     gamesSnapshot.forEach((gameDoc) => {
-  
+
       const game =
         gameDoc.data() as GameData;
-  
+
       gamesMap[
         `${game.teamA} x ${game.teamB}`
       ] = game;
-  
+
     });
-  
+
     const history: BetHistory[] = [];
-  
+
     betsSnapshot.forEach((betDoc) => {
 
       const bet =
         betDoc.data();
-    
+
       if (
         bet.uid !==
         firebaseUser.uid
       ) {
-    
-       
+
+
         return;
-    
+
       }
-    
+
       const game =
         gamesMap[bet.match];
-   
+
       if (!game) {
-    
+
         return;
-    
+
       }
       let pontosCalculados = 0;
 
@@ -250,49 +253,49 @@ if (
     });
 
 }
-    
+
 
       history.push({
-  
+
         jogo:
           bet.match,
-  
+
         aposta:
           `${bet.golsA} x ${bet.golsB}`,
-  
+
         resultado:
-  
+
           game.resultadoA != null &&
           game.resultadoB != null
-  
+
             ? `${game.resultadoA} x ${game.resultadoB}`
-  
+
             : undefined,
-  
+
         pontos:
         pontosCalculados,
-  
+
         fase:
           game.fase,
-  
+
         grupo:
           game.grupo,
-  
+
         matchDate:
           game.matchDate,
-  
+
         emojiA:
           game.emojiA,
-  
+
         emojiB:
           game.emojiB
-  
+
       });
-  
+
     });
-  
-   
-  
+
+
+
     history.sort((a, b) =>
         (a.matchDate || "")
           .localeCompare(
@@ -302,13 +305,13 @@ if (
 
 
 
-      
+
       setBetHistory(history);
 
-      
-    
+
+
     }
- 
+
 
     /******** */
 
@@ -363,28 +366,49 @@ if (
           "";
 
       // =========================
+      // TORNEIO ATIVO
+      // =========================
+
+      const torneioAtivo =
+        await getTorneioAtivo();
+
+      setTorneioId(torneioAtivo);
+
+      // Se a fase selecionada não existe no torneio ativo, cai
+      // pra primeira fase disponível (ex: trocou de Copa 2026
+      // pra Copa do Brasil e "Fase32" não existe mais).
+      const config = getConfigTorneio(torneioAtivo);
+      if (!config.fasesMataMata.some((f) => f.id === faseSelecionada)) {
+        setFaseSelecionada(config.fasesMataMata[0]?.id || "Oitavas");
+      }
+      if (!config.temGrupos && tipoVisualizacao === "grupos") {
+        setTipoVisualizacao("matamata");
+      }
+
+      // =========================
       // RANKING OFICIAL
       // =========================
 
       const ranking =
         await buildRanking(
-          currentGroupId
+          currentGroupId,
+          torneioAtivo
         );
 
 
         const possibleNames = [
 
           userData.nome,
-        
+
           userData.username,
-        
+
           userData.apelido,
-        
+
           firebaseUser.displayName
-        
+
         ].filter(Boolean);
-        
-      
+
+
 
       // =========================
       // LOCALIZA USUÁRIO
@@ -402,17 +426,17 @@ if (
           )
         );
 
-    
+
       // =========================
       // NÃO ENCONTROU
       // =========================
-     
+
       if (!currentUserData) {
 
         await carregarPalpites();
         setLoading(false);
         return;
-      
+
       }
 
       // =========================
@@ -426,26 +450,20 @@ if (
       possibleNames.includes(
         u.username
       ) ||
-  
+
       possibleNames.includes(
         u.nome
       )
-  
+
     ) + 1;
 
-     
 
-      // =========================
-      // HISTORY
-      // =========================
-
-      
 
       // =========================
       // SET STATE
       // =========================
 
-      
+
 
       setData({
 
@@ -456,7 +474,7 @@ if (
 
       });
 
-      
+
 
       await carregarPalpites();
       setLoading(false);
@@ -525,31 +543,22 @@ if (
     "A","B","C","D","E","F",
     "G","H","I","J","K","L"
   ];
-  
-  const fasesMataMata = [
-    "Fase32",
-    "Oitavas",
-    "Quartas",
-    "Semi",
-    "Terceiro",
-    "Final"
-  ];
 
   const resumoGrupos = grupos.reduce(
     (acc, grupo) => {
-  
+
       const feitos =
         betHistory.filter(
           (bet) => bet.grupo === grupo
         ).length;
-  
+
       acc[grupo] = {
         feitos,
         total: 6
       };
-  
+
       return acc;
-  
+
     },
     {} as Record<
       string,
@@ -574,22 +583,15 @@ if (
     }
 
     return (
-      [
-        "Fase32",
-        "Oitavas",
-        "Quartas",
-        "Semi",
-        "Terceiro",
-        "Final"
-      ].includes(
-        bet.fase || ""
+      configTorneio.fasesMataMata.some(
+        (f) => f.id === bet.fase
       ) &&
       bet.fase === faseSelecionada
     );
 
   });
 
- 
+
   const groupedBets =
   apostasFiltradas.reduce(
 
@@ -621,7 +623,7 @@ if (
     >
 
   );
-  
+
   // =========================
   // RENDER
   // =========================
@@ -661,7 +663,7 @@ if (
         </div>
 
       </div>
-    
+
 
       <div className="mt-6">
 
@@ -695,41 +697,43 @@ if (
 
         <div className="mt-4">
 
-          {/* TIPO DE VISUALIZAÇÃO */}
+          {/* TIPO DE VISUALIZAÇÃO — só mostra se o torneio ativo tiver fase de grupos */}
 
-          <div className="flex gap-2 mb-4">
+          {configTorneio.temGrupos && (
+            <div className="flex gap-2 mb-4">
 
-            <button
-              onClick={() =>
-                setTipoVisualizacao("grupos")
-              }
-              className={
-                tipoVisualizacao === "grupos"
-                  ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
-                  : "bg-zinc-700 px-3 py-2 rounded-xl"
-              }
-            >
-              🌎 Grupos
-            </button>
+              <button
+                onClick={() =>
+                  setTipoVisualizacao("grupos")
+                }
+                className={
+                  tipoVisualizacao === "grupos"
+                    ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
+                    : "bg-zinc-700 px-3 py-2 rounded-xl"
+                }
+              >
+                🌎 Grupos
+              </button>
 
-            <button
-              onClick={() =>
-                setTipoVisualizacao("matamata")
-              }
-              className={
-                tipoVisualizacao === "matamata"
-                  ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
-                  : "bg-zinc-700 px-3 py-2 rounded-xl"
-              }
-            >
-              ⚔️ Mata-mata
-            </button>
+              <button
+                onClick={() =>
+                  setTipoVisualizacao("matamata")
+                }
+                className={
+                  tipoVisualizacao === "matamata"
+                    ? "bg-yellow-500 text-black px-3 py-2 rounded-xl font-black"
+                    : "bg-zinc-700 px-3 py-2 rounded-xl"
+                }
+              >
+                ⚔️ Mata-mata
+              </button>
 
-          </div>
+            </div>
+          )}
 
           {/* BOTÕES DOS GRUPOS */}
 
-          {tipoVisualizacao === "grupos" && (
+          {configTorneio.temGrupos && tipoVisualizacao === "grupos" && (
 
             <div className="flex flex-wrap gap-2 mb-4">
 
@@ -787,26 +791,26 @@ if (
 
           )}
 
-          {/* BOTÕES DAS FASES */}
+          {/* BOTÕES DAS FASES — só as fases que existem no torneio ativo */}
 
-          {tipoVisualizacao === "matamata" && (
+          {(!configTorneio.temGrupos || tipoVisualizacao === "matamata") && (
 
             <div className="flex flex-wrap gap-2 mb-4">
 
-              {fasesMataMata.map((fase) => (
+              {configTorneio.fasesMataMata.map((fase) => (
 
                 <button
-                  key={fase}
+                  key={fase.id}
                   onClick={() =>
-                    setFaseSelecionada(fase)
+                    setFaseSelecionada(fase.id)
                   }
                   className={
-                    faseSelecionada === fase
+                    faseSelecionada === fase.id
                       ? "bg-red-500 text-black px-3 py-2 rounded-xl font-black"
                       : "bg-zinc-700 px-3 py-2 rounded-xl"
                   }
                 >
-                  {fase}
+                  {fase.label}
                 </button>
 
               ))}

@@ -12,7 +12,7 @@ import { db } from "../../../lib/firebase";
 
 import { buildRanking, type RankingUser } from "../../../lib/buildRanking";
 
-
+import { getTorneioAtivo } from "../../../lib/getTorneioAtivo";
 //**************************** */
 //  T Y P E S 
 //**************************** */
@@ -210,13 +210,15 @@ export default function EstatisticasPage() {
           const leaders: LeagueLeader[] = [];
           const exactPredictionsList: ExactPrediction[] = [];
           const globalUsers: GlobalRankingUser[] = [];
+          const torneioId = await getTorneioAtivo();
 
 
           for (const groupDoc of groupsSnap.docs) {
 
             const ranking =
               await buildRanking(
-                groupDoc.id
+                groupDoc.id,
+                torneioId
               );
           
             if (!ranking.length) {
@@ -321,8 +323,8 @@ export default function EstatisticasPage() {
 
             const ranking =
                 await buildRanking(
-                groupDoc.id
-                );
+                  groupDoc.id,
+                  torneioId);
 
             rankings.push(
                 ...ranking

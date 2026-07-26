@@ -1,0 +1,472 @@
+[
+  {
+    "caminho": "analytics_matches",
+    "totalDocumentos": 688,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "match": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Alemanha x Costa do Marfim"
+      },
+      "groupId": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "5YJaqrWntPDGpvl8YtLz"
+      },
+      "totalBets": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 2
+      },
+      "resultadoA": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 2
+      },
+      "resultadoB": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 1
+      },
+      "realWinner": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "home"
+      },
+      "homePercent": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 100
+      },
+      "drawPercent": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "awayPercent": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "winnerPredictions": {
+        "tipos": [
+          "object"
+        ],
+        "exemplo": "{\"home\":2,\"draw\":0,\"away\":0}"
+      },
+      "avgHomeGoals": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 2
+      },
+      "avgAwayGoals": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "exactScoreHits": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "surpriseIndex": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "closestUsers": {
+        "tipos": [
+          "array(2)",
+          "array(5)",
+          "array(1)",
+          "array(4)"
+        ],
+        "exemplo": "[{\"username\":\"Moral\",\"distance\":1,\"palpite\":\"2x0\",\"points\":3,\"drawHit\":false,\"winnerHit\":true},{\"username\":\"Perna Torta FC\",\"distance\":1,\"palpite\":\"2x0\",\"points\":3,\"drawHit\":false,\"winnerHit\":true}]"
+      },
+      "allUserDistances": {
+        "tipos": [
+          "array(2)",
+          "array(6)",
+          "array(5)",
+          "array(25)",
+          "array(9)",
+          "array(1)",
+          "array(7)",
+          "array(4)"
+        ],
+        "exemplo": "[{\"username\":\"Moral\",\"palpite\":\"2x0\",\"distance\":1,\"exactHit\":0,\"points\":3,\"drawHit\":0,\"winnerHit\":1},{\"username\":\"Perna Torta FC\",\"palpite\":\"2x0\",\"distance\":1,\"exactHit\":0,\"points\":3,\"drawHit\":0,\"winn"
+      },
+      "visionaryUsers": {
+        "tipos": [
+          "array(0)"
+        ],
+        "exemplo": "[]"
+      },
+      "updatedAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1783397151,\"_nanoseconds\":822000000}"
+      },
+      "matchDate": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "2026-06-20T17:00"
+      },
+      "fase": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Grupos"
+      },
+      "grupo": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "E"
+      }
+    }
+  },
+  {
+    "caminho": "bets",
+    "totalDocumentos": 5143,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "uid": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "BGMp0GfYzwYNHl4073JYrK1zhHA3"
+      },
+      "username": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Moral"
+      },
+      "nome": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Márcio Moral"
+      },
+      "userName": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Márcio Moral"
+      },
+      "match": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Alemanha x Costa do Marfim"
+      },
+      "golsA": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "2"
+      },
+      "golsB": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "0"
+      },
+      "points": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 0
+      },
+      "groupId": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "5YJaqrWntPDGpvl8YtLz"
+      },
+      "createdAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1781283464,\"_nanoseconds\":588000000}"
+      }
+    }
+  },
+  {
+    "caminho": "games",
+    "totalDocumentos": 104,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "match": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Estados Unidos x Bélgica"
+      },
+      "teamA": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Estados Unidos"
+      },
+      "emojiA": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "🇺🇸"
+      },
+      "teamB": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Bélgica"
+      },
+      "emojiB": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "🇧🇪"
+      },
+      "fase": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Oitavas"
+      },
+      "grupo": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Oitavas"
+      },
+      "matchDate": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "2026-07-06T21:00"
+      },
+      "createdAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1783077866,\"_nanoseconds\":248000000}"
+      },
+      "resultadoA": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 1
+      },
+      "resultadoB": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 4
+      },
+      "finished": {
+        "tipos": [
+          "boolean"
+        ],
+        "exemplo": true
+      },
+      "status": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "FT"
+      },
+      "idEventSportsDB": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "2391744"
+      }
+    }
+  },
+  {
+    "caminho": "groups",
+    "totalDocumentos": 18,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "name": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Copa Manzana"
+      },
+      "nameNormalized": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "copa manzana"
+      },
+      "ownerId": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "BGMp0GfYzwYNHl4073JYrK1zhHA3"
+      },
+      "createdAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1780686208,\"_nanoseconds\":54000000}"
+      }
+    }
+  },
+  {
+    "caminho": "leagueHistory",
+    "totalDocumentos": 18,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "groupId": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "5YJaqrWntPDGpvl8YtLz"
+      },
+      "updatedAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1784499017,\"_nanoseconds\":616000000}"
+      },
+      "version": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 3
+      },
+      "totalGames": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 104
+      },
+      "totalPlayers": {
+        "tipos": [
+          "number"
+        ],
+        "exemplo": 3
+      },
+      "frames": {
+        "tipos": [
+          "array(104)"
+        ],
+        "exemplo": "[{\"step\":1,\"match\":\"México x África do Sul\",\"ranking\":[{\"username\":\"Moral\",\"points\":3,\"position\":1},{\"username\":\"Cindy Lauper\",\"points\":0,\"position\":2},{\"username\":\"Perna Torta FC\",\"points\":0,\"positio"
+      }
+    }
+  },
+  {
+    "caminho": "ligas",
+    "totalDocumentos": 0,
+    "documentosAmostrados": 0,
+    "temSubcolecoes": false,
+    "campos": {}
+  },
+  {
+    "caminho": "memes",
+    "totalDocumentos": 4,
+    "documentosAmostrados": 4,
+    "temSubcolecoes": false,
+    "campos": {
+      "targetUser": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": ""
+      },
+      "active": {
+        "tipos": [
+          "boolean"
+        ],
+        "exemplo": true
+      },
+      "createdAt": {
+        "tipos": [
+          "timestamp"
+        ],
+        "exemplo": "{\"_seconds\":1778276003,\"_nanoseconds\":251000000}"
+      },
+      "text": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Atacado BB - será que alguém aqui entende mesmo de futebol???"
+      }
+    }
+  },
+  {
+    "caminho": "users",
+    "totalDocumentos": 78,
+    "documentosAmostrados": 15,
+    "temSubcolecoes": false,
+    "campos": {
+      "uid": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "1Nqbc29vcnTW9asN6FdpdA2m45w2"
+      },
+      "activeGroupId": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "nsou2vU7aXu8atsfWaPH"
+      },
+      "groups": {
+        "tipos": [
+          "array(1)",
+          "array(2)"
+        ],
+        "exemplo": "[\"nsou2vU7aXu8atsfWaPH\"]"
+      },
+      "nome": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Felipenho Allejo"
+      },
+      "email": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "fei.yingz@gmail.com"
+      },
+      "username": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Fefuncio O Sábio"
+      },
+      "displayName": {
+        "tipos": [
+          "string"
+        ],
+        "exemplo": "Eliane Bazaglia"
+      }
+    }
+  }
+]
