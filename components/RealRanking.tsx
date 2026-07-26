@@ -127,24 +127,26 @@ export default function RealRanking() {
     };
   }, []);
 
-  // Se a fase selecionada não existir mais no torneio ativo (ex: trocou
-  // de torneio e "Fase32" não existe na Copa do Brasil), volta pro Geral.
-  useEffect(() => {
-    if (faseSelecionada === "Geral") return;
-    if (faseSelecionada === "Grupos" && configTorneio.temGrupos) return;
-    if (configTorneio.fasesMataMata.some((f) => f.id === faseSelecionada)) return;
-    setFaseSelecionada("Geral");
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [torneioId]);
+  // Se a fase guardada em estado não existir mais no torneio ativo (ex:
+  // trocou de torneio e "Fase32" não existe na Copa do Brasil), usamos
+  // "Geral" apenas para fins de exibição — calculado no render, sem
+  // precisar de um efeito que force um setState (evita o
+  // react-hooks/set-state-in-effect e o re-render em cascata que ele avisa).
+  const faseEfetiva = (() => {
+    if (faseSelecionada === "Geral") return "Geral";
+    if (faseSelecionada === "Grupos" && configTorneio.temGrupos) return "Grupos";
+    if (configTorneio.fasesMataMata.some((f) => f.id === faseSelecionada)) return faseSelecionada;
+    return "Geral";
+  })();
 
   // =========================
   // TÍTULO
   // =========================
 
   function getTituloRanking() {
-    if (faseSelecionada === "Geral") return "🏆 Ranking Geral";
-    if (faseSelecionada === "Grupos") return "🌎 Ranking da Fase de Grupos";
-    const fase = configTorneio.fasesMataMata.find((f) => f.id === faseSelecionada);
+    if (faseEfetiva === "Geral") return "🏆 Ranking Geral";
+    if (faseEfetiva === "Grupos") return "🌎 Ranking da Fase de Grupos";
+    const fase = configTorneio.fasesMataMata.find((f) => f.id === faseEfetiva);
     return fase ? `${fase.label} Ranking` : "🏆 Ranking Geral";
   }
 
@@ -154,8 +156,8 @@ export default function RealRanking() {
 
   const rankingExibido = ranking
     .map((user) => {
-      if (faseSelecionada === "Geral") return user;
-      return { ...user, points: user.porFase?.[faseSelecionada as keyof typeof user.porFase] || 0 };
+      if (faseEfetiva === "Geral") return user;
+      return { ...user, points: user.porFase?.[faseEfetiva as keyof typeof user.porFase] || 0 };
     })
     .sort((a, b) => b.points - a.points);
 
@@ -205,7 +207,7 @@ export default function RealRanking() {
               setExpandido(false); // recolhe ao trocar de fase
             }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
-              faseSelecionada === id
+              faseEfetiva === id
                 ? "bg-yellow-500 text-black"
                 : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
             }`}
@@ -221,7 +223,7 @@ export default function RealRanking() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-black uppercase opacity-70">
-                {faseSelecionada === "Geral" ? "🏆 Campeão Geral" : "👑 Líder da Fase"}
+                {faseEfetiva === "Geral" ? "🏆 Campeão Geral" : "👑 Líder da Fase"}
               </p>
               <h3 className="text-2xl font-black mt-1">
                 {campeaoAtual.username === campeaoAtual.nome
@@ -281,7 +283,7 @@ export default function RealRanking() {
             </div>
             <div className="text-right">
               <p className="text-yellow-400 font-black text-sm">⭐ {user.points}</p>
-              {faseSelecionada !== "Geral" && (
+              {faseEfetiva !== "Geral" && (
                 <p className="text-zinc-500 text-xs mt-1">fase</p>
               )}
             </div>
