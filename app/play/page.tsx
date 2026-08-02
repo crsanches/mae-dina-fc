@@ -47,6 +47,8 @@ grupo?: string;
 fase?: FaseCopa;
 
 pesoFase?: number;
+
+torneioId: string; 
 };
 
 // =========================
@@ -149,7 +151,8 @@ getTorneioAtivo().then((id) => {
         pesoFase:
           obterPesoDaFase(
             data.fase || "Grupos"
-          )
+          ),
+          torneioId: data.torneioId
 
       });
 
@@ -403,6 +406,10 @@ return (
 
           fase={game.fase}
           pesoFase={game.pesoFase}
+
+          torneioId={game.torneioId}
+
+          
         />
 
       ))}

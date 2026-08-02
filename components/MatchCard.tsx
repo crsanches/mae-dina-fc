@@ -38,6 +38,8 @@ type Props = {
   fase?: string;
   pesoFase?: number;
 
+  torneioId: string;
+
 };
 
 export default function MatchCard({
@@ -54,8 +56,8 @@ export default function MatchCard({
   matchDate,
 
   fase,
-  pesoFase
-
+  pesoFase,
+  torneioId
 }: Props) {
 
   const [golsA, setGolsA] =
@@ -206,13 +208,13 @@ export default function MatchCard({
 
         : 0;
 
-    const betId =
-      `${groupId}-${userName}-${teamA}-${teamB}`;
+        const betId =
+        `${torneioId}-${groupId}-${userName}-${teamA}-${teamB}`;
 
     try {
 
       await setDoc(
-        doc(db, "bets", betId),
+        doc(db, "bets", betId,),
         {
       
           uid:
@@ -248,7 +250,8 @@ export default function MatchCard({
           createdAt:
             serverTimestamp(),
       
-          groupId
+          groupId, 
+          torneioId
       
         }
       
@@ -327,8 +330,8 @@ export default function MatchCard({
           const groupId =
             userSnap.data().activeGroupId;
 
-          const betId =
-            `${groupId}-${userName}-${teamA}-${teamB}`;
+            const betId =
+            `${torneioId}-${groupId}-${userName}-${teamA}-${teamB}`;
 
           const betRef =
             doc(db, "bets", betId);
