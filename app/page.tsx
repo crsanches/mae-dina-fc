@@ -298,7 +298,10 @@ export default function Home() {
         <GroupCard />
 
         {/* BOTÃO ADMIN */}
-        {auth.currentUser?.uid === "s45fFE4vSrOmnpQIcjuWnWU0pKB3" && (
+        {[
+            "s45fFE4vSrOmnpQIcjuWnWU0pKB3",
+            "oAb06GWv47fNroclu2sYFXhIz3J2",
+          ].includes(auth.currentUser?.uid || "") && (
           <Link
             href="/admin/dashboard"
             className="bg-zinc-800 hover:bg-zinc-700 transition border border-zinc-600 rounded-3xl p-5 flex items-center gap-4"

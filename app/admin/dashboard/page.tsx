@@ -57,7 +57,7 @@ type League = {
 
 export default function AdminDashboard() {
 
-  const ADMIN_EMAILS = ["crsanches4@gmail.com", "rodrigocpq@gmail.com"];
+  const ADMIN_EMAILS = ["crsanches4@gmail.com", "rodrigocpq@gmail.com",];
 
   const [stats, setStats] = useState<DashboardStats>({
     games: 0,
