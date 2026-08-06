@@ -474,19 +474,35 @@ export default function AdminPage() {
 
                   <div>
 
-                    <h3 className="text-xl font-black">
+                  <h3 className="text-xl font-black flex items-center gap-2 flex-wrap">
 
-                      {game.emojiA}
-                      {" "}
-                      {game.teamA}
+{game.emojiA?.startsWith("/") ? (
+  <img
+    src={game.emojiA}
+    alt={game.teamA}
+    className="w-8 h-8 object-contain"
+  />
+) : (
+  <span>{game.emojiA}</span>
+)}
 
-                      {" x "}
+<span>{game.teamA}</span>
 
-                      {game.emojiB}
-                      {" "}
-                      {game.teamB}
+<span className="text-zinc-500 mx-1">x</span>
 
-                    </h3>
+{game.emojiB?.startsWith("/") ? (
+  <img
+    src={game.emojiB}
+    alt={game.teamB}
+    className="w-8 h-8 object-contain"
+  />
+) : (
+  <span>{game.emojiB}</span>
+)}
+
+<span>{game.teamB}</span>
+
+</h3>
 
                     <p className="text-zinc-400 text-sm">
 

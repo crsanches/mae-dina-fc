@@ -61,6 +61,7 @@ const ESCUDOS = {
 
 const jogos = [
   // ── Jogo 1 (ida) ──
+  /*
   { teamA: "Vasco da Gama", teamB: "Fluminense", matchDate: "2026-08-01T17:30" },
   { teamA: "Atlético-MG", teamB: "Juventude", matchDate: "2026-08-01T19:30" },
   { teamA: "Santos", teamB: "Remo", matchDate: "2026-08-01T21:00" },
@@ -76,9 +77,12 @@ const jogos = [
   { teamA: "Cruzeiro", teamB: "Chapecoense", matchDate: "2026-08-05T19:00" },
   { teamA: "Grêmio", teamB: "Mirassol", matchDate: "2026-08-05T19:30" },
   { teamA: "Fluminense", teamB: "Vasco da Gama", matchDate: "2026-08-05T21:30" },
+  */
   { teamA: "Fortaleza", teamB: "Palmeiras", matchDate: "2026-08-05T21:30" },
+  /*
   { teamA: "EC Vitória", teamB: "Athletico-PR", matchDate: "2026-08-06T20:00" },
   { teamA: "Corinthians", teamB: "Internacional", matchDate: "2026-08-06T20:00" },
+  */
 ];
 
 async function main() {

@@ -347,11 +347,37 @@ function GameResultCard({ game, onSave }: CardProps) {
 
       {/* TIME E DATA */}
       <div className="flex justify-between items-start mb-2">
-        <p className="text-sm font-black leading-tight">
-          {game.emojiA} {game.teamA}
-          <span className="text-zinc-500 font-normal"> x </span>
-          {game.emojiB} {game.teamB}
-        </p>
+      <div className="flex items-center gap-2 text-sm font-black leading-tight">
+
+{game.emojiA?.startsWith("/") ? (
+  <img
+    src={game.emojiA}
+    alt={game.teamA}
+    className="w-6 h-6 object-contain"
+  />
+) : (
+  <span>{game.emojiA}</span>
+)}
+
+<span>{game.teamA}</span>
+
+<span className="text-zinc-500 font-normal mx-1">
+  x
+</span>
+
+{game.emojiB?.startsWith("/") ? (
+  <img
+    src={game.emojiB}
+    alt={game.teamB}
+    className="w-6 h-6 object-contain"
+  />
+) : (
+  <span>{game.emojiB}</span>
+)}
+
+<span>{game.teamB}</span>
+
+</div>
         {temResultado && (
           <span className="text-green-400 text-xs font-bold ml-2 shrink-0">
             ✅
