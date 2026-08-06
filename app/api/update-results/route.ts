@@ -169,6 +169,24 @@ export async function GET() {
       res3.json(),
       resSeason.json(),
     ]);
+// novo teste de verificacao de jogtos existetes
+    console.log("Eventos retornados pelo eventsseason:", dataSeason.events?.length);
+
+    const fortaleza = (dataSeason.events || []).filter(
+      (e: ApiGame) =>
+        e.strHomeTeam?.toLowerCase().includes("fortaleza") ||
+        e.strAwayTeam?.toLowerCase().includes("fortaleza") ||
+        e.strHomeTeam?.toLowerCase().includes("palmeiras") ||
+        e.strAwayTeam?.toLowerCase().includes("palmeiras") ||
+        e.strHomeTeam?.toLowerCase().includes("juventude") ||
+        e.strAwayTeam?.toLowerCase().includes("juventude") ||
+        e.strHomeTeam?.toLowerCase().includes("atletico") ||
+        e.strAwayTeam?.toLowerCase().includes("atletico")
+    );
+    
+    console.log("=== PROCURA ESPECÍFICA ===");
+    console.log(fortaleza);
+
 
     // Filtra jogos da temporada com placar e recentes (últimas 48h)
     const seasonGames = (dataSeason.events || []).filter((g: ApiGame) => {
@@ -177,6 +195,19 @@ export async function GET() {
       const recente = agora - timestamp < limite48h;
       return temPlacar && recente;
     });
+
+    // lista os jogos existentes
+    console.log("===== TODOS OS JOGOS DA TEMPORADA =====");
+
+    for (const e of (dataSeason.events || [])) {
+      console.log({
+        home: e.strHomeTeam,
+        away: e.strAwayTeam,
+        status: e.strStatus,
+        score: `${e.intHomeScore} x ${e.intAwayScore}`,
+        timestamp: e.strTimestamp,
+      });
+    }
 
     // Junta eventos do dia + season
     const allRaw = [
