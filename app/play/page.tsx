@@ -11,7 +11,7 @@ FaseCopa,
 obterPesoDaFase
 } from "../../lib/copas";
 
-import { getTorneioAtivo } from "../../lib/getTorneioAtivo";
+import { useTorneioSelecionado, TORNEIOS_INFO } from "../../lib/useTorneioSelecionado";
 
 import {
 useEffect,
@@ -66,8 +66,14 @@ export default function PlayPage() {
 const [games, setGames] =
 useState<Game[]>([]);
 
-const [torneioId, setTorneioId] =
-useState<string | null>(null);
+const {
+  torneioSelecionado,
+  torneiosDisponiveis,
+  selecionarTorneio,
+  loading: loadingTorneio,
+} = useTorneioSelecionado();
+
+const configTorneio = getConfigTorneio(torneioSelecionado);
 
 const [tipoVisualizacao, setTipoVisualizacao] =
 useState<"grupos" | "matamata">(
@@ -82,19 +88,14 @@ faseMataMataSelecionada,
 setFaseMataMataSelecionada
 ] = useState<FaseCopa>("Oitavas");
 
-const configTorneio = getConfigTorneio(torneioId);
+
 
 useEffect(() => {
 
-let unsubscribe: (() => void) | undefined;
+  if (!torneioSelecionado) return;
 
-getTorneioAtivo().then((id) => {
-
-  setTorneioId(id);
-
-  // Se o torneio ativo não tem fase de grupos, força a visão mata-mata
-  // e garante que a fase selecionada exista na lista desse torneio.
-  const config = getConfigTorneio(id);
+  // reseta a fase selecionada se ela não existir no torneio escolhido
+  const config = getConfigTorneio(torneioSelecionado);
   if (!config.temGrupos) {
     setTipoVisualizacao("matamata");
   }
@@ -104,73 +105,36 @@ getTorneioAtivo().then((id) => {
 
   const q = query(
     collection(db, "games"),
-    where("torneioId", "==", id),
+    where("torneioId", "==", torneioSelecionado),
     orderBy("matchDate", "asc")
   );
 
-  unsubscribe = onSnapshot(q, (snapshot) => {
-
+  const unsubscribe = onSnapshot(q, (snapshot) => {
     const loadedGames: Game[] = [];
-
     snapshot.forEach((doc) => {
-
-      const data =
-        doc.data();
-
+      const data = doc.data();
       loadedGames.push({
-
         id: doc.id,
-
-        teamA:
-          data.teamA,
-
-        teamB:
-          data.teamB,
-
-        emojiA:
-          data.emojiA,
-
-        emojiB:
-          data.emojiB,
-
-        resultadoA:
-          data.resultadoA,
-
-        resultadoB:
-          data.resultadoB,
-
-        matchDate:
-          data.matchDate,
-
-        grupo:
-          data.grupo,
-
-        fase:
-          data.fase || "Grupos",
-
-        pesoFase:
-          obterPesoDaFase(
-            data.fase || "Grupos"
-          ),
-          torneioId: data.torneioId
-
+        teamA: data.teamA,
+        teamB: data.teamB,
+        emojiA: data.emojiA,
+        emojiB: data.emojiB,
+        resultadoA: data.resultadoA,
+        resultadoB: data.resultadoB,
+        matchDate: data.matchDate,
+        grupo: data.grupo,
+        fase: data.fase || "Grupos",
+        pesoFase: obterPesoDaFase(data.fase || "Grupos"),
+        torneioId: data.torneioId,
       });
-
     });
-
-    setGames(
-      loadedGames
-    );
-
+    setGames(loadedGames);
   });
 
-});
+  return () => unsubscribe();
 
-return () => { if (unsubscribe) unsubscribe(); };
-
-
-// eslint-disable-next-line react-hooks/exhaustive-deps
-}, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [torneioSelecionado]);
 
 const grupos = [
 "A","B","C","D","E","F",
@@ -201,6 +165,13 @@ games.filter((game) => {
 });
 
 
+if (loadingTorneio) {
+  return (
+    <main className="min-h-screen bg-zinc-950 text-white p-4 flex items-center justify-center">
+      <p className="text-zinc-500">Carregando...</p>
+    </main>
+  );
+}
 
 return (
 
@@ -232,6 +203,26 @@ return (
       </Link>
 
     </div>
+
+ {/* mostrar torneios disponiveis */}
+    {torneiosDisponiveis.length > 1 && (
+  <div className="flex gap-2 mb-4">
+    {torneiosDisponiveis.map((id) => (
+      <button
+        key={id}
+        onClick={() => selecionarTorneio(id)}
+        className={
+          torneioSelecionado === id
+            ? "bg-yellow-500 text-black px-4 py-2 rounded-xl font-black"
+            : "bg-zinc-800 px-4 py-2 rounded-xl"
+        }
+      >
+        {TORNEIOS_INFO[id]?.emoji} {TORNEIOS_INFO[id]?.nome || id}
+      </button>
+    ))}
+  </div>
+)}
+
 
 
     {/* MENU PROGRESSOL */}

@@ -34,6 +34,15 @@ export const FASES_POR_TORNEIO: Record<string, ConfigTorneio> = {
       { id: "Final", label: "🏆 Final" },
     ],
   },
+  libertadores2026: {
+    temGrupos: false,
+    fasesMataMata: [
+      { id: "Oitavas", label: "⚔️ Oitavas" },
+      { id: "Quartas", label: "🏟️ Quartas" },
+      { id: "Semi", label: "🔥 Semi" },
+      { id: "Final", label: "🏆 Final" },
+    ],
+  },
 };
 
 // Fallback pra um torneio novo sem entrada mapeada aqui — mostra tudo,

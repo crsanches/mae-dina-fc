@@ -28,15 +28,16 @@ type Bet = {
 };
 
 export async function buildLeagueHistory(
-  groupId: string
+  groupId: string,
+  torneioId: string 
 ) {
 
   // =========================
   // TORNEIO ATIVO
   // =========================
 
-  const torneioId =
-    await getTorneioAtivoAdmin();
+ 
+
 
   // =========================
   // JOGOS ENCERRADOS

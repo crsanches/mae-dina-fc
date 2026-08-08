@@ -12,39 +12,37 @@ import {
 
 import {
   collection,
-  doc,
-  getDoc,
   onSnapshot,
   query,
   where
 } from "firebase/firestore";
 
 import {
-  onAuthStateChanged
-} from "firebase/auth";
-
-import {
-  db,
-  auth
+  db
 } from "../lib/firebase";
 
 import type {
   RankingUser
 } from "../lib/buildRanking";
 
-import { getTorneioAtivo } from "../lib/getTorneioAtivo";
 import { getConfigTorneio } from "../lib/torneios";
+import { useTorneioSelecionado, TORNEIOS_INFO } from "../lib/useTorneioSelecionado";
 
 export default function RealRanking() {
 
   const [ranking, setRanking] =
     useState<RankingUser[]>([]);
 
-  const [torneioId, setTorneioId] =
-    useState<string | null>(null);
+  const {
+    torneioSelecionado,
+    torneiosDisponiveis,
+    selecionarTorneio,
+    groupId,
+    loading: loadingTorneio,
+  } = useTorneioSelecionado();
 
   // "Geral" e "Grupos" não fazem parte do tipo FaseCopa — usamos string
-  // aqui porque as opções disponíveis agora dependem do torneio ativo.
+  // aqui porque as opções disponíveis agora dependem do torneio selecionado.
   const [faseSelecionada, setFaseSelecionada] =
     useState<string>("Geral");
 
@@ -54,9 +52,9 @@ export default function RealRanking() {
   // Ref para o container do ranking — usado para voltar ao topo ao recolher
   const rankingRef = useRef<HTMLDivElement>(null);
 
-  const configTorneio = getConfigTorneio(torneioId);
+  const configTorneio = getConfigTorneio(torneioSelecionado);
 
-  // Lista de abas exibidas: Geral + (Grupos, se o torneio tiver) + fases de mata-mata do torneio ativo
+  // Lista de abas exibidas: Geral + (Grupos, se o torneio tiver) + fases de mata-mata do torneio selecionado
   const fasesDisponiveis: { id: string; label: string }[] = [
     { id: "Geral", label: "🏆 Geral" },
     ...(configTorneio.temGrupos ? [{ id: "Grupos", label: "🌎 Grupos" }] : []),
@@ -64,70 +62,44 @@ export default function RealRanking() {
   ];
 
   // =========================
-  // CARREGA RANKING
-  // =========================
-
-  async function carregarRanking() {
-    try {
-      const currentUser = auth.currentUser;
-      if (!currentUser) { setRanking([]); return; }
-
-      const userRef = doc(db, "users", currentUser.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return;
-
-      const currentGroupId = userSnap.data().activeGroupId;
-      if (!currentGroupId) return;
-
-      const idTorneioAtivo = await getTorneioAtivo();
-      setTorneioId(idTorneioAtivo);
-
-      const rankingArray = await buildRanking(currentGroupId, idTorneioAtivo);
-      setRanking(rankingArray);
-    } catch (error) {
-      console.error("Erro ao carregar ranking:", error);
-    }
-  }
-
-  // =========================
-  // EFFECT
+  // EFFECT — recarrega ranking quando o torneio selecionado muda
   // =========================
 
   useEffect(() => {
-    let unsubscribeBets: (() => void) | undefined;
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
-      if (!user) { setRanking([]); return; }
-
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      if (!userSnap.exists()) return;
-
-      const currentGroupId = userSnap.data().activeGroupId;
-      if (!currentGroupId) return;
-
-      const idTorneioAtivo = await getTorneioAtivo();
-      setTorneioId(idTorneioAtivo);
-
-      carregarRanking();
-
-      unsubscribeBets = onSnapshot(
-        query(
-          collection(db, "bets"),
-          where("groupId", "==", currentGroupId),
-          where("torneioId", "==", idTorneioAtivo)
-        ),
-        () => {}
-      );
-    });
+    if (!torneioSelecionado || !groupId) return;
+  
+    const torneioAtual = torneioSelecionado; // string (não mais string | null)
+    const groupIdAtual = groupId;            // string (não mais string | null)
+  
+    let ativo = true;
+  
+    async function carregar() {
+      try {
+        const rankingArray = await buildRanking(groupIdAtual, torneioAtual);
+        if (ativo) setRanking(rankingArray);
+      } catch (error) {
+        console.error("Erro ao carregar ranking:", error);
+      }
+    }
+  
+    carregar();
+    
+    const unsubscribeBets = onSnapshot(
+      query(
+        collection(db, "bets"),
+        where("groupId", "==", groupId),
+        where("torneioId", "==", torneioSelecionado)
+      ),
+      () => {}
+    );
 
     return () => {
-      unsubscribeAuth();
-      if (unsubscribeBets) unsubscribeBets();
+      ativo = false;
+      unsubscribeBets();
     };
-  }, []);
+  }, [torneioSelecionado, groupId]);
 
-  // Se a fase guardada em estado não existir mais no torneio ativo (ex:
+  // Se a fase guardada em estado não existir mais no torneio selecionado (ex:
   // trocou de torneio e "Fase32" não existe na Copa do Brasil), usamos
   // "Geral" apenas para fins de exibição — calculado no render, sem
   // precisar de um efeito que force um setState (evita o
@@ -178,11 +150,10 @@ export default function RealRanking() {
 
   function handleToggle() {
     if (expandido) {
-      // Recolhe e volta para o topo do componente
       setExpandido(false);
       setTimeout(() => {
         rankingRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 50); // pequeno delay para o DOM recolher antes do scroll
+      }, 50);
     } else {
       setExpandido(true);
     }
@@ -192,19 +163,50 @@ export default function RealRanking() {
   // RENDER
   // =========================
 
+  if (loadingTorneio) {
+    return (
+      <div className="bg-zinc-900 rounded-xl p-4 border border-zinc-800 text-center text-zinc-500 text-sm">
+        Carregando...
+      </div>
+    );
+  }
+
   return (
     <div ref={rankingRef} className="bg-zinc-900 rounded-xl p-4 border border-zinc-800">
 
       <h2 className="text-xl font-black mb-4">{getTituloRanking()}</h2>
 
-      {/* FILTROS */}
+      {/* ABAS DE TORNEIO */}
+      {torneiosDisponiveis.length > 1 && (
+        <div className="flex gap-2 mb-4">
+          {torneiosDisponiveis.map((id) => (
+            <button
+              key={id}
+              onClick={() => {
+                selecionarTorneio(id);
+                setFaseSelecionada("Geral");
+                setExpandido(false);
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                torneioSelecionado === id
+                  ? "bg-blue-500 text-white"
+                  : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+              {TORNEIOS_INFO[id]?.emoji} {TORNEIOS_INFO[id]?.nome || id}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* FILTROS DE FASE */}
       <div className="flex flex-wrap gap-2 mb-5">
         {fasesDisponiveis.map(({ id, label }) => (
           <button
             key={id}
             onClick={() => {
               setFaseSelecionada(id);
-              setExpandido(false); // recolhe ao trocar de fase
+              setExpandido(false);
             }}
             className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
               faseEfetiva === id
@@ -237,7 +239,6 @@ export default function RealRanking() {
             </div>
           </div>
 
-          {/* TOP 3 */}
           <div className="mt-4 grid grid-cols-3 gap-2">
             {top3.map((user, index) => (
               <div key={index} className="bg-black/20 rounded-xl p-2 text-center">
@@ -291,7 +292,6 @@ export default function RealRanking() {
         ))}
       </div>
 
-      {/* BOTÃO EXPANDIR / RECOLHER */}
       {temMais && (
         <button
           onClick={handleToggle}

@@ -1,4 +1,3 @@
-
 "use client";
 
 //PAGINA PRINCIPAL DO APP
@@ -32,7 +31,7 @@ import {
   getDoc,
 } from "firebase/firestore";
 
-import { getTorneioAtivo } from "../lib/getTorneioAtivo";
+import { useTorneioSelecionado, TORNEIOS_INFO } from "../lib/useTorneioSelecionado";
 
 const UserStats = dynamic(() => import("../components/UserStats"), { ssr: false });
 const RealRanking = dynamic(() => import("../components/RealRanking"), { ssr: false });
@@ -72,10 +71,19 @@ export default function Home() {
   const [automaticMeme, setAutomaticMeme] = useState<{ text: string; image?: string } | null>(null);
   const [showHeavyComponents, setShowHeavyComponents] = useState(false);
 
-  const gerarMemeAutomatico = useCallback(async (currentUser: string, currentGroupId: string) => {
+  const {
+    torneioSelecionado,
+    torneiosDisponiveis,
+    selecionarTorneio,
+    groupId,
+  } = useTorneioSelecionado();
+
+  const gerarMemeAutomatico = useCallback(async (
+    currentUser: string,
+    currentGroupId: string,
+    torneioId: string
+  ) => {
     try {
-      const torneioId = await getTorneioAtivo();
-  
       const betsQuery = query(
         collection(db, "bets"),
         where("groupId", "==", currentGroupId),
@@ -89,7 +97,7 @@ export default function Home() {
         getDocs(betsQuery),
         getDocs(gamesQuery),
       ]);
-  
+
       const ranking: Record<string, number> = {};
       let exactScore = false;
       let crazyBet = false;
@@ -148,6 +156,11 @@ export default function Home() {
     }
   }, []);
 
+  // =========================
+  // AUTH — só cuida de login, liga ativa e membros da liga.
+  // Não depende mais de torneio nenhum, então não corre risco
+  // de disparar antes da sessão estar pronta.
+  // =========================
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setIsLogged(!!user);
@@ -175,46 +188,64 @@ export default function Home() {
           activeGroupId: data.activeGroupId,
         };
       }));
-
-      await gerarMemeAutomatico(user.displayName || "", activeGroupId);
     });
 
     return () => unsubscribe();
-  }, [gerarMemeAutomatico]);
-
-  useEffect(() => {
-    let unsubscribe: (() => void) | undefined;
-  
-    getTorneioAtivo().then((torneioId) => {
-      const q = query(
-        collection(db, "games"),
-        where("torneioId", "==", torneioId),
-        orderBy("createdAt", "asc")
-      );
-      unsubscribe = onSnapshot(q, (snapshot) => {
-        const games: Game[] = [];
-        snapshot.forEach((docItem) => {
-          const data = docItem.data();
-          games.push({
-            id: docItem.id,
-            teamA: data.teamA,
-            teamB: data.teamB,
-            emojiA: data.emojiA,
-            emojiB: data.emojiB,
-            fase: data.fase || data.phase,
-            grupo: data.grupo,
-            matchDate: data.matchDate,
-            resultadoA: data.resultadoA,
-            resultadoB: data.resultadoB,
-            apiStatus: data.status || data.apiStatus,
-          });
-        });
-        setJogos(games);
-      });
-    });
-  
-    return () => { if (unsubscribe) unsubscribe(); };
   }, []);
+
+  // =========================
+  // MEME AUTOMÁTICO — só roda quando o hook já resolveu
+  // groupId e torneioSelecionado (ou seja, quando a sessão do
+  // Auth já está pronta e a leitura de `groups` já aconteceu).
+  // =========================
+  useEffect(() => {
+    if (!groupId || !torneioSelecionado) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    gerarMemeAutomatico(user.displayName || "", groupId, torneioSelecionado);
+  }, [groupId, torneioSelecionado, gerarMemeAutomatico]);
+
+  // =========================
+  // JOGOS — recarrega sempre que o torneio selecionado mudar,
+  // e só cria o listener depois que torneioSelecionado existe
+  // (evita a leitura sem sessão pronta que causava o erro de
+  // "Missing or insufficient permissions").
+  // =========================
+  useEffect(() => {
+    if (!torneioSelecionado) return;
+
+    const q = query(
+      collection(db, "games"),
+      where("torneioId", "==", torneioSelecionado),
+      orderBy("createdAt", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const games: Game[] = [];
+      snapshot.forEach((docItem) => {
+        const data = docItem.data();
+        games.push({
+          id: docItem.id,
+          teamA: data.teamA,
+          teamB: data.teamB,
+          emojiA: data.emojiA,
+          emojiB: data.emojiB,
+          fase: data.fase || data.phase,
+          grupo: data.grupo,
+          matchDate: data.matchDate,
+          resultadoA: data.resultadoA,
+          resultadoB: data.resultadoB,
+          apiStatus: data.status || data.apiStatus,
+        });
+      });
+      setJogos(games);
+    });
+
+    return () => unsubscribe();
+  }, [torneioSelecionado]);
+
   useEffect(() => {
     const timer = setTimeout(() => setShowHeavyComponents(true), 1200);
     return () => clearTimeout(timer);
@@ -223,10 +254,10 @@ export default function Home() {
   function getStatusJogo(jogo: Game, agora: number) {
     const inicioJogo = new Date(jogo.matchDate).getTime();
     const fechamentoApostas = inicioJogo - 60 * 60 * 1000;
-  
+
     if (agora < fechamentoApostas) return "🟢 Apostas abertas";
     if (agora < inicioJogo) return "🔒 Apostas encerradas";
-  
+
     // Status vindo do TheSportsDB (fonte da verdade)
     if (jogo.apiStatus) {
       if (["FT", "AET", "AP", "Match Finished"].includes(jogo.apiStatus))
@@ -237,9 +268,9 @@ export default function Home() {
         return "🥅 Pênaltis";
       if (["1H", "HT", "2H"].includes(jogo.apiStatus))
         return "⚽ Jogo em andamento";
-     
+
     }
-  
+
     // Fallback por tempo (se o sync ainda não gravou status)
     const fimTempoNormal = inicioJogo + 125 * 60 * 1000;
     const fimProrrogacao = inicioJogo + 163 * 60 * 1000;
@@ -247,11 +278,11 @@ export default function Home() {
       jogo.resultadoA != null &&
       jogo.resultadoB != null &&
       jogo.resultadoA === jogo.resultadoB;
-  
+
     if (agora < fimTempoNormal) return "⚽ Jogo em andamento";
     if (!jogo.grupo && empatado && agora < fimProrrogacao)
       return "⏱️ Prorrogação";
-  
+
     return "✅ Jogo encerrado";
   }
   const jogosEncerrados = jogos.filter((jogo) => {
@@ -261,11 +292,11 @@ export default function Home() {
 
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
-  const duasDiasAtras = new Date(hoje);
-  duasDiasAtras.setDate(hoje.getDate() - 2);
+  const seteDiasAtras = new Date(hoje);
+  seteDiasAtras.setDate(hoje.getDate() - 7);
 
   const jogosEncerradosPorFase = jogosEncerrados
-    .filter((jogo) => new Date(jogo.matchDate) >= duasDiasAtras)
+    .filter((jogo) => new Date(jogo.matchDate) >= seteDiasAtras)
     .sort((a, b) => new Date(b.matchDate).getTime() - new Date(a.matchDate).getTime())
     .reduce((acc, jogo) => {
       if (!acc[jogo.fase]) acc[jogo.fase] = [];
@@ -363,7 +394,7 @@ export default function Home() {
             <RealRanking />
             <CentralCorneta ligaId={ligaId} usuarios={usuariosLiga} />
             <AnalyticsDashboard />
-           
+
           </>
         )}
 
@@ -379,9 +410,29 @@ export default function Home() {
 
         {/* RESULTADOS */}
         <div className="bg-zinc-900 rounded-xl p-3 border border-zinc-800">
+
+          {/* ABAS DE TORNEIO */}
+          {torneiosDisponiveis.length > 1 && (
+            <div className="flex gap-2 mb-3">
+              {torneiosDisponiveis.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => selecionarTorneio(id)}
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition ${
+                    torneioSelecionado === id
+                      ? "bg-blue-500 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {TORNEIOS_INFO[id]?.emoji} {TORNEIOS_INFO[id]?.nome || id}
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="flex items-start justify-between">
             <h2 className="text-xl font-bold">
-              Resultados Oficiais dos últimos dois dias.
+              Resultados Oficiais dos últimos 7 dias.
               <p className="text-zinc-400 text-sm mt-1">
                 Os demais resultados você vê em &quot;seus palpites&quot;
               </p>
@@ -466,6 +517,3 @@ export default function Home() {
     </main>
   );
 }
-
-
-
