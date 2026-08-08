@@ -1,5 +1,6 @@
 import { adminDb } from "@/lib/firebaseAdmin";
 import { getTorneioAtivoAdmin } from "@/lib/getTorneioAtivoAdmin";
+import { getTorneiosAtivosAdmin } from "@/lib/getTorneiosAtivosAdmin";
 import { calculatePoints } from "./calculatePoints";
 import { obterPesoDaFase } from "./copas";
 
