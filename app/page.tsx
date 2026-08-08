@@ -148,11 +148,17 @@ export default function Home() {
       const sorted = Object.entries(ranking).sort((a, b) => b[1] - a[1]);
       const isLeader = sorted[0]?.[0] === currentUser;
       const isLastPlace = sorted[sorted.length - 1]?.[0] === currentUser;
-      const meme = getAutomaticMeme({ isLeader, isLastPlace, exactScore, crazyBet });
-      if (meme) setAutomaticMeme(meme);
+      return getAutomaticMeme({
+        isLeader,
+        isLastPlace,
+        exactScore,
+        crazyBet
+      });
+      
 
     } catch (error) {
       console.error("Erro meme automático:", error);
+      return null;
     }
   }, []);
 
@@ -204,7 +210,15 @@ export default function Home() {
     const user = auth.currentUser;
     if (!user) return;
 
-    gerarMemeAutomatico(user.displayName || "", groupId, torneioSelecionado);
+    void (async () => {
+      const meme = await gerarMemeAutomatico(
+        user.displayName || "",
+        groupId,
+        torneioSelecionado
+      );
+    
+      setAutomaticMeme(meme);
+    })();
   }, [groupId, torneioSelecionado, gerarMemeAutomatico]);
 
   // =========================
