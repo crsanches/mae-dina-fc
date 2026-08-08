@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { auth, db } from "../../../lib/firebase";
 import Link from "next/link";
 import { buildMatchAnalytics } from "../../../lib/buildMatchAnalytics";
-import { getTorneioAtivo } from "../../../lib/getTorneioAtivo";
+import { getTorneiosAtivos } from "../../../lib/getTorneiosAtivos";
+import { TORNEIOS_INFO } from "../../../lib/useTorneioSelecionado";
 import {
   collection,
   getDocs,
@@ -29,11 +30,16 @@ type Game = {
   resultadoB?: number;
 };
 
+const ADMIN_TORNEIO_KEY = "adminTorneioSelecionado";
+
 export default function AdminResultsPage() {
 
   const [games, setGames] = useState<Game[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [groupId, setGroupId] = useState<string | null>(null);
+
+  const [torneiosAtivos, setTorneiosAtivos] = useState<string[]>([]);
+  const [torneioSelecionado, setTorneioSelecionado] = useState<string | null>(null);
 
   const grupos = Array.from(
     new Set(games.map((g) => g.grupo || "Sem Grupo"))
@@ -53,10 +59,24 @@ export default function AdminResultsPage() {
     setGroupId(userSnap.data().activeGroupId ?? null);
   }
 
-  async function carregarJogos() {
+  async function carregarTorneiosAtivos() {
+    const ativos = await getTorneiosAtivos();
+    setTorneiosAtivos(ativos);
 
-    const torneioId = await getTorneioAtivo();
-  
+    const salvo = localStorage.getItem(ADMIN_TORNEIO_KEY);
+    const inicial = salvo && ativos.includes(salvo) ? salvo : ativos[0] || null;
+
+    setTorneioSelecionado(inicial);
+  }
+
+  function selecionarTorneio(torneioId: string) {
+    setTorneioSelecionado(torneioId);
+    localStorage.setItem(ADMIN_TORNEIO_KEY, torneioId);
+    setSelectedGroup(""); // reseta o grupo/fase selecionado ao trocar de torneio
+  }
+
+  async function carregarJogos(torneioId: string) {
+
     const snapshot =
       await getDocs(
         query(
@@ -64,9 +84,9 @@ export default function AdminResultsPage() {
           where("torneioId", "==", torneioId)
         )
       );
-  
+
     const loadedGames: Game[] = [];
-  
+
     snapshot.forEach((docItem) => {
       const data = docItem.data();
       loadedGames.push({
@@ -77,10 +97,12 @@ export default function AdminResultsPage() {
         emojiB: data.emojiB,
         fase: data.fase || data.phase,
         grupo: data.grupo,
-        matchDate: data.matchDate
+        matchDate: data.matchDate,
+        resultadoA: data.resultadoA,
+        resultadoB: data.resultadoB
       });
     });
-  
+
     setGames(loadedGames);
   }
 
@@ -89,41 +111,43 @@ export default function AdminResultsPage() {
       alert("Grupo não identificado. Tente recarregar a página 😥");
       return;
     }
-  
+    if (!torneioSelecionado) {
+      alert("Torneio não selecionado 😥");
+      return;
+    }
+
     const jogosComResultado = games.filter(
       (g) => g.resultadoA != null && g.resultadoB != null
     );
-  
+
     if (jogosComResultado.length === 0) {
       alert("Nenhum jogo com resultado encontrado.");
       return;
     }
-  
+
     const confirmou = confirm(
       `Reprocessar ${jogosComResultado.length} jogos? Isso vai atualizar todos os analytics e pontos.`
     );
-  
+
     if (!confirmou) return;
-  
+
     let sucesso = 0;
     let falha = 0;
-
-    const torneioId = await getTorneioAtivo();
 
     for (const game of jogosComResultado) {
       try {
         const match = `${game.teamA} x ${game.teamB}`;
         const resultadoA = game.resultadoA as number;
         const resultadoB = game.resultadoB as number;
-  
+
         const betsQuery = query(
           collection(db, "bets"),
           where("match", "==", match),
           where("groupId", "==", groupId)
         );
-  
+
         const betsSnapshot = await getDocs(betsQuery);
-  
+
         for (const betDoc of betsSnapshot.docs) {
           const bet = betDoc.data();
           const points = calculatePoints({
@@ -134,62 +158,73 @@ export default function AdminResultsPage() {
           });
           await updateDoc(doc(db, "bets", betDoc.id), { points });
         }
-  
-       
-        await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioId);
-  
+
+
+        await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioSelecionado);
+
         sucesso++;
       } catch (err) {
         falha++;
       }
     }
-  
+
     alert(`Reprocessamento concluído!\n✅ ${sucesso} jogos atualizados\n❌ ${falha} erros`);
-    carregarJogos();
+    carregarJogos(torneioSelecionado);
   }
 
+  // Carrega torneios ativos e groupId do admin uma vez, no mount
   useEffect(() => {
     const timeout = setTimeout(async () => {
       await carregarGroupId();
-      await carregarJogos();
+      await carregarTorneiosAtivos();
     }, 0);
-  
+
     return () => clearTimeout(timeout);
   }, []);
+
+  // Recarrega os jogos sempre que o torneio selecionado mudar
+  useEffect(() => {
+    if (!torneioSelecionado) return;
+    carregarJogos(torneioSelecionado);
+  }, [torneioSelecionado]);
 
   async function salvarResultado(
     gameId: string,
     resultadoA: number,
     resultadoB: number
   ) {
-  
+
     if (!groupId) {
       alert("Grupo não identificado. Tente recarregar a página 😥");
       console.error("❌ groupId ausente");
       return;
     }
-  
-  
+    if (!torneioSelecionado) {
+      alert("Torneio não selecionado 😥");
+      return;
+    }
+
+
     await updateDoc(doc(db, "games", gameId), { resultadoA, resultadoB });
     console.log("✅ game atualizado");
-  
+
     const game = games.find((g) => g.id === gameId);
     if (!game) {
       alert("Jogo não encontrado 😥");
       console.error("❌ game não encontrado no estado");
       return;
     }
-  
+
     const match = `${game.teamA} x ${game.teamB}`;
-  
+
     const betsQuery = query(
       collection(db, "bets"),
       where("match", "==", match),
       where("groupId", "==", groupId)
     );
-  
+
     const betsSnapshot = await getDocs(betsQuery);
-  
+
     for (const betDoc of betsSnapshot.docs) {
       const bet = betDoc.data();
       const points = calculatePoints({
@@ -200,20 +235,13 @@ export default function AdminResultsPage() {
       });
       await updateDoc(doc(db, "bets", betDoc.id), { points });
     }
-  
-  
-   const torneioId = await getTorneioAtivo();
-    await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioId);
-  
-  
+
+
+    await buildMatchAnalytics(match, resultadoA, resultadoB, groupId, torneioSelecionado);
+
+
     alert("Resultado salvo e apostas atualizadas 😎");
-    carregarJogos();
-
-
-
-
-
-   
+    carregarJogos(torneioSelecionado);
 
   }
 
@@ -241,7 +269,29 @@ export default function AdminResultsPage() {
           🏆 Resultados Oficiais
         </h1>
 
-    
+        {/* FILTRO DE TORNEIO */}
+        {torneiosAtivos.length > 0 && (
+          <div className="mb-4">
+            <p className="text-zinc-400 text-xs mb-2 font-semibold uppercase tracking-wide">
+              Torneio
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {torneiosAtivos.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => selecionarTorneio(id)}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-bold transition ${
+                    torneioSelecionado === id
+                      ? "bg-blue-500 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {TORNEIOS_INFO[id]?.emoji} {TORNEIOS_INFO[id]?.nome || id}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* BOTÃO REPROCESSAR */}
         <button

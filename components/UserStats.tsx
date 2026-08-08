@@ -214,7 +214,11 @@ export default function UserStats() {
         possibleNames.includes(u.username) || possibleNames.includes(u.nome)
       );
 
+      // Sem dados nesse torneio ainda (ex: Libertadores sem jogos/apostas
+      // cadastrados) — reseta posição/pontos em vez de deixar os valores
+      // do torneio anterior na tela.
       if (!currentUserData) {
+        setData({ position: 0, points: 0 });
         await carregarPalpites(torneioId, currentGroupId);
         setLoading(false);
         return;
