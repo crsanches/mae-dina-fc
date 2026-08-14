@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 
 import { db } from "../../lib/firebase";
 
-import { getTorneioAtivo } from "../../lib/getTorneioAtivo";
+import { getTorneiosAtivos } from "../../lib/getTorneiosAtivos";
+import { TORNEIOS_INFO } from "../../lib/useTorneioSelecionado";
 
 import {
   addDoc,
@@ -37,6 +38,8 @@ type Game = {
 
   matchDate: string;
 };
+
+const ADMIN_TORNEIO_KEY = "adminTorneioSelecionado";
 
 export default function AdminPage() {
 
@@ -80,6 +83,12 @@ export default function AdminPage() {
 
     const [showCreateForm, setShowCreateForm] =
     useState(false);
+
+  const [torneiosAtivos, setTorneiosAtivos] =
+    useState<string[]>([]);
+
+  const [torneioSelecionado, setTorneioSelecionado] =
+    useState<string | null>(null);
   
   const groupedGames =
     games.reduce(
@@ -105,10 +114,23 @@ export default function AdminPage() {
   
     );
 
-    async function carregarJogos() {
+    async function carregarTorneiosAtivos() {
+      const ativos = await getTorneiosAtivos();
+      setTorneiosAtivos(ativos);
 
-      const torneioId = await getTorneioAtivo();
-    
+      const salvo = localStorage.getItem(ADMIN_TORNEIO_KEY);
+      const inicial = salvo && ativos.includes(salvo) ? salvo : ativos[0] || null;
+
+      setTorneioSelecionado(inicial);
+    }
+
+    function selecionarTorneio(torneioId: string) {
+      setTorneioSelecionado(torneioId);
+      localStorage.setItem(ADMIN_TORNEIO_KEY, torneioId);
+    }
+
+    async function carregarJogos(torneioId: string) {
+
       const snapshot =
         await getDocs(
           query(
@@ -136,11 +158,12 @@ export default function AdminPage() {
       setGames(loadedGames);
     }
 
+  // Carrega a lista de torneios ativos uma vez, no mount
   useEffect(() => {
 
     const timeout = setTimeout(() => {
 
-      carregarJogos();
+      carregarTorneiosAtivos();
 
     }, 0);
 
@@ -148,14 +171,22 @@ export default function AdminPage() {
 
   }, []);
 
+  // Recarrega os jogos sempre que o torneio selecionado mudar
+  useEffect(() => {
+    if (!torneioSelecionado) return;
+    carregarJogos(torneioSelecionado);
+  }, [torneioSelecionado]);
+
   async function criarJogo() {
 
     if (!teamA || !teamB || !matchDate) {
       alert("Preencha tudo 😄");
       return;
     }
-  
-    const torneioId = await getTorneioAtivo();
+    if (!torneioSelecionado) {
+      alert("Selecione um torneio antes de criar o jogo 😥");
+      return;
+    }
   
     await addDoc(
       collection(db, "games"),
@@ -166,7 +197,7 @@ export default function AdminPage() {
         emojiA,
         emojiB,
         fase: phase,
-        torneioId,
+        torneioId: torneioSelecionado,
         matchDate,
         createdAt: serverTimestamp()
       }
@@ -178,7 +209,7 @@ export default function AdminPage() {
     setEmojiA("");
     setEmojiB("");
     setMatchDate("");
-    carregarJogos();
+    carregarJogos(torneioSelecionado);
   
     setTimeout(() => { setSuccess(false); }, 2000);
   }
@@ -195,7 +226,7 @@ export default function AdminPage() {
       }
     );
 
-    carregarJogos();
+    if (torneioSelecionado) carregarJogos(torneioSelecionado);
 
   }
 
@@ -216,7 +247,7 @@ export default function AdminPage() {
       doc(db, "games", gameId)
     );
 
-    carregarJogos();
+    if (torneioSelecionado) carregarJogos(torneioSelecionado);
 
   }
 
@@ -254,6 +285,30 @@ export default function AdminPage() {
           ⚽ Gerenciamento de Jogos
         </h1>
 
+        {/* FILTRO DE TORNEIO */}
+        {torneiosAtivos.length > 0 && (
+          <div className="mb-6">
+            <p className="text-zinc-400 text-xs mb-2 font-semibold uppercase tracking-wide">
+              Torneio
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {torneiosAtivos.map((id) => (
+                <button
+                  key={id}
+                  onClick={() => selecionarTorneio(id)}
+                  className={`px-3 py-1.5 rounded-xl text-sm font-bold transition ${
+                    torneioSelecionado === id
+                      ? "bg-blue-500 text-white"
+                      : "bg-zinc-800 text-zinc-300 hover:bg-zinc-700"
+                  }`}
+                >
+                  {TORNEIOS_INFO[id]?.emoji} {TORNEIOS_INFO[id]?.nome || id}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         <button
           onClick={() =>
             setShowCreateForm(
@@ -285,6 +340,14 @@ export default function AdminPage() {
         {/* FORMULÁRIO */}
         {showCreateForm && (
         <div className="bg-zinc-900 rounded-2xl p-4 border border-zinc-800 space-y-4">
+
+          {torneioSelecionado && (
+            <p className="text-zinc-400 text-sm">
+              Criando jogo em: <span className="text-white font-bold">
+                {TORNEIOS_INFO[torneioSelecionado]?.emoji} {TORNEIOS_INFO[torneioSelecionado]?.nome || torneioSelecionado}
+              </span>
+            </p>
+          )}
 
           <div>
 

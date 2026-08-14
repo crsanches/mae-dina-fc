@@ -16,4 +16,8 @@ export type SyncConfig = {
       leagueId: "4725", // Copa do Brasil
       season: "2026",
     },
+    libertadores2026: {
+      leagueId: "4501",
+      season: "2026",
+    },
   };

@@ -78,7 +78,14 @@ const jogos = [
   { teamA: "Grêmio", teamB: "Mirassol", matchDate: "2026-08-05T19:30" },
   { teamA: "Fluminense", teamB: "Vasco da Gama", matchDate: "2026-08-05T21:30" },
   */
-  { teamA: "Fortaleza", teamB: "Palmeiras", matchDate: "2026-08-05T21:30" },
+  { teamA: "Cruzeiro", teamB: "Atlético-MG", matchDate: "2026-08-26T21:30" },
+  { teamA: "Internacional", teamB: "Grêmio", matchDate: "2026-08-26T21:30" },
+  { teamA: "Palmeiras", teamB: "Santos", matchDate: "2026-08-26T21:30" },
+  { teamA: "Vasco da Gama", teamB: "EC Vitória", matchDate: "2026-08-26T21:30" },
+  { teamA: "Atlético-MG", teamB: "Cruzeiro", matchDate: "2026-09-02T21:30" },
+  { teamA: "Grêmio", teamB: "Internacional", matchDate: "2026-09-02T21:30" },
+  { teamA: "Santos", teamB: "Palmeiras", matchDate: "2026-09-02T21:30" },
+  { teamA: "EC VItória", teamB: "Vasco da Gama", matchDate: "2026-09-02T21:30" },
   /*
   { teamA: "EC Vitória", teamB: "Athletico-PR", matchDate: "2026-08-06T20:00" },
   { teamA: "Corinthians", teamB: "Internacional", matchDate: "2026-08-06T20:00" },

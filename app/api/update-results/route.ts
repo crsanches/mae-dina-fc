@@ -90,6 +90,7 @@ function normalize(text?: string) {
     "croatia": "croacia",
     "ghana": "gana",
     "panama": "panama",
+    "ldu quito": "ldu",
   };
 
   return aliases[value] || value;
